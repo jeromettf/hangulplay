@@ -1390,6 +1390,8 @@
         .sb-stage-box { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 1rem; overflow: hidden; border: 4px solid #fff; container-type: inline-size; box-shadow: inset 0 0 0 1px rgba(0,0,0,.04); }
         .sb-prop { position: absolute; line-height: 1; user-select: none; pointer-events: none; }
         .sb-bgart { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; user-select: none; }
+        .sb-ico { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -.22em; object-fit: contain; pointer-events: none; user-select: none; }
+        .sb-stage-box .sb-ico { filter: drop-shadow(0 .05em .06em rgba(0,0,0,.28)); }
         .sb-pos-T  { top: 3%;  left: 50%; translate: -50% 0; z-index: 2; }
         .sb-pos-TL { top: 3%;  left: 4%;  z-index: 2; }
         .sb-pos-TR { top: 3%;  right: 4%; z-index: 2; }
@@ -7089,6 +7091,191 @@
         keys: () => Object.keys(S)
       };
     })();
+
+    // ---------- 그림책 소품 아이콘 (배경과 같은 그림체의 SVG · 이모지 대신 그려 넣어요) ----------
+    // 동화 그림·미션 화면의 글자 속 이모지를 찾아 같은 뜻의 그림으로 바꿔요. 없는 이모지는 그대로 둬요.
+    const SBI = (() => {
+      const D = `<filter id="w" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter><filter id="g" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+      const W = b => `<g filter="url(#w)">${b}</g>`, G = b => `<g filter="url(#g)">${b}</g>`;
+      const hl = (d, c = '#fff', w = 3, o = .7) => `<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${o}"/>`;
+      // 공통 모양
+      const drop = (c, c2, hi) => W(`<path d="M32,6 C26,20 14,30 14,42 C14,53 22,60 32,60 C42,60 50,53 50,42 C50,30 38,20 32,6Z" fill="${c}"/>${hl('M22,40 C22,34 25,30 28,27', hi, 4, .8)}${hl('M40,52 C45,49 47,45 47,41', c2, 3, .6)}`);
+      const heart = (c, c2) => W(`<path d="M32,56 C14,44 6,34 6,22 C6,12 14,6 22,6 C27,6 30,9 32,13 C34,9 37,6 42,6 C50,6 58,12 58,22 C58,34 50,44 32,56Z" fill="${c}"/>${hl('M14,20 C14,15 18,12 22,12', '#fff', 3.5, .65)}${hl('M44,40 C50,34 53,28 53,23', c2, 3, .5)}`);
+      const star = (c, s, x = 32, y = 32, r = 26) => { const p = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; p.push((x + Math.cos(a) * rr).toFixed(1) + ',' + (y + Math.sin(a) * rr).toFixed(1)); } return `<path d="M${p.join(' L')}Z" fill="${c}" stroke="${s}" stroke-width="2" stroke-linejoin="round"/>`; };
+      const sparkle = (x, y, r, c) => `<path d="M${x},${y - r} Q${x + r * .18},${y - r * .18} ${x + r},${y} Q${x + r * .18},${y + r * .18} ${x},${y + r} Q${x - r * .18},${y + r * .18} ${x - r},${y} Q${x - r * .18},${y - r * .18} ${x},${y - r}Z" fill="${c}"/>`;
+      const flower = (pc, cc, n = 5, r = 13, pr = 11) => W(`${[...Array(n)].map((_, i) => { const a = i / n * Math.PI * 2 - Math.PI / 2; return `<ellipse cx="${(32 + Math.cos(a) * r).toFixed(1)}" cy="${(30 + Math.sin(a) * r).toFixed(1)}" rx="${pr}" ry="${pr * .82}" fill="${pc}" transform="rotate(${(a * 180 / Math.PI + 90).toFixed(0)} ${(32 + Math.cos(a) * r).toFixed(1)} ${(30 + Math.sin(a) * r).toFixed(1)})"/>`; }).join('')}<circle cx="32" cy="30" r="8" fill="${cc}"/><circle cx="29.5" cy="27.5" r="2.5" fill="#fff" opacity=".55"/>`);
+      const ball = (top, bot, band) => W(`<circle cx="32" cy="32" r="26" fill="${bot}"/><path d="M6,32 A26,26 0 0 1 58,32Z" fill="${top}"/>${band ? `<rect x="6" y="29" width="52" height="6" fill="${band}"/><circle cx="32" cy="32" r="8" fill="#fff" stroke="${band}" stroke-width="4"/>` : ''}${hl('M16,20 C19,14 24,11 29,10', '#fff', 3.5, .6)}`);
+      const house = (wall, roof, door = '#8b5a3c', extra = '') => W(`<rect x="12" y="30" width="40" height="28" fill="${wall}"/><path d="M6,32 L32,8 L58,32Z" fill="${roof}"/><rect x="27" y="40" width="11" height="18" rx="5" fill="${door}"/><rect x="16" y="36" width="8" height="8" fill="#fef3c7" stroke="#fff" stroke-width="1.5"/><rect x="42" y="36" width="8" height="8" fill="#fef3c7" stroke="#fff" stroke-width="1.5"/>${extra}`);
+      const leaf = (c, c2, rot = 0) => W(`<g transform="rotate(${rot} 32 32)"><path d="M32,6 C48,16 52,38 32,58 C12,38 16,16 32,6Z" fill="${c}"/><path d="M32,10 L32,56" stroke="${c2}" stroke-width="2.4"/><path d="M32,24 L42,18 M32,34 L44,28 M32,24 L22,18 M32,34 L20,28 M32,44 L41,39 M32,44 L23,39" stroke="${c2}" stroke-width="1.6"/></g>`);
+      const mountain = (c, c2, snow, lava) => W(`<path d="M2,58 L24,16 L34,30 L42,20 L62,58Z" fill="${c}"/><path d="M24,16 L30,28 L20,40Z" fill="${c2}" opacity=".6"/>${snow ? '<path d="M24,16 L30,27 L26,25 L22,29 L19,26Z" fill="#fff"/><path d="M42,20 L47,29 L43,27 L39,30Z" fill="#fff"/>' : ''}${lava ? '<path d="M18,28 Q24,22 30,28" stroke="#f97316" stroke-width="4" fill="none"/><circle cx="24" cy="12" r="6" fill="#9ca3af" opacity=".8"/><circle cx="30" cy="7" r="4" fill="#d1d5db" opacity=".8"/>' : ''}`);
+      const I = {};
+      I['💧'] = drop('#5aa9e6', '#3a86c4', '#d9efff');
+      I['💦'] = W(`<g transform="translate(-6 4) scale(.62)">${drop('#5aa9e6', '#3a86c4', '#d9efff')}</g><g transform="translate(26 -2) scale(.5)">${drop('#7cc0ef', '#3a86c4', '#e6f5ff')}</g><g transform="translate(22 30) scale(.42)">${drop('#5aa9e6', '#3a86c4', '#e6f5ff')}</g>`);
+      I['🔥'] = G(`<path d="M32,60 C14,58 10,40 20,28 C22,36 26,38 27,34 C26,22 32,12 38,6 C38,18 50,24 50,40 C50,52 42,60 32,60Z" fill="#f97316"/><path d="M32,58 C22,56 21,46 27,40 C28,45 31,46 32,42 C32,36 35,32 38,28 C40,36 44,40 43,48 C42,54 38,58 32,58Z" fill="#fbbf24"/><path d="M32,56 C28,55 27,51 30,48 C31,50 33,50 34,47 C36,50 37,55 32,56Z" fill="#fff7d6"/>`);
+      I['⚡'] = G(`<path d="M38,4 L14,36 L29,36 L22,60 L50,24 L34,24 L42,4Z" fill="#fcd34d" stroke="#d97706" stroke-width="2.5" stroke-linejoin="round"/>${hl('M36,10 L22,32', '#fff6cf', 3, .9)}`);
+      I['🌙'] = G(`<path d="M42,6 C24,8 12,20 12,36 C12,51 25,61 42,58 C31,54 24,45 24,33 C24,21 32,11 42,6Z" fill="#fcd34d" stroke="#eab308" stroke-width="1.5"/><circle cx="20" cy="38" r="2.6" fill="#eab308" opacity=".55"/><circle cx="25" cy="49" r="2" fill="#eab308" opacity=".55"/>`);
+      I['🌕'] = G(`<circle cx="32" cy="32" r="26" fill="#fde68a"/><circle cx="24" cy="24" r="5" fill="#fbbf24" opacity=".45"/><circle cx="40" cy="38" r="7" fill="#fbbf24" opacity=".4"/><circle cx="26" cy="44" r="3.5" fill="#fbbf24" opacity=".45"/>`);
+      I['✨'] = G(`${sparkle(26, 30, 20, '#fde047')}${sparkle(48, 14, 9, '#fef08a')}${sparkle(48, 48, 7, '#fef9c3')}`);
+      I['🌟'] = G(`${star('#fde047', '#f59e0b')}<circle cx="32" cy="32" r="10" fill="#fff7cc" opacity=".7"/>`);
+      I['⭐'] = G(`${star('#fcd34d', '#f59e0b')}${hl('M28,16 L25,26', '#fff6cf', 3, .9)}`);
+      I['💫'] = G(`${star('#fcd34d', '#f59e0b', 40, 22, 14)}<path d="M6,50 Q20,30 36,34" stroke="#fde68a" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="2 6"/>`);
+      I['🪨'] = W(`<path d="M8,52 Q6,36 18,26 Q30,16 44,22 Q58,30 56,48 Q54,58 32,58 Q12,58 8,52Z" fill="#8e979f"/><path d="M18,30 Q28,22 40,26 Q32,30 26,38Z" fill="#b8c0c7" opacity=".85"/>${hl('M40,50 Q50,46 52,38', '#6b737b', 3, .6)}`);
+      I['🌊'] = W(`<path d="M4,46 Q14,22 32,22 Q50,22 52,38 Q42,30 36,38 Q44,42 50,46 Q58,50 60,58 L4,58Z" fill="#3b9bd1"/><path d="M4,52 Q20,44 36,50 Q48,54 60,50 L60,58 L4,58Z" fill="#2878ad"/>${hl('M14,34 Q22,26 34,26', '#e0f4ff', 3.5, .85)}<circle cx="47" cy="34" r="3" fill="#e0f4ff"/>`);
+      I['☁'] = W(`<path d="M14,48 C4,48 4,34 14,34 C14,22 30,18 36,28 C42,20 56,24 54,36 C62,38 60,48 52,48Z" fill="#fff"/><path d="M14,48 L52,48 C58,48 60,44 58,41 C52,46 22,46 12,44 C10,46 11,48 14,48Z" fill="#dbe7f3"/>`);
+      I['🌧'] = W(`<path d="M14,36 C4,36 4,22 14,22 C14,10 30,6 36,16 C42,8 56,12 54,24 C62,26 60,36 52,36Z" fill="#cbd5e1"/><path d="M14,36 L52,36 C58,36 60,32 58,29 C52,34 22,34 12,32Z" fill="#94a3b8"/>${[18, 30, 42].map((x, i) => `<path d="M${x},${42 + i % 2 * 3} q-2,6 0,9 q3,-3 0,-9Z" fill="#5aa9e6"/>`).join('')}`);
+      I['☀'] = G(`${[...Array(10)].map((_, i) => { const a = i / 10 * Math.PI * 2; return `<path d="M${(32 + Math.cos(a) * 20).toFixed(1)},${(32 + Math.sin(a) * 20).toFixed(1)} L${(32 + Math.cos(a) * 29).toFixed(1)},${(32 + Math.sin(a) * 29).toFixed(1)}" stroke="#fbbf24" stroke-width="4.5" stroke-linecap="round"/>`; }).join('')}<circle cx="32" cy="32" r="16" fill="#fcd34d"/><circle cx="27" cy="27" r="5" fill="#fff7cc" opacity=".7"/>`);
+      I['🍎'] = W(`<path d="M32,20 C18,10 6,22 9,38 C12,54 24,60 32,55 C40,60 52,54 55,38 C58,22 46,10 32,20Z" fill="#e2453c"/>${hl('M14,30 C14,24 20,20 26,22', '#f8a29a', 3.5, .8)}${hl('M40,50 C48,46 52,38 52,32', '#b42f2a', 3, .5)}<path d="M32,20 Q31,12 35,6" stroke="#7a4b2a" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M35,11 Q44,4 50,10 Q42,15 35,11Z" fill="#6aa84f"/>`);
+      I['🌳'] = W(`<path d="M28,62 Q30,44 29,34 L35,34 Q34,44 37,62Z" fill="#8a5a3a"/><circle cx="32" cy="24" r="17" fill="#4f8a4f"/><circle cx="18" cy="32" r="11" fill="#4f8a4f"/><circle cx="46" cy="32" r="12" fill="#4a8150"/><circle cx="26" cy="18" r="9" fill="#68a35c"/><circle cx="40" cy="16" r="6" fill="#8cc070"/>`);
+      I['🌲'] = W(`<rect x="29" y="50" width="6" height="12" fill="#6b4a32"/><path d="M8,52 L32,30 L56,52Z" fill="#3f7a5a"/><path d="M12,40 L32,18 L52,40Z" fill="#4a8a66"/><path d="M17,28 L32,6 L47,28Z" fill="#5a9c76"/>`);
+      I['🍃'] = W(`<path d="M10,54 C10,30 26,12 54,10 C54,36 38,54 10,54Z" fill="#7cb85a"/><path d="M12,52 C24,40 36,28 50,14" stroke="#4d8a37" stroke-width="2.5" fill="none"/><path d="M20,10 C24,18 26,24 22,32 C16,26 14,18 20,10Z" fill="#9fd07a"/>`);
+      I['🌿'] = W(`<path d="M32,60 Q30,36 34,8" stroke="#4d8a37" stroke-width="3" fill="none"/>${[[34, 14, 1], [32, 26, -1], [33, 38, 1], [31, 48, -1]].map(([x, y, d]) => `<path d="M${x},${y} q${d * 16},-6 ${d * 20},6 q${-d * 14},6 ${-d * 20},-6Z" fill="${d > 0 ? '#6aa84f' : '#7cb85a'}"/>`).join('')}`);
+      I['🍂'] = leaf('#e08a3c', '#a85a20', 30);
+      I['🌱'] = W(`<path d="M32,60 Q32,44 32,34" stroke="#4d8a37" stroke-width="3.5"/><path d="M32,36 C18,36 10,26 12,16 C24,16 32,24 32,36Z" fill="#7cb85a"/><path d="M32,32 C44,32 52,24 52,14 C40,14 32,20 32,32Z" fill="#9fd07a"/><ellipse cx="32" cy="60" rx="16" ry="4" fill="#8b5e3c"/>`);
+      I['🦋'] = W(`<path d="M32,30 C22,6 4,8 6,22 C8,34 22,34 32,32Z" fill="#a78bfa"/><path d="M32,30 C42,6 60,8 58,22 C56,34 42,34 32,32Z" fill="#a78bfa"/><path d="M32,34 C20,36 10,46 16,54 C24,58 30,46 32,36Z" fill="#c4b5fd"/><path d="M32,34 C44,36 54,46 48,54 C40,58 34,46 32,36Z" fill="#c4b5fd"/><circle cx="16" cy="20" r="4" fill="#fde68a"/><circle cx="48" cy="20" r="4" fill="#fde68a"/><rect x="30" y="18" width="4" height="30" rx="2" fill="#4c1d95"/><path d="M31,19 Q26,10 24,8 M33,19 Q38,10 40,8" stroke="#4c1d95" stroke-width="1.6" fill="none"/>`);
+      I['🌸'] = flower('#f9a8d4', '#fde68a');
+      I['🌼'] = flower('#fde047', '#f59e0b');
+      I['🌻'] = flower('#facc15', '#7c4a1e', 10, 15, 7);
+      I['🌷'] = W(`<path d="M32,62 Q31,46 32,34" stroke="#4d8a37" stroke-width="3.5" fill="none"/><path d="M32,52 Q22,40 18,44 Q22,52 32,52Z" fill="#6aa84f"/><path d="M18,14 L24,22 L32,10 L40,22 L46,14 Q50,32 32,38 Q14,32 18,14Z" fill="#f472b6"/>${hl('M24,24 Q24,30 28,33', '#fbcfe8', 3, .8)}`);
+      I['🥀'] = W(`<path d="M32,62 Q34,46 30,34" stroke="#6b7c4a" stroke-width="3" fill="none"/><path d="M30,36 Q16,34 14,22 Q22,14 32,18 Q40,12 46,22 Q44,34 30,36Z" fill="#b45370"/><path d="M34,48 Q44,46 46,52" stroke="#6b7c4a" stroke-width="2.4" fill="none"/>`);
+      I['🪷'] = W(`<ellipse cx="32" cy="50" rx="26" ry="8" fill="#6ea76a"/><path d="M32,48 Q20,40 20,24 Q30,30 32,48Z M32,48 Q44,40 44,24 Q34,30 32,48Z" fill="#f9a8d4"/><path d="M32,48 Q26,32 32,14 Q38,32 32,48Z" fill="#fbcfe8"/><path d="M32,48 Q12,46 8,36 Q22,36 32,48Z M32,48 Q52,46 56,36 Q42,36 32,48Z" fill="#f472b6"/>`);
+      I['🎵'] = W(`<path d="M24,48 L24,14 L48,8 L48,40" stroke="#6d28d9" stroke-width="4" fill="none" stroke-linejoin="round"/><ellipse cx="18" cy="48" rx="8" ry="6" fill="#7c3aed" transform="rotate(-20 18 48)"/><ellipse cx="42" cy="42" rx="8" ry="6" fill="#7c3aed" transform="rotate(-20 42 42)"/><path d="M24,20 L48,14" stroke="#6d28d9" stroke-width="5"/>`);
+      I['🎶'] = I['🎵'];
+      I['🏠'] = house('#fde2c4', '#e0735a');
+      I['🏡'] = house('#fff1c9', '#6aa84f', '#8b5a3c', '<circle cx="54" cy="52" r="6" fill="#4f8a43"/>');
+      I['🏚'] = house('#c9b8a6', '#7c6a5a', '#5b4a3c', '<path d="M18,32 L22,40 M46,46 L50,50" stroke="#7c6a5a" stroke-width="2"/>');
+      I['🏪'] = W(`<rect x="10" y="26" width="44" height="32" fill="#fff7ed"/><path d="M6,26 L58,26 L54,14 L10,14Z" fill="#ef4444"/>${[0, 1, 2, 3].map(i => `<path d="M${10 + i * 11},26 a5.5,5 0 0 0 11,0" fill="${i % 2 ? '#fff' : '#f87171'}"/>`).join('')}<rect x="16" y="36" width="14" height="22" rx="2" fill="#8b5a3c"/><rect x="36" y="36" width="12" height="10" fill="#bae6fd"/>`);
+      I['🏰'] = W(`<rect x="14" y="26" width="36" height="32" fill="#e5e7eb"/><rect x="8" y="18" width="12" height="40" fill="#d1d5db"/><rect x="44" y="18" width="12" height="40" fill="#d1d5db"/><path d="M8,18 L14,6 L20,18Z M44,18 L50,6 L56,18Z" fill="#8b5cf6"/><path d="M26,58 L26,44 Q32,36 38,44 L38,58Z" fill="#8b5a3c"/><path d="M50,6 L50,0 L56,3 L50,5" fill="#f43f5e"/>`);
+      I['🏮'] = G(`<rect x="26" y="4" width="12" height="7" rx="2" fill="#7c2d12"/><ellipse cx="32" cy="33" rx="20" ry="22" fill="#ef4444"/><path d="M20,16 Q14,33 20,50 M32,11 L32,55 M44,16 Q50,33 44,50" stroke="#b91c1c" stroke-width="2" fill="none"/><ellipse cx="32" cy="33" rx="9" ry="14" fill="#fde68a" opacity=".55"/><rect x="26" y="54" width="12" height="6" rx="2" fill="#7c2d12"/>`);
+      I['🕯'] = G(`<rect x="22" y="26" width="20" height="32" rx="3" fill="#fef3c7"/><path d="M22,30 Q32,34 42,30" stroke="#fde68a" stroke-width="3" fill="none"/><path d="M32,26 L32,20" stroke="#57534e" stroke-width="2"/><path d="M32,4 C26,12 26,18 32,21 C38,18 38,12 32,4Z" fill="#fb923c"/><path d="M32,10 C29,15 29,18 32,19 C35,18 35,15 32,10Z" fill="#fde68a"/>`);
+      I['⚽'] = W(`<circle cx="32" cy="32" r="26" fill="#fff"/><path d="M32,20 L43,28 L39,41 L25,41 L21,28Z" fill="#1f2937"/><path d="M32,20 L32,8 M43,28 L55,24 M39,41 L46,52 M25,41 L18,52 M21,28 L9,24" stroke="#1f2937" stroke-width="2.4"/>${hl('M14,20 C18,14 22,11 28,9', '#e5e7eb', 3, .9)}`);
+      I['⚪'] = ball('#ef4444', '#fff', '#1e293b');
+      I['🔵'] = ball('#60a5fa', '#3b82f6');
+      I['🎈'] = W(`<path d="M32,44 Q30,52 34,62" stroke="#94a3b8" stroke-width="1.4" fill="none"/><ellipse cx="32" cy="24" rx="16" ry="19" fill="#f43f5e"/><path d="M29,42 L35,42 L32,46Z" fill="#e11d48"/><ellipse cx="25" cy="17" rx="4" ry="7" fill="#fecdd3" opacity=".75"/>`);
+      I['❄'] = G(`<g stroke="#7cc6ef" stroke-width="4.5" stroke-linecap="round">${[0, 60, 120].map(a => `<path d="M32,6 L32,58" transform="rotate(${a} 32 32)"/><path d="M24,12 L32,18 L40,12 M24,52 L32,46 L40,52" fill="none" transform="rotate(${a} 32 32)"/>`).join('')}</g><circle cx="32" cy="32" r="4" fill="#e0f2fe"/>`);
+      I['🧊'] = W(`<path d="M12,22 L32,12 L52,22 L52,46 L32,56 L12,46Z" fill="#bae6fd"/><path d="M12,22 L32,32 L52,22 L32,12Z" fill="#e0f2fe"/><path d="M32,32 L32,56 L52,46 L52,22Z" fill="#7dd3fc"/>`);
+      I['⛄'] = W(`<circle cx="32" cy="44" r="16" fill="#fff" stroke="#dbe8f3" stroke-width="2"/><circle cx="32" cy="20" r="11" fill="#fff" stroke="#dbe8f3" stroke-width="2"/><circle cx="28" cy="18" r="1.8" fill="#334155"/><circle cx="36" cy="18" r="1.8" fill="#334155"/><path d="M32,22 L40,24 L32,25Z" fill="#fb923c"/><path d="M22,30 Q32,34 42,30" stroke="#ef4444" stroke-width="4" fill="none"/><path d="M22,10 L42,10 L40,4 L24,4Z" fill="#334155"/><circle cx="32" cy="40" r="1.8" fill="#334155"/><circle cx="32" cy="48" r="1.8" fill="#334155"/>`);
+      I['🥁'] = W(`<ellipse cx="32" cy="24" rx="22" ry="8" fill="#fde68a"/><path d="M10,24 L10,46 Q32,58 54,46 L54,24 Q32,36 10,24Z" fill="#ef4444"/><path d="M10,24 L22,48 M22,30 L34,52 M42,30 L32,52 M54,24 L44,48" stroke="#fde68a" stroke-width="2"/><path d="M40,4 L50,18 M24,4 L18,18" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>`);
+      I['🧺'] = W(`<path d="M16,26 Q32,4 48,26" stroke="#a16207" stroke-width="4" fill="none"/><path d="M8,26 L56,26 L50,56 L14,56Z" fill="#d6a463"/>${[34, 42, 50].map(y => `<path d="M10,${y} L54,${y}" stroke="#a16207" stroke-width="2" opacity=".6"/>`).join('')}${[20, 32, 44].map(x => `<path d="M${x},26 L${x - 1},56" stroke="#a16207" stroke-width="2" opacity=".6"/>`).join('')}`);
+      I['🫧'] = W(`<circle cx="26" cy="36" r="16" fill="#bae6fd" opacity=".55" stroke="#7dd3fc" stroke-width="2"/><circle cx="46" cy="18" r="9" fill="#bae6fd" opacity=".55" stroke="#7dd3fc" stroke-width="2"/>${hl('M18,30 Q20,24 26,22', '#fff', 3, .9)}${hl('M42,15 Q44,12 47,12', '#fff', 2, .9)}`);
+      I['👻'] = W(`<path d="M12,58 L12,30 C12,14 22,6 32,6 C42,6 52,14 52,30 L52,58 L45,52 L38,58 L32,52 L26,58 L19,52Z" fill="#f1f5f9"/><ellipse cx="25" cy="28" rx="3.5" ry="5" fill="#334155"/><ellipse cx="39" cy="28" rx="3.5" ry="5" fill="#334155"/><ellipse cx="32" cy="40" rx="4" ry="3" fill="#334155"/><circle cx="20" cy="36" r="3" fill="#fbcfe8" opacity=".7"/><circle cx="44" cy="36" r="3" fill="#fbcfe8" opacity=".7"/>`);
+      I['🍄'] = W(`<path d="M24,36 Q22,52 26,60 L38,60 Q42,52 40,36Z" fill="#f5ecd7"/><path d="M6,36 Q8,10 32,8 Q56,10 58,36 Q32,42 6,36Z" fill="#dc2626"/><circle cx="20" cy="24" r="5" fill="#fff"/><circle cx="36" cy="18" r="4" fill="#fff"/><circle cx="46" cy="28" r="3.5" fill="#fff"/>`);
+      I['💎'] = G(`<path d="M14,22 L22,10 L42,10 L50,22 L32,56Z" fill="#7dd3fc"/><path d="M14,22 L50,22 L32,56Z" fill="#38bdf8"/><path d="M22,10 L28,22 L32,56 M42,10 L36,22 L32,56 M28,22 L32,10 L36,22" stroke="#e0f2fe" stroke-width="1.6" fill="none"/>${hl('M19,18 L24,12', '#fff', 2.5, .9)}`);
+      I['🪙'] = W(`<circle cx="32" cy="32" r="24" fill="#f59e0b"/><circle cx="32" cy="32" r="18" fill="#fbbf24"/>${star('#f59e0b', '#d97706', 32, 32, 10)}${hl('M18,22 Q22,14 30,12', '#fff6cf', 3, .8)}`);
+      I['💰'] = W(`<path d="M22,16 L42,16 L38,24 Q56,32 54,46 Q52,58 32,58 Q12,58 10,46 Q8,32 26,24Z" fill="#d6a463"/><path d="M22,16 Q32,22 42,16" stroke="#a16207" stroke-width="3" fill="none"/><circle cx="32" cy="42" r="8" fill="#fbbf24"/><path d="M32,37 L32,47" stroke="#a16207" stroke-width="2.4"/>`);
+      I['🏆'] = W(`<path d="M18,8 L46,8 L44,30 Q42,40 32,40 Q22,40 20,30Z" fill="#fbbf24"/><path d="M18,12 Q6,12 8,22 Q10,30 20,30 M46,12 Q58,12 56,22 Q54,30 44,30" stroke="#f59e0b" stroke-width="4" fill="none"/><rect x="28" y="40" width="8" height="10" fill="#f59e0b"/><rect x="18" y="50" width="28" height="8" rx="2" fill="#a16207"/>${hl('M24,14 L24,28', '#fff6cf', 3, .8)}`);
+      I['🏅'] = W(`<path d="M20,4 L30,26 L34,26 L26,4Z M44,4 L34,26 L30,26 L38,4Z" fill="#3b82f6"/><circle cx="32" cy="40" r="17" fill="#fbbf24"/><circle cx="32" cy="40" r="11" fill="#fcd34d"/>${star('#f59e0b', '#d97706', 32, 40, 8)}`);
+      I['👑'] = W(`<path d="M8,48 L6,18 L20,30 L32,10 L44,30 L58,18 L56,48Z" fill="#fbbf24"/><rect x="8" y="46" width="48" height="8" rx="2" fill="#f59e0b"/><circle cx="32" cy="36" r="4" fill="#ef4444"/><circle cx="18" cy="40" r="3" fill="#3b82f6"/><circle cx="46" cy="40" r="3" fill="#22c55e"/>`);
+      I['🐚'] = W(`<path d="M32,8 L8,50 Q32,60 56,50Z" fill="#fbcfe8"/>${[14, 22, 32, 42, 50].map(x => `<path d="M32,10 L${x},52" stroke="#f9a8d4" stroke-width="2.4"/>`).join('')}<ellipse cx="32" cy="54" rx="10" ry="4" fill="#f9a8d4"/>`);
+      I['🦀'] = W(`<ellipse cx="32" cy="40" rx="18" ry="12" fill="#ef4444"/><circle cx="12" cy="22" r="8" fill="#ef4444"/><circle cx="52" cy="22" r="8" fill="#ef4444"/><path d="M9,18 L15,24 M55,18 L49,24" stroke="#fecaca" stroke-width="3"/><path d="M16,46 L6,52 M18,50 L10,58 M48,46 L58,52 M46,50 L54,58" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/><circle cx="27" cy="32" r="2.5" fill="#1f2937"/><circle cx="37" cy="32" r="2.5" fill="#1f2937"/>`);
+      I['🪸'] = W(`<path d="M32,60 L32,34 M32,40 Q20,34 18,18 M32,40 Q44,34 46,16 M24,30 Q14,30 10,22 M42,28 Q52,28 56,20 M32,34 Q30,20 34,8" stroke="#fb7185" stroke-width="5" fill="none" stroke-linecap="round"/>`);
+      I['🐟'] = W(`<path d="M8,32 Q24,12 44,26 L58,16 L56,32 L58,48 L44,38 Q24,52 8,32Z" fill="#60a5fa"/><path d="M24,24 Q30,32 24,40" stroke="#93c5fd" stroke-width="2.4" fill="none"/><circle cx="16" cy="30" r="2.6" fill="#1e293b"/>${hl('M18,24 Q26,20 34,22', '#dbeafe', 2.4, .8)}`);
+      I['🦆'] = W(`<ellipse cx="34" cy="42" rx="22" ry="14" fill="#facc15"/><circle cx="20" cy="24" r="12" fill="#facc15"/><path d="M6,26 L14,22 L14,30Z" fill="#fb923c"/><circle cx="18" cy="21" r="2.2" fill="#1f2937"/><path d="M30,40 Q42,32 50,40" stroke="#eab308" stroke-width="3" fill="none"/>`);
+      I['🐦'] = W(`<ellipse cx="30" cy="36" rx="18" ry="14" fill="#60a5fa"/><circle cx="44" cy="24" r="10" fill="#60a5fa"/><path d="M53,24 L60,26 L53,28Z" fill="#fb923c"/><circle cx="46" cy="22" r="2" fill="#1f2937"/><path d="M14,30 L2,22 L8,36Z" fill="#3b82f6"/><path d="M22,34 Q30,26 38,34" stroke="#bfdbfe" stroke-width="3" fill="none"/>`);
+      I['🐛'] = W(`${[12, 22, 32, 42].map((x, i) => `<circle cx="${x}" cy="${40 - (i === 3 ? 6 : 0)}" r="${8 + (i === 3 ? 2 : 0)}" fill="${i % 2 ? '#86efac' : '#4ade80'}"/>`).join('')}<circle cx="45" cy="32" r="2" fill="#1f2937"/><path d="M42,24 L40,16 M48,24 L52,16" stroke="#166534" stroke-width="2"/>`);
+      I['🐝'] = W(`<ellipse cx="22" cy="20" rx="10" ry="7" fill="#e0f2fe" opacity=".9"/><ellipse cx="40" cy="20" rx="10" ry="7" fill="#e0f2fe" opacity=".9"/><ellipse cx="32" cy="38" rx="18" ry="14" fill="#facc15"/><path d="M26,26 L24,50 M36,25 L38,51" stroke="#1f2937" stroke-width="5"/><circle cx="16" cy="36" r="2" fill="#1f2937"/>`);
+      I['🐴'] = W(`<path d="M18,58 L22,30 Q22,12 38,8 L46,4 L44,12 Q54,18 54,30 L48,32 L40,26 L36,58Z" fill="#a16207"/><path d="M24,14 Q30,8 38,8 L28,30Z" fill="#78350f"/><circle cx="42" cy="18" r="2.2" fill="#1f2937"/>`);
+      I['🦁'] = W(`<circle cx="32" cy="32" r="26" fill="#d97706"/><circle cx="32" cy="34" r="17" fill="#fbbf24"/><circle cx="26" cy="30" r="2.4" fill="#1f2937"/><circle cx="38" cy="30" r="2.4" fill="#1f2937"/><path d="M29,38 L35,38 L32,42Z" fill="#78350f"/>`);
+      I['🐣'] = W(`<path d="M10,40 Q10,58 32,58 Q54,58 54,40 L46,36 L40,42 L32,36 L24,42 L18,36Z" fill="#f5f5f4"/><circle cx="32" cy="28" r="14" fill="#facc15"/><circle cx="27" cy="25" r="2" fill="#1f2937"/><circle cx="37" cy="25" r="2" fill="#1f2937"/><path d="M29,30 L35,30 L32,34Z" fill="#fb923c"/>`);
+      I['🐔'] = W(`<ellipse cx="32" cy="42" rx="20" ry="16" fill="#fff"/><circle cx="24" cy="22" r="11" fill="#fff"/><path d="M18,12 Q20,4 24,10 Q26,2 30,10" fill="#ef4444"/><path d="M12,22 L6,24 L12,26Z" fill="#fb923c"/><circle cx="21" cy="20" r="2" fill="#1f2937"/><path d="M50,34 Q60,24 56,40" fill="#e5e7eb"/>`);
+      I['🥚'] = W(`<path d="M32,6 C18,6 10,26 10,40 C10,52 20,60 32,60 C44,60 54,52 54,40 C54,26 46,6 32,6Z" fill="#fef3c7"/><circle cx="24" cy="34" r="4" fill="#fbcfe8"/><circle cx="40" cy="26" r="3" fill="#a5f3fc"/><circle cx="38" cy="46" r="4.5" fill="#bbf7d0"/>${hl('M18,26 Q20,16 26,12', '#fff', 3.5, .9)}`);
+      I['🍓'] = W(`<path d="M32,60 C16,52 8,36 12,24 C18,16 46,16 52,24 C56,36 48,52 32,60Z" fill="#ef4444"/>${[[22, 30], [32, 28], [42, 30], [26, 40], [38, 40], [32, 50]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.4" ry="2" fill="#fde68a"/>`).join('')}<path d="M16,20 L24,12 L32,18 L40,12 L48,20 Q32,24 16,20Z" fill="#4d8a37"/>`);
+      I['🍇'] = W(`${[[26, 22], [38, 22], [20, 34], [32, 34], [44, 34], [26, 46], [38, 46], [32, 56]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#8b5cf6"/><circle cx="${x - 2}" cy="${y - 2}" r="2" fill="#c4b5fd"/>`).join('')}<path d="M32,16 Q34,6 40,4" stroke="#7a4b2a" stroke-width="3" fill="none"/><path d="M34,10 Q44,6 48,12 Q40,16 34,10Z" fill="#6aa84f"/>`);
+      I['🍞'] = W(`<path d="M8,30 Q8,12 32,12 Q56,12 56,30 Q56,34 52,36 L52,56 L12,56 L12,36 Q8,34 8,30Z" fill="#e3a857"/><path d="M14,30 Q14,18 32,18 Q50,18 50,30 L50,52 L14,52Z" fill="#f6dcae"/>`);
+      I['🍰'] = W(`<path d="M8,30 L56,22 L56,50 L8,56Z" fill="#fde68a"/><path d="M8,30 L56,22 L56,30 L8,38Z" fill="#fff"/><path d="M8,44 L56,38" stroke="#fbcfe8" stroke-width="5"/><path d="M40,12 C30,12 32,22 40,24 C48,22 50,12 40,12Z" fill="#ef4444"/>`);
+      I['🎂'] = W(`<rect x="10" y="32" width="44" height="24" rx="4" fill="#fbcfe8"/><path d="M10,36 Q16,44 22,36 Q28,44 34,36 Q40,44 46,36 Q50,42 54,36 L54,32 L10,32Z" fill="#fff"/><rect x="8" y="54" width="48" height="5" rx="2" fill="#e5e7eb"/>${[20, 32, 44].map(x => `<rect x="${x - 2}" y="18" width="4" height="14" fill="#93c5fd"/><path d="M${x},8 C${x - 4},14 ${x - 3},18 ${x},18 C${x + 3},18 ${x + 4},14 ${x},8Z" fill="#fb923c"/>`).join('')}`);
+      I['🍦'] = W(`<path d="M20,32 L32,62 L44,32Z" fill="#e3a857"/><path d="M22,34 L42,34 M24,40 L40,40" stroke="#c2803e" stroke-width="2"/><circle cx="32" cy="22" r="14" fill="#c4b5fd"/><circle cx="24" cy="28" r="8" fill="#c4b5fd"/><circle cx="40" cy="28" r="8" fill="#c4b5fd"/>${hl('M24,18 Q26,12 32,10', '#ede9fe', 3, .9)}`);
+      I['🍫'] = W(`<rect x="12" y="8" width="40" height="48" rx="3" fill="#7c4a1e"/>${[0, 1, 2].map(r => [0, 1].map(c => `<rect x="${16 + c * 17}" y="${12 + r * 14}" width="14" height="11" rx="2" fill="#92582a"/>`).join('')).join('')}<path d="M12,40 L52,40 L52,56 L12,56Z" fill="#ef4444"/>`);
+      I['🍯'] = W(`<rect x="12" y="20" width="40" height="38" rx="10" fill="#f59e0b"/><rect x="16" y="10" width="32" height="10" rx="3" fill="#d6a463"/><path d="M12,30 Q22,38 22,30 Q26,40 32,30 Q40,38 52,30" stroke="#fbbf24" stroke-width="4" fill="none"/>`);
+      I['🥛'] = W(`<path d="M18,10 L46,10 L42,58 L22,58Z" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><path d="M19,20 L45,20 L42,58 L22,58Z" fill="#f8fafc"/>${hl('M24,24 L26,50', '#e2e8f0', 3, .9)}`);
+      I['☂'] = W(`<path d="M6,32 Q8,8 32,8 Q56,8 58,32 Q52,26 45,32 Q38,26 32,32 Q26,26 19,32 Q12,26 6,32Z" fill="#f472b6"/><path d="M32,32 L32,54 Q32,60 26,58" stroke="#475569" stroke-width="3" fill="none" stroke-linecap="round"/>${hl('M14,24 Q18,14 28,12', '#fbcfe8', 3, .8)}`);
+      I['🚪'] = W(`<rect x="14" y="6" width="36" height="54" rx="3" fill="#a0704a"/><rect x="19" y="11" width="26" height="20" rx="2" fill="#8b5e3c"/><rect x="19" y="35" width="26" height="20" rx="2" fill="#8b5e3c"/><circle cx="42" cy="34" r="2.6" fill="#fbbf24"/>`);
+      I['🪟'] = W(`<rect x="8" y="8" width="48" height="48" rx="4" fill="#bae6fd" stroke="#fff" stroke-width="5"/><path d="M32,8 L32,56 M8,32 L56,32" stroke="#fff" stroke-width="4"/>${hl('M14,20 L22,14', '#fff', 3, .9)}`);
+      I['🖼'] = W(`<rect x="6" y="10" width="52" height="44" rx="3" fill="#d6a463"/><rect x="12" y="16" width="40" height="32" fill="#e0f2fe"/><path d="M12,48 L24,32 L32,40 L40,30 L52,48Z" fill="#86b674"/><circle cx="42" cy="24" r="4" fill="#fde047"/>`);
+      I['✉'] = W(`<rect x="6" y="14" width="52" height="36" rx="3" fill="#fff" stroke="#e2c5a0" stroke-width="2"/><path d="M6,16 L32,36 L58,16" stroke="#e2c5a0" stroke-width="2.4" fill="none"/>${heart('#f43f5e', '#be123c').replace('<g', '<g transform="translate(44 34) scale(.22)"')}`);
+      I['📜'] = W(`<rect x="14" y="10" width="36" height="44" fill="#fdf1d6"/><rect x="8" y="6" width="48" height="8" rx="4" fill="#e3c08a"/><rect x="8" y="50" width="48" height="8" rx="4" fill="#e3c08a"/>${[22, 30, 38].map(y => `<path d="M20,${y} L44,${y}" stroke="#c9a46b" stroke-width="2"/>`).join('')}`);
+      I['🗺'] = W(`<path d="M6,14 L22,8 L42,14 L58,8 L58,50 L42,56 L22,50 L6,56Z" fill="#fdf1d6"/><path d="M22,8 L22,50 M42,14 L42,56" stroke="#e3c08a" stroke-width="2"/><path d="M12,40 Q22,30 30,36 Q38,42 48,26" stroke="#ef4444" stroke-width="2.4" fill="none" stroke-dasharray="3 4"/><path d="M44,22 L52,30 M52,22 L44,30" stroke="#dc2626" stroke-width="3"/>`);
+      I['🧰'] = W(`<rect x="8" y="22" width="48" height="34" rx="4" fill="#a0704a"/><path d="M8,22 Q8,10 32,10 Q56,10 56,22Z" fill="#b8865a"/><rect x="8" y="30" width="48" height="5" fill="#fbbf24"/><rect x="27" y="27" width="10" height="12" rx="2" fill="#fbbf24"/><circle cx="32" cy="33" r="2" fill="#78350f"/>`);
+      I['🎁'] = W(`<rect x="10" y="26" width="44" height="30" rx="3" fill="#f472b6"/><rect x="6" y="18" width="52" height="10" rx="2" fill="#fb7185"/><rect x="28" y="18" width="8" height="38" fill="#fde047"/><path d="M32,18 Q20,4 16,14 Q20,20 32,18 Q44,4 48,14 Q44,20 32,18Z" fill="#fde047"/>`);
+      I['⛵'] = W(`<path d="M8,44 L56,44 L48,56 L16,56Z" fill="#a0704a"/><path d="M30,8 L30,42 L10,42Z" fill="#fff"/><path d="M34,14 L34,42 L52,42Z" fill="#f87171"/><path d="M32,6 L32,44" stroke="#78350f" stroke-width="2.5"/>`);
+      I['🚩'] = W(`<path d="M16,6 L16,60" stroke="#78350f" stroke-width="4" stroke-linecap="round"/><path d="M18,8 Q32,4 38,12 Q46,18 54,14 L54,36 Q46,40 38,34 Q30,28 18,32Z" fill="#ef4444"/>`);
+      I['🏁'] = W(`<path d="M14,6 L14,60" stroke="#475569" stroke-width="4" stroke-linecap="round"/><rect x="16" y="8" width="38" height="26" fill="#fff"/>${[0, 1, 2, 3].map(c => [0, 1, 2].map(r => (c + r) % 2 ? '' : `<rect x="${16 + c * 9.5}" y="${8 + r * 8.7}" width="9.5" height="8.7" fill="#1f2937"/>`).join('')).join('')}`);
+      I['⛺'] = W(`<path d="M4,56 L32,10 L60,56Z" fill="#fb923c"/><path d="M32,10 L24,56 L40,56Z" fill="#c2410c"/><path d="M32,10 L32,4" stroke="#78350f" stroke-width="3"/>`);
+      I['🏔'] = mountain('#94a3b8', '#64748b', true);
+      I['⛰'] = mountain('#a3a08f', '#7c7a6a', false);
+      I['🌋'] = mountain('#8a5a46', '#6b4434', false, true);
+      I['🏝'] = W(`<ellipse cx="32" cy="52" rx="28" ry="9" fill="#5aa9e6"/><ellipse cx="32" cy="48" rx="20" ry="6" fill="#f6e3b6"/><path d="M34,48 Q32,30 26,18" stroke="#9b6b43" stroke-width="4" fill="none"/>${[[-50, 16], [-10, 18], [30, 16], [150, 16], [200, 14]].map(([a, l]) => { const r = a * Math.PI / 180; return `<path d="M26,18 q${(Math.cos(r) * l * .6).toFixed(1)},${(Math.sin(r) * l * .3 - 8).toFixed(1)} ${(Math.cos(r) * l * 1.4).toFixed(1)},${(Math.sin(r) * l + 6).toFixed(1)}" stroke="#4d9a4f" stroke-width="5" fill="none" stroke-linecap="round"/>`; }).join('')}`);
+      I['🧵'] = W(`<rect x="18" y="8" width="28" height="6" rx="2" fill="#a0704a"/><rect x="18" y="50" width="28" height="6" rx="2" fill="#a0704a"/><rect x="22" y="14" width="20" height="36" fill="#f472b6"/>${[20, 26, 32, 38, 44].map(y => `<path d="M22,${y} L42,${y + 3}" stroke="#ec4899" stroke-width="1.6"/>`).join('')}<path d="M42,40 Q56,44 50,58" stroke="#f472b6" stroke-width="2" fill="none"/>`);
+      I['🪶'] = W(`<path d="M50,6 Q20,10 14,44 L18,46 Q40,40 50,6Z" fill="#e0f2fe"/><path d="M50,6 Q30,24 12,56" stroke="#94a3b8" stroke-width="2.4" fill="none"/>`);
+      I['🎤'] = W(`<rect x="28" y="34" width="8" height="24" rx="3" fill="#475569"/><circle cx="32" cy="22" r="14" fill="#94a3b8"/><path d="M22,16 L42,16 M20,22 L44,22 M22,28 L42,28" stroke="#64748b" stroke-width="1.6"/>${hl('M24,12 Q28,9 32,9', '#e2e8f0', 3, .9)}`);
+      I['🎆'] = G(`${[...Array(12)].map((_, i) => { const a = i / 12 * Math.PI * 2; return `<path d="M${(32 + Math.cos(a) * 8).toFixed(1)},${(32 + Math.sin(a) * 8).toFixed(1)} L${(32 + Math.cos(a) * 26).toFixed(1)},${(32 + Math.sin(a) * 26).toFixed(1)}" stroke="${['#f472b6', '#fde047', '#60a5fa'][i % 3]}" stroke-width="3.5" stroke-linecap="round"/>`; }).join('')}<circle cx="32" cy="32" r="5" fill="#fff7cc"/>`);
+      I['💥'] = G(`<path d="M32,4 L38,22 L56,12 L46,30 L62,36 L44,40 L52,58 L34,46 L24,62 L22,44 L4,46 L16,32 L4,18 L22,22Z" fill="#f97316"/><path d="M32,16 L35,26 L46,22 L40,32 L50,36 L39,38 L42,48 L33,42 L27,50 L26,40 L16,40 L23,33 L16,24 L27,27Z" fill="#fde047"/>`);
+      I['💨'] = W(`<path d="M6,24 L40,24 Q50,24 50,16 Q50,8 42,8 Q36,8 36,14" stroke="#cbd5e1" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M10,36 L52,36 Q60,36 60,44 Q60,52 52,52 Q46,52 46,46" stroke="#e2e8f0" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M4,48 L30,48" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round"/>`);
+      I['🕳'] = W(`<ellipse cx="32" cy="38" rx="27" ry="14" fill="#5b4334"/><ellipse cx="32" cy="38" rx="20" ry="9" fill="#1c1410"/><path d="M8,34 Q32,22 56,34" stroke="#8b6b52" stroke-width="3" fill="none"/>`);
+      I['🛏'] = W(`<rect x="4" y="34" width="56" height="16" rx="3" fill="#bfdbfe"/><rect x="6" y="26" width="16" height="10" rx="4" fill="#fff"/><rect x="2" y="16" width="6" height="40" rx="2" fill="#a0704a"/><rect x="56" y="30" width="6" height="26" rx="2" fill="#a0704a"/><path d="M22,34 L60,34 L60,46 L22,46Z" fill="#93c5fd"/>`);
+      I['🕰'] = W(`<rect x="12" y="44" width="40" height="12" rx="4" fill="#a0704a"/><circle cx="32" cy="28" r="20" fill="#a0704a"/><circle cx="32" cy="28" r="15" fill="#fef3c7"/><path d="M32,28 L32,18 M32,28 L40,32" stroke="#334155" stroke-width="2.6" stroke-linecap="round"/>`);
+      I['🛷'] = W(`<path d="M6,46 L52,46 Q60,46 60,38" stroke="#78350f" stroke-width="4" fill="none" stroke-linecap="round"/><rect x="10" y="24" width="40" height="12" rx="3" fill="#ef4444"/><path d="M16,36 L16,46 M44,36 L44,46" stroke="#78350f" stroke-width="4"/>`);
+      I['🎣'] = W(`<path d="M8,58 L46,10" stroke="#a0704a" stroke-width="4" stroke-linecap="round"/><path d="M46,10 Q56,20 54,40" stroke="#94a3b8" stroke-width="1.6" fill="none"/><path d="M54,40 Q54,48 48,46" stroke="#475569" stroke-width="2.4" fill="none"/><circle cx="54" cy="34" r="3.5" fill="#ef4444"/>`);
+      I['🎨'] = W(`<path d="M32,6 C14,6 4,20 6,34 C8,46 18,46 22,42 C26,38 32,42 30,48 C28,56 36,60 44,56 C56,50 60,36 56,24 C52,12 44,6 32,6Z" fill="#f5d0a9"/>${[[20, 22, '#ef4444'], [32, 16, '#facc15'], [44, 22, '#3b82f6'], [48, 36, '#22c55e']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="5" fill="${c}"/>`).join('')}`);
+      I['🚿'] = W(`<path d="M12,34 L36,24 L46,30 L50,38 L26,48Z" fill="#7dd3fc"/><path d="M36,24 Q44,10 56,12" stroke="#5aa9e6" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M14,40 L20,52 M22,44 L26,56 M30,46 L32,58" stroke="#93c5fd" stroke-width="2.6" stroke-linecap="round"/>`);
+      I['🦶'] = W(`<path d="M22,58 Q10,50 14,32 Q18,20 30,22 Q40,24 38,38 Q36,52 30,58Z" fill="#fcd7b6"/>${[[24, 14, 4], [32, 12, 3.4], [39, 14, 3], [44, 18, 2.6], [47, 24, 2.3]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fcd7b6"/>`).join('')}`);
+      I['❤'] = heart('#ef4444', '#b91c1c');
+      I['💗'] = heart('#f472b6', '#db2777');
+      I['💕'] = W(`<g transform="translate(-2 6) scale(.62)">${heart('#f472b6', '#db2777')}</g><g transform="translate(26 -2) scale(.5)">${heart('#fb7185', '#e11d48')}</g>`);
+      I['💙'] = heart('#60a5fa', '#2563eb');
+      I['💤'] = W(`<path d="M10,40 L26,40 L10,58 L28,58" stroke="#818cf8" stroke-width="4.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M34,18 L48,18 L34,34 L50,34" stroke="#a5b4fc" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M50,4 L58,4 L50,13 L59,13" stroke="#c7d2fe" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`);
+      I['❗'] = W(`<path d="M26,6 L38,6 L35,40 L29,40Z" fill="#ef4444"/><circle cx="32" cy="52" r="6" fill="#ef4444"/>`);
+      I['❓'] = W(`<path d="M18,22 Q18,6 32,6 Q46,6 46,20 Q46,28 38,32 Q33,35 33,42 L29,42 Q28,32 36,27 Q40,24 40,20 Q40,12 32,12 Q24,12 24,22Z" fill="#8b5cf6"/><circle cx="31" cy="53" r="5.5" fill="#8b5cf6"/>`);
+      I['💢'] = W(`<g stroke="#ef4444" stroke-width="6" stroke-linecap="round" fill="none"><path d="M10,24 Q22,24 24,10"/><path d="M54,24 Q42,24 40,10"/><path d="M10,40 Q22,40 24,54"/><path d="M54,40 Q42,40 40,54"/></g>`);
+      I['💭'] = W(`<ellipse cx="38" cy="24" rx="22" ry="16" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><circle cx="16" cy="46" r="6" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><circle cx="8" cy="58" r="3.5" fill="#fff" stroke="#cbd5e1" stroke-width="2"/>`);
+
+      const cache = {};
+      const norm = e => e.replace(/️/g, '');
+      const url = e => {
+        const k = norm(e);
+        if (!I[k]) return '';
+        if (!cache[k]) cache[k] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>${D}</defs>${I[k]}</svg>`);
+        return cache[k];
+      };
+      const RE = /\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic})*️?/gu;
+      // 글자(텍스트 노드) 속 이모지만 그림으로 바꿔요. 속성(data-…)이나 버튼 기능은 그대로예요.
+      function iconize(root) {
+        if (!root) return;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        const todo = [];
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) { RE.lastIndex = 0; if (RE.test(n.nodeValue)) todo.push(n); }
+        todo.forEach(n => {
+          const txt = n.nodeValue; RE.lastIndex = 0;
+          let m, last = 0, frag = null;
+          while ((m = RE.exec(txt))) {
+            const u = url(m[0]); if (!u) continue;
+            frag = frag || document.createDocumentFragment();
+            if (m.index > last) frag.appendChild(document.createTextNode(txt.slice(last, m.index)));
+            const img = document.createElement('img');
+            img.className = 'sb-ico'; img.src = u; img.alt = m[0]; img.draggable = false;
+            frag.appendChild(img); last = m.index + m[0].length;
+          }
+          if (!frag) return;
+          if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+          n.parentNode.replaceChild(frag, n);
+        });
+      }
+      // 동화 그림 칸 · 참여 동화 미션 칸에서만 자동으로 바꿔요 (다른 탭·배틀은 건드리지 않아요)
+      let obs = null;
+      function watch() {
+        if (obs || typeof MutationObserver === 'undefined') return;
+        const ids = ['sb-stage', 'ib-stage', 'ib-actions'];
+        const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+        if (!els.length) return;
+        let pending = false;
+        obs = new MutationObserver(() => {
+          if (pending) return; pending = true;
+          Promise.resolve().then(() => { pending = false; els.forEach(iconize); });
+        });
+        els.forEach(el => { obs.observe(el, { childList: true, subtree: true, characterData: true }); iconize(el); });
+      }
+      return { has: e => !!I[norm(e)], url, iconize, watch, keys: () => Object.keys(I) };
+    })();
+    if (document.readyState !== 'loading') SBI.watch(); else document.addEventListener('DOMContentLoaded', () => SBI.watch());
 
     function sbStageHtml(page, story) {
       const art = sbParseArt(page.art);
