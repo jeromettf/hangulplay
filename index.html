@@ -1604,6 +1604,22 @@
         .ib-goal { background: #fef9c3; border-color: #fde047; }
         .ib-near { border-color: #a78bfa; background: #f5f3ff; animation: ibPulse 1.2s ease-out infinite; }
         .ib-maze-me { width: 92%; height: 92%; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); }
+        /* 🔴 몬스터볼 / 🔦 손전등 */
+        .ib-wild { position: absolute; width: 30cqw; translate: -50% -50%; transition: scale .5s ease-in, opacity .5s; pointer-events: none; }
+        .ib-wild img { width: 100%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 4px 5px rgba(0,0,0,.3)); animation: sbFloat2 2.4s ease-in-out infinite; }
+        .ib-suck { scale: 0; opacity: 0; }
+        .ib-ball { position: absolute; width: 13cqw; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; border: .8cqw solid #1e293b; padding: 0; cursor: pointer;
+          background: linear-gradient(#ef4444 0 46%, #1e293b 46% 54%, #fff 54%); box-shadow: 0 1cqw 2cqw rgba(0,0,0,.35); transition: left .6s ease-out, top .6s cubic-bezier(.3,-.6,.6,1); animation: sbBob 1.4s ease-in-out infinite; }
+        .ib-ball i { position: absolute; left: 50%; top: 50%; width: 32%; height: 32%; translate: -50% -50%; border-radius: 50%; background: #fff; border: .7cqw solid #1e293b; }
+        .ib-ball-fly { animation: ibSpin .6s linear; }
+        .ib-ball-big { width: 17cqw; animation: none; }
+        @keyframes ibSpin { to { rotate: 720deg; } }
+        @keyframes ibWob { 0%,100% { rotate: 0deg; } 25% { rotate: -22deg; } 75% { rotate: 22deg; } }
+        .ib-wobble { animation: ibWob .5s ease-in-out; }
+        .ib-ball-done { box-shadow: 0 0 0 1.2cqw #fde047, 0 0 5cqw #fde047; }
+        .ib-dark { position: absolute; inset: 0; pointer-events: none !important; z-index: 6;
+          background: radial-gradient(circle at var(--x) var(--y), rgba(5,5,15,0) 0 12cqw, rgba(5,5,15,.55) 16cqw, rgba(5,5,15,.95) 22cqw); }
+        #ib-ov > .ib-counter, #ib-ov > .ib-hp { z-index: 7; }
       </style>
       <div id="sb-wrap" class="max-w-2xl mx-auto space-y-2.5">
         <div class="bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 rounded-3xl p-3.5 text-white shadow-md">
@@ -8833,6 +8849,306 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         }
       }
     ];
+    // ---------- 참여 동화 2탄 (11편) ----------
+    IB_STORIES.push(
+      {
+        id: 'darkcave', hero: 25, title: '숲속 친구들과 깜깜 동굴 대모험', tags: '🔍 🔴 🔦 🧩 ✏️ · 결말 3개',
+        cover: ['cave', ['KS', 'H'], '@cave #H:glow #K:surprise ⚪/TR/m/bob'],
+        nodes: {
+          start: [
+            { p: ['forest', ['KS', 'H'], '{KIDS|은} {H|와} 함께 숲으로 탐험을 떠났어요. 가방에는 반짝반짝 새 몬스터볼이 들어 있어요! “오늘은 새 친구를 꼭 만날 거야!”', '#H:jump #K:happy'] },
+            { p: ['forest', ['KS', 'H', 10], '풀숲이 바스락바스락! 초록색 캐터피가 고개를 쏙 내밀었어요. “도와줘! 내 동생들이 풀숲에 숨었는데 못 찾겠어.”', '#10:sad'] },
+            { m: { t: 'find', pk: 10, e: '🐛', n: 3, decoy: ['🍃', '🌿'], tiny: true, q: '풀숲에 숨은 아기 캐터피 세 마리를 찾아 줘!', nope: '그건 나뭇잎이야! 초록색 캐터피를 찾아봐!', done: '캐터피 동생들을 모두 찾았어요! 캐터피들이 고맙다며 반짝이는 실로 길을 만들어 주었어요.' } },
+            { p: ['meadow', ['KS', 'H', 16], '반짝이는 길을 따라가니 구구가 나뭇가지에 앉아 있어요. “구구구! 저 산 아래 깜깜 동굴 깊은 곳에 별빛 보석이 숨어 있대. 하지만 너무 어둡고 무서운 곳이야.”', '#16:fly'] },
+            { p: ['meadow', ['KS', 'H', 4, 39, 74], '“동굴에 가려면 든든한 친구가 한 명 더 있으면 좋겠다!” 그때 세 친구가 다가왔어요. 꼬리에 불꽃이 활활 파이리, 노래를 잘하는 푸린, 단단한 꼬마돌이에요.', '#4:happy #39:happy #74:happy'] },
+            { c: { q: '누구를 몬스터볼로 친구로 만들까요?', opts: [['🔥', '불꽃이 활활 파이리', 'fire'], ['🎵', '노래하는 푸린', 'song'], ['🪨', '단단한 꼬마돌', 'rock']] } }
+          ],
+          fire: [
+            { m: { t: 'catch', pk: 4, chars: ['KS', 'H'], q: '파이리에게 몬스터볼을 톡 던져 볼까? 볼을 눌러 봐!', done: '잡았다! 파이리가 친구가 되었어요! “파이파이! 깜깜한 곳은 내가 밝혀 줄게!”' } },
+            { p: ['cave', ['KS', 'H', 4], '산 아래 동굴 앞에 도착했어요. 동굴 속은 너무너무 깜깜하고, 어디선가 “우우우…” 하는 소리가 들려요. {KIDS|은} {H}의 손을 꼭 잡았어요.', '@cave #K:surprise #H:surprise'] },
+            { m: { t: 'write', w: '불', q: '파이리가 꼬리 불꽃을 크게 켜려면 주문이 필요해! 네모 칸에 ‘불’이라고 써 봐.', done: '화르륵! 파이리의 꼬리 불꽃이 커다랗게 타올랐어요!' } },
+            { m: { t: 'find', dark: true, e: '💎', n: 3, decoy: ['🪨', '🍄'], scene: 'cave', chars: ['KS', 'H', 4], art: '#4:glow', q: '파이리의 불빛으로 동굴을 비춰 보자! 반짝이는 보석 세 개를 찾아 줘!', done: '보석 세 개를 찾았어요! 보석이 반짝이며 동굴 안쪽 길을 가리켰어요.' } },
+            { p: ['cave', ['KS', 'H', 4, 92], '그때 “우우우!” 소리와 함께 보라색 그림자가 쑥! 고오스였어요. 그런데 고오스가 울먹이며 말했어요. “너무 깜깜해서 집에 가는 길을 잃어버렸어…”', '@cave #92:sad #K:surprise #4:glow'] },
+            { m: { t: 'solve', k: 'maze', pk: 92, grid: ['S.#..', '.#...', '...#.', '#.#.G'], wall: '🪨', goal: '🏚️', q: '파이리 불빛으로 길을 밝혀서 고오스를 집까지 데려다줘! 반짝이는 옆 칸을 눌러 한 칸씩 가요.', done: '고오스가 집에 도착했어요! “고마워! 선물로 내 보물 방을 보여 줄게!”' } },
+            { end: { id: 'crystal', e: '💎', title: '파이리 불빛으로 수정 동굴을 찾은 결말', scene: 'cave', chars: ['KS', 'H', 4, 92], art: '@sparkle #4:glow #92:happy 💎/T/l/pulse',
+                     text: '고오스의 보물 방에는 무지갯빛 수정이 가득했어요! 파이리가 불꽃을 비추자 동굴 전체가 별처럼 반짝반짝. 이제 깜깜한 동굴도 하나도 안 무서워요. 끝!' } }
+          ],
+          song: [
+            { m: { t: 'catch', pk: 39, chars: ['KS', 'H'], q: '푸린에게 몬스터볼을 톡 던져 볼까? 볼을 눌러 봐!', done: '잡았다! 푸린이 친구가 되었어요! “푸린~ 무서울 땐 내가 노래를 불러 줄게!”' } },
+            { p: ['cave', ['KS', 'H', 39], '동굴 앞에 도착했어요. 안은 깜깜하고, 바람이 “휘이잉” 으스스한 소리를 내요. 푸린이 말했어요. “노래를 부르면 하나도 안 무서워!”', '@cave #K:surprise'] },
+            { m: { t: 'write', w: '별', q: '푸린의 노래 가사에 ‘별’이 나와요! 네모 칸에 ‘별’이라고 써 주면 노래가 시작돼요.', done: '푸린이 별 노래를 부르자 동굴 천장에 작은 별빛이 하나둘 켜졌어요!' } },
+            { m: { t: 'find', dark: true, e: '🎵', n: 3, decoy: ['🪨', '💧'], scene: 'cave', chars: ['KS', 'H', 39], q: '노래가 동굴 여기저기로 흩어졌어요. 손전등으로 비춰서 음표 세 개를 찾아 줘!', done: '음표를 다 찾았어요! 노래가 동굴 가득 울려 퍼졌어요.' } },
+            { p: ['cave', ['KS', 'H', 39, 41], '그러자 동굴 천장에서 주뱃이 파닥파닥 내려왔어요. “누가 이렇게 예쁜 노래를 부르니? 우리 아기들이 잠을 못 자는데, 자장가를 불러 줄래?”', '@cave #41:fly +41:fly'] },
+            { m: { t: 'solve', k: 'pattern', seq: ['🌙', '⭐', '🌙', '⭐', '🌙'], a: '⭐', opts: ['🌙', '⭐', '☀️'], q: '자장가에는 규칙이 있대요! “달, 별, 달, 별, 달! 그다음은 뭘까?”', done: '정답! 푸린의 자장가에 아기 주뱃들이 새근새근 잠들었어요.' } },
+            { end: { id: 'lullaby', e: '🌙', title: '푸린의 자장가로 동굴을 재운 결말', scene: 'cave', chars: ['KS', 'H', 39, 41], art: '@stars @notes #41:sleep #39:happy',
+                     text: '주뱃 엄마가 고맙다며 동굴 깊은 곳의 별빛 보석을 선물해 주었어요. 깜깜하던 동굴이 포근한 자장가 동굴이 되었답니다. 끝!' } }
+          ],
+          rock: [
+            { m: { t: 'catch', pk: 74, chars: ['KS', 'H'], q: '꼬마돌에게 몬스터볼을 톡 던져 볼까? 볼을 눌러 봐!', done: '잡았다! 꼬마돌이 친구가 되었어요! “동굴은 내 고향이야. 길은 내가 다 알아!”' } },
+            { p: ['cave', ['KS', 'H', 74], '동굴 앞에 왔어요. 깜깜한 동굴 속에서 “똑… 똑…” 물방울 소리가 울려요. 꼬마돌이 앞장섰어요. “걱정 마, 나만 따라와!”', '@cave #74:happy #K:surprise'] },
+            { m: { t: 'solve', k: 'maze', pk: 74, grid: ['S..#.', '#.#..', '...#.', '.#..G'], wall: '🪨', goal: '💧', q: '꼬마돌을 따라 동굴 미로를 지나가자! 반짝이는 옆 칸을 눌러 한 칸씩 가요.', done: '미로를 빠져나왔어요! 저 앞에서 물소리가 졸졸 들려요.' } },
+            { p: ['cave', ['KS', 'H', 74, 95], '그런데 커다란 롱스톤이 길을 막고 드르렁드르렁 자고 있어요! 롱스톤이 몸을 뒤척일 때마다 동굴이 우르르 흔들려요.', '@cave #95:sleep #K:surprise'] },
+            { m: { t: 'tap', pk: 95, n: 6, pos: [62, 50], q: '롱스톤을 톡톡 여섯 번 살살 깨워 줘!', sounds: ['드르렁', '쿠울', '음냐', '드르렁', '어?', '하암!'], done: '롱스톤이 눈을 번쩍! “미안미안, 내가 길을 막고 있었구나. 이쪽으로 가면 비밀 호수가 있어!”' } },
+            { m: { t: 'word', a: '물', opts: ['물', '불', '풀'], hint: { '물': '💧', '불': '🔥', '풀': '🌿' }, q: '비밀 호수 앞에 팻말이 세 개 있어요. ‘물’이라고 쓰인 팻말을 찾아봐!' } },
+            { end: { id: 'lake', e: '💧', title: '꼬마돌과 지하 호수를 찾은 결말', scene: 'lake', chars: ['KS', 'H', 74, 95], art: '@sparkle #74:jump 💎/T/m/pulse',
+                     text: '동굴 깊은 곳에 반짝이는 지하 호수가 있었어요! 호수 바닥에서 별빛 보석이 반짝반짝. 꼬마돌과 롱스톤, 그리고 {KIDS|은} 시원한 호숫가에서 신나게 놀았어요. 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'umbreon', hero: 197, title: '{H|와} 사라진 달빛', tags: '🔦 🧩 ✏️ 🔤 👆',
+        cover: ['night', ['KS', 'H'], '@stars #H:glow 🌙/TR/m/pulse'],
+        nodes: {
+          start: [
+            { p: ['night', ['KS', 'H'], '깊은 밤 숲속에 {H|이} 살고 있어요. {H}의 몸에 있는 노란 동그라미 무늬는 달빛을 받으면 반짝반짝 빛나요.', '@stars #H:glow 🌙/TR/m'] },
+            { p: ['night', ['KS', 'H'], '그런데 오늘 밤은 하늘에 달님이 보이지 않아요! {H}의 무늬도 빛을 잃었어요. “달님이 어디 갔지? {KV}, 같이 찾아 줄래?”', '#H:sad'] },
+            { m: { t: 'find', dark: true, e: '🌟', n: 3, decoy: ['🍃', '🍄'], q: '깜깜한 숲에 달빛 조각이 떨어져 있대요. 손전등으로 비춰서 달빛 조각 세 개를 찾아 줘!', done: '달빛 조각을 모았어요! {H}의 무늬가 조금 반짝였어요.' } },
+            { p: ['night', ['KS', 'H'], '달빛 조각이 두 갈래 길을 가리켜요. 하나는 부엉이 숲, 하나는 반짝 호수로 가는 길이에요.', '#H:think'] },
+            { c: { q: '어느 길로 갈까요?', opts: [['🦉', '부엉이가 사는 숲', 'owl'], ['🌊', '반짝반짝 호수', 'lake']] } }
+          ],
+          owl: [
+            { p: ['night', ['KS', 'H', 163], '부엉이 숲에서 부우부가 눈을 동그랗게 뜨고 있었어요. “부우! 달님은 구름 이불을 덮고 잠들었어. 구름을 걷으려면 별자리 순서를 맞춰야 해!”', '@stars #163:happy ☁️/T/l'] },
+            { m: { t: 'solve', k: 'order', items: [{ e: '⭐', l: '별 하나' }, { e: '⭐⭐', l: '별 둘' }, { e: '⭐⭐⭐', l: '별 셋' }], q: '별 하나, 별 둘, 별 셋! 별이 적은 것부터 차례대로 눌러 봐요!', done: '별자리가 반짝! 구름 이불이 스르륵 걷혔어요.' } },
+            { m: { t: 'write', w: '달', q: '달님을 깨우는 주문! 네모 칸에 ‘달’이라고 써 봐.', done: '달님이 “하암~” 하고 눈을 떴어요!' } },
+            { end: { id: 'moon', e: '🌙', title: '부엉이 숲에서 달님을 깨운 결말', scene: 'night', chars: ['KS', 'H', 163], art: '#H:glow @stars 🌕/TR/l/pulse',
+                     text: '달님이 환하게 웃자 {H}의 무늬가 노랗게 반짝반짝! {H|은} 부우부, {KIDS|와} 함께 달빛 아래에서 밤 산책을 했어요. 끝!' } }
+          ],
+          lake: [
+            { p: ['night', ['KS', 'H'], '반짝 호수에 오니 호수 물에 동그란 달이 비쳐 있어요! 그런데 하늘에는 달님이 없어요. 달님이 호수에 빠진 걸까요?', '🌕/C/l/bob @stars'] },
+            { m: { t: 'solve', k: 'count', e: '🌟', n: 5, q: '호수 위에 별빛이 몇 개 떠 있을까요? 하나씩 톡톡 누르면서 세어 봐!', done: '정답! 별빛이 모여 동그란 다리가 생겼어요!' } },
+            { m: { t: 'word', a: '달', opts: ['달', '말', '발'], hint: { '달': '🌙', '말': '🐴', '발': '🦶' }, q: '호수 속 달님이 말했어요. “내 이름을 불러 줘!” ‘달’ 글자를 찾아봐!', done: '맞아요! 호수 속 달님이 하늘로 휘익 날아올랐어요!' } },
+            { m: { t: 'tap', pk: 197, n: 5, pos: [55, 52], drop: '✨', q: '{H|을} 톡톡 다섯 번 응원해 줘! 무늬가 다시 빛날 거야!', done: '{H}의 무늬가 반짝반짝 빛나기 시작했어요!' } },
+            { end: { id: 'lake', e: '✨', title: '호수에서 달님을 구한 결말', scene: 'stars', chars: ['KS', 'H'], art: '#H:glow 🌕/TR/l/pulse @sparkle',
+                     text: '하늘에 다시 달님이 떴어요! {H}의 동그라미 무늬가 호수에 비쳐 별처럼 반짝였어요. “고마워, {KV}. 넌 밤하늘의 친구야!” 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'pichu', hero: 172, title: '{H}의 첫 심부름', tags: '🔤 🧩 ✏️ 👆',
+        cover: ['town', ['KS', 'H'], '#H:jump 🧺/C/m'],
+        nodes: {
+          start: [
+            { p: ['town', ['KS', 'H', 25], '{H|이} 처음으로 혼자 심부름을 가요! 엄마 피카츄가 말했어요. “사과랑 우유를 사 오렴.” {KIDS|이} 함께 가 주기로 했어요.', '#H:jump #25:happy'] },
+            { m: { t: 'word', a: '사과', opts: ['사과', '사자', '포도'], hint: { '사과': '🍎', '사자': '🦁', '포도': '🍇' }, q: '심부름 쪽지에 뭐라고 쓰여 있을까요? ‘사과’를 찾아봐!' } },
+            { p: ['town', ['KS', 'H'], '시장 가는 길이 두 갈래예요. 한쪽은 꽃이 핀 꽃길, 한쪽은 징검다리가 있는 냇물 길이에요.', '#H:think'] },
+            { c: { q: '어느 길로 갈까요?', opts: [['🌸', '꽃이 핀 꽃길', 'flower'], ['🪨', '징검다리 냇물 길', 'river']] } }
+          ],
+          flower: [
+            { p: ['garden', ['KS', 'H', 12], '꽃길에서 버터플을 만났어요. “시장에 가니? 사과 가게는 이 길 끝에 있어!” 버터플이 팔랑팔랑 길을 알려 줬어요.', '@petals #12:fly'] },
+            { m: { t: 'solve', k: 'count', e: '🍎', n: 3, scene: 'town', chars: ['KS', 'H'], q: '사과를 세 개 사야 해요. 가게에 있는 사과를 하나씩 톡톡 세어 봐요! 모두 몇 개일까요?', done: '사과 세 개를 바구니에 담았어요!' } },
+            { m: { t: 'write', w: '우유', q: '우유 가게 아저씨가 말했어요. “이름을 써 주면 우유를 줄게!” 네모 칸에 ‘우유’라고 써 봐.', done: '우유를 받았어요! 심부름 완료!' } },
+            { end: { id: 'flower', e: '🌸', title: '꽃길로 심부름을 다녀온 결말', scene: 'town', chars: ['KS', 'H', 25], art: '#H:jump 🍎/C/m',
+                     text: '{H|이} 사과랑 우유를 들고 집에 왔어요. 엄마 피카츄가 꼭 안아 주었어요. “혼자서도 잘했구나!” {H|은} 볼을 찌릿찌릿, 자랑스럽게 웃었어요. 끝!' } }
+          ],
+          river: [
+            { p: ['river', ['KS', 'H'], '냇물에는 징검다리 돌이 놓여 있어요. 그런데 돌 사이로 물이 졸졸, 미끄러워요!', '#H:surprise'] },
+            { m: { t: 'solve', k: 'maze', grid: ['S.#..', '#..#.', '.#...', '...#G'], wall: '💧', goal: '🏪', q: '미끄러운 물을 피해서 {H|을} 가게까지 데려가 줘! 반짝이는 옆 칸을 눌러 한 칸씩 가요.', done: '가게에 도착했어요!' } },
+            { m: { t: 'tap', e: '🧺', n: 4, pos: [60, 55], drop: '🍎', scene: 'town', chars: ['KS', 'H'], q: '가게 바구니를 톡톡 네 번 두드리면 사과가 나와요!', done: '사과가 데굴데굴! 가게 할머니가 우유도 한 병 주셨어요.' } },
+            { end: { id: 'river', e: '🪨', title: '징검다리 길로 심부름을 다녀온 결말', scene: 'town', chars: ['KS', 'H', 25], art: '#H:jump @confetti',
+                     text: '{H|은} 징검다리를 폴짝폴짝 건너 집에 왔어요. 엄마 피카츄가 박수를 쳤어요. “우리 {H}, 용감하구나!” 오늘 저녁은 사과 우유 파티예요. 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'marill', hero: 183, title: '{H}의 깜짝 생일 케이크', tags: '🧩 🔍 ✏️ 👆 🔤',
+        cover: ['party', ['KS', 'H'], '@confetti #H:happy 🎂/C/m'],
+        nodes: {
+          start: [
+            { p: ['party', ['KS', 'H'], '오늘은 {H}의 생일이에요! {KIDS|은} {H|을} 위해 깜짝 케이크를 만들기로 했어요. 쉿, 비밀이에요!', '#H:happy 🎈/TL/m'] },
+            { p: ['kitchen', ['KS'], '부엌에 왔어요. 앞치마를 두르고, 손도 깨끗이 씻었어요. 케이크는 순서대로 만들어야 해요.', '#K:happy'] },
+            { m: { t: 'solve', k: 'order', items: [{ e: '🥚', l: '달걀 깨기' }, { e: '🥣', l: '반죽 섞기' }, { e: '🔥', l: '오븐에 굽기' }, { e: '🍰', l: '크림 바르기' }], q: '케이크 만드는 순서대로 눌러 봐요!', done: '말랑말랑 폭신한 케이크가 완성됐어요!' } },
+            { c: { q: '케이크 위에 무엇을 올릴까요?', opts: [['🍓', '빨간 딸기', 'berry'], ['🍫', '달콤한 초콜릿', 'choco']] } }
+          ],
+          berry: [
+            { m: { t: 'find', e: '🍓', n: 4, decoy: ['🍒', '🍅'], scene: 'kitchen', chars: ['KS'], q: '부엌 여기저기에 있는 딸기 네 개를 찾아 줘! 체리랑 토마토는 아니야!', nope: '그건 딸기가 아니야! 씨가 콕콕 박힌 딸기를 찾아봐!', done: '딸기를 다 찾았어요! 케이크 위에 콕콕 올렸어요.' } },
+            { m: { t: 'write', w: '마릴', q: '생일 카드에 이름을 써 주자! 네모 칸에 ‘마릴’이라고 써 봐.', done: '멋진 생일 카드 완성!' } },
+            { end: { id: 'berry', e: '🍓', title: '딸기 케이크로 축하한 결말', scene: 'party', chars: ['KS', 'H'], art: '#H:jump 🎂/C/m',
+                     text: '“짠! 생일 축하해, {H}!” {H|은} 깜짝 놀라 동그란 귀를 쫑긋! 딸기 케이크를 한 입 먹고 활짝 웃었어요. “최고의 생일이야!” 끝!' } }
+          ],
+          choco: [
+            { m: { t: 'tap', e: '🍫', n: 5, pos: [60, 50], drop: '✨', scene: 'kitchen', chars: ['KS'], q: '초콜릿을 톡톡 다섯 번 녹여서 케이크에 뿌려요!', done: '초콜릿이 사르르 녹아 케이크 위에 반짝반짝!' } },
+            { m: { t: 'word', a: '빵', opts: ['빵', '방', '공'], hint: { '빵': '🍞', '방': '🚪', '공': '⚽' }, q: '케이크 상자에 이름표를 붙여요. ‘빵’ 글자를 찾아봐!' } },
+            { m: { t: 'solve', k: 'count', e: '🕯️', n: 5, scene: 'party', chars: ['KS', 'H'], q: '{H|은} 오늘 몇 살일까요? 케이크 위의 초를 하나씩 톡톡 세어 봐!', done: '정답! 초 다섯 개에 반짝 불을 켰어요!' } },
+            { end: { id: 'choco', e: '🍫', title: '초콜릿 케이크로 축하한 결말', scene: 'party', chars: ['KS', 'H'], art: '#H:jump 🎂/C/m',
+                     text: '“생일 축하합니다~” 노래가 끝나자 {H|이} “후우!” 하고 초를 껐어요. 초콜릿 케이크는 달콤달콤, 모두의 입가에 초콜릿 수염이 생겼어요. 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'piplup', hero: 393, title: '{H}의 얼음 미끄럼 대회', tags: '👆 🧩 🔤 ✏️',
+        cover: ['snow', ['KS', 'H'], '@snowfall #H:jump'],
+        nodes: {
+          start: [
+            { p: ['snow', ['KS', 'H'], '하얀 눈 나라에 얼음 미끄럼 대회가 열렸어요! {H|은} 1등을 하고 싶어서 날개를 파닥파닥.', '@snowfall #H:jump'] },
+            { p: ['snow', ['KS', 'H', 220], '그런데 미끄럼틀이 눈에 푹 덮여 있어요. 꾸꾸리가 코로 킁킁. “눈을 치워야 미끄럼을 탈 수 있어!”', '#220:think'] },
+            { m: { t: 'tap', e: '❄️', n: 6, pos: [60, 55], drop: '💨', q: '눈 더미를 톡톡 여섯 번 눌러서 치워 줘!', done: '눈을 다 치웠어요! 반짝반짝 얼음 미끄럼틀이 나타났어요.' } },
+            { c: { q: '어떻게 미끄럼을 탈까요?', opts: [['🐧', '배로 쭉 미끄러지기', 'belly'], ['🛷', '썰매 타기', 'sled']] } }
+          ],
+          belly: [
+            { m: { t: 'solve', k: 'maze', grid: ['S..#.', '##...', '...#.', '.#..G'], wall: '🪨', goal: '🏁', q: '{H|이} 배로 쭉! 바위를 피해서 결승선까지 가 보자! 반짝이는 옆 칸을 눌러요.', done: '결승선 통과! 슈우웅~' } },
+            { m: { t: 'word', a: '눈', opts: ['눈', '문', '물'], hint: { '눈': '❄️', '문': '🚪', '물': '💧' }, q: '결승선 깃발에 쓰인 글자는 뭘까요? ‘눈’을 찾아봐!' } },
+            { end: { id: 'belly', e: '🏆', title: '배 미끄럼으로 1등 한 결말', scene: 'snow', chars: ['KS', 'H', 220], art: '@snowfall #H:jump 🏆/T/l/bounce',
+                     text: '{H|이} 배로 쭈욱~ 미끄러져 1등! 꾸꾸리도 박수를 쳤어요. {H|은} 금메달을 목에 걸고 “팽!” 하고 뿌듯하게 외쳤어요. 끝!' } }
+          ],
+          sled: [
+            { m: { t: 'write', w: '눈', q: '썰매에 이름을 붙여요. 네모 칸에 ‘눈’이라고 써 봐!', done: '‘눈’ 썰매 출발 준비 완료!' } },
+            { m: { t: 'solve', k: 'pattern', seq: ['❄️', '⛄', '❄️', '⛄', '❄️'], a: '⛄', opts: ['❄️', '⛄', '🔥'], q: '썰매 길에 규칙이 있어요! “눈송이, 눈사람, 눈송이, 눈사람, 눈송이! 그다음은?”', done: '정답! 썰매가 쌩쌩 달려요!' } },
+            { end: { id: 'sled', e: '🛷', title: '썰매 타고 눈사람 친구를 만난 결말', scene: 'snow', chars: ['KS', 'H', 220], art: '@snowfall #H:happy ⛄/R/l',
+                     text: '썰매를 타고 언덕 아래로 쌩~! 도착한 곳에서 커다란 눈사람이 웃고 있었어요. {H|와} {KIDS|은} 눈사람 친구와 함께 눈싸움을 했어요. 1등보다 더 신나는 하루였어요! 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'quaxly', hero: 912, title: '{H}의 첫 수영 수업', tags: '🧩 👆 ✏️ 🔍 🔤',
+        cover: ['lake', ['KS', 'H'], '#H:happy @sparkle'],
+        nodes: {
+          start: [
+            { p: ['lake', ['KS', 'H'], '{H|은} 물 타입 포켓몬인데, 아직 수영을 못 해요! “물이 조금 무서워…” {H|이} 머리 깃털을 매만졌어요.', '#H:shy'] },
+            { p: ['lake', ['KS', 'H', 7], '수영 선생님 꼬부기가 왔어요. “걱정 마! 하나씩 차근차근 배우면 돼!”', '#7:happy'] },
+            { m: { t: 'solve', k: 'order', items: [{ e: '🤸', l: '준비 운동' }, { e: '🦶', l: '발 담그기' }, { e: '🏊', l: '헤엄치기' }], q: '수영은 순서가 중요해요! 차례대로 눌러 봐요.', done: '준비 완료! 이제 물에 들어가 봐요.' } },
+            { c: { q: '어디에서 연습할까요?', opts: [['🏞️', '잔잔한 호수', 'lake'], ['🌊', '철썩철썩 바다', 'sea']] } }
+          ],
+          lake: [
+            { m: { t: 'tap', pk: 912, n: 5, pos: [55, 55], drop: '💦', q: '{H|이} 발을 첨벙첨벙! 톡톡 다섯 번 눌러서 발차기를 도와줘!', done: '첨벙첨벙! {H|이} 앞으로 쭉 나아갔어요!' } },
+            { m: { t: 'write', w: '물', q: '꼬부기 선생님이 말했어요. “물과 친해지는 주문! 네모 칸에 ‘물’이라고 써 봐.”', done: '{H|이} 물속에서 방긋 웃었어요!' } },
+            { end: { id: 'lake', e: '🏅', title: '호수에서 수영을 배운 결말', scene: 'lake', chars: ['KS', 'H', 7], art: '#H:jump @sparkle',
+                     text: '{H|은} 호수를 한 바퀴 빙 돌았어요! “나 수영할 수 있어!” 물에 젖은 머리 깃털도 멋지게 반짝였어요. 끝!' } }
+          ],
+          sea: [
+            { m: { t: 'find', e: '🐚', n: 3, decoy: ['🪨', '🦀'], scene: 'sea', chars: ['KS', 'H', 7], q: '수영 연습 전에 반짝 조개 세 개를 찾아요! 조개가 행운을 빌어 준대요.', done: '조개를 다 찾았어요! 행운이 가득!' } },
+            { m: { t: 'solve', k: 'match', pairs: [[912, '💧', '꾸왁스는 물'], [25, '⚡', '피카츄는 전기'], [4, '🔥', '파이리는 불꽃']], q: '바닷가 친구들이 수영 모자를 바꿔 썼대요! 친구를 누르고, 알맞은 모자 그림을 눌러 봐!', done: '척척! 모두 수영 준비 끝!' } },
+            { m: { t: 'word', a: '바다', opts: ['바다', '나비', '오리'], hint: { '바다': '🌊', '나비': '🦋', '오리': '🦆' }, q: '파도 위에 둥둥 떠 있는 글자는? ‘바다’를 찾아봐!' } },
+            { end: { id: 'sea', e: '🌊', title: '바다에서 파도를 탄 결말', scene: 'sea', chars: ['KS', 'H', 7], art: '#H:jump @sparkle',
+                     text: '{H|이} 파도를 타고 슝~! “와, 바다가 이렇게 재밌는 곳이었구나!” 꼬부기 선생님이 엄지척을 해 주었어요. 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'slowpoke', hero: 79, title: '느릿느릿 {H}의 낚시 대회', tags: '👆 🧩 🔍 ✏️',
+        cover: ['river', ['KS', 'H'], '#H:sleep 🎣/R/m'],
+        nodes: {
+          start: [
+            { p: ['river', ['KS', 'H'], '{H|은} 세상에서 제일 느긋한 포켓몬이에요. 오늘은 강가 낚시 대회 날! {H|은} 꼬리를 물에 퐁당 담갔어요.', '#H:happy'] },
+            { p: ['river', ['KS', 'H'], '1분… 2분… {H|은} 그대로 꾸벅꾸벅 졸기 시작했어요. “하아암~”', '#H:sleep'] },
+            { m: { t: 'tap', pk: 79, n: 5, pos: [58, 55], q: '{H|을} 톡톡 다섯 번 깨워 줘! 대회가 시작됐어!', sounds: ['…', '…야?', '야…', '야아?', '야돈!'], done: '{H|이} 눈을 반쯤 떴어요. “…응? …벌써?”' } },
+            { c: { q: '{H|은} 어디에서 낚시를 할까요?', opts: [['🌉', '강 위 다리', 'bridge'], ['🪷', '연꽃 연못', 'pond']] } }
+          ],
+          bridge: [
+            { m: { t: 'solve', k: 'count', e: '🐟', n: 4, q: '다리 아래에 물고기가 몇 마리 헤엄치고 있을까요? 하나씩 톡톡 세어 봐!', done: '정답! 물고기 네 마리가 꼬리를 살랑살랑 흔들었어요.' } },
+            { m: { t: 'solve', k: 'pattern', seq: ['🐟', '💧', '🐟', '💧', '🐟'], a: '💧', opts: ['🐟', '💧', '🍃'], q: '물고기들이 줄지어 헤엄쳐요! “물고기, 물방울, 물고기, 물방울, 물고기! 그다음은?”', done: '정답! 그때 꼬리가 덥석! 뭔가가 물었어요!' } },
+            { end: { id: 'bridge', e: '🎣', title: '꼬리를 물리고 진화한 결말', scene: 'river', chars: ['KS', 80, 90], art: '@sparkle #80:happy',
+                     text: '“낚았다!” 그런데 물고기가 아니라 셀러가 꼬리를 꼭 물었어요. 그러자 {H|이} 번쩍! 야도란으로 진화했어요. 1등은 못 했지만 야도란은 “…좋아…” 하고 느릿느릿 웃었어요. 끝!' } }
+          ],
+          pond: [
+            { m: { t: 'find', e: '🪷', n: 3, decoy: ['🍃', '🌿'], scene: 'lake', chars: ['KS', 'H'], q: '연꽃 연못에 핀 연꽃 세 송이를 찾아 줘!', done: '연꽃을 다 찾았어요! 연꽃 사이로 오리가 헤엄쳐 왔어요.' } },
+            { m: { t: 'write', w: '오리', q: '연못 오리가 이름을 불러 달래요! 네모 칸에 ‘오리’라고 써 봐.', done: '“꽥꽥! 고마워!” 오리가 신나서 빙글빙글 헤엄쳤어요.' } },
+            { end: { id: 'pond', e: '🪷', title: '연꽃 연못에서 낮잠 잔 결말', scene: 'lake', chars: ['KS', 'H'], art: '#H:sleep #K:happy',
+                     text: '{H|은} 연꽃 옆에서 꼬리를 담근 채 다시 쿨쿨… 물고기는 한 마리도 못 잡았지만, 연못 친구들이 옆에 모여 함께 낮잠을 잤어요. 이것도 1등만큼 행복한 일이래요. 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'ditto', hero: 132, title: '{H}의 변신 숨바꼭질', tags: '🔍 🧩 ✏️ 🔤',
+        cover: ['meadow', ['KS', 'H'], '#H:happy @sparkle'],
+        nodes: {
+          start: [
+            { p: ['meadow', ['KS', 'H'], '말랑말랑 {H|은} 무엇이든 될 수 있어요! “나랑 숨바꼭질하자! 나는 변신해서 숨을 거야!”', '#H:jump'] },
+            { m: { t: 'find', pk: 132, e: '🔍', n: 1, decoy: ['🌸', '🍄', '🪨'], tiny: true, q: '{H|이} 꽃밭 어딘가에 숨었어요! 분홍색 {H|을} 찾아 줘!', nope: '거긴 없어! 말랑말랑 분홍색 친구를 찾아봐!', done: '찾았다! {H|이} “헤헤” 하고 웃었어요.' } },
+            { p: ['meadow', ['KS', 'H'], '“이번엔 더 꼭꼭 숨을 거야! 어디에 숨을지 골라 줘!”', '#H:happy'] },
+            { c: { q: '{H|이} 어디에 숨으면 좋을까요?', opts: [['🏠', '사람들이 많은 마을', 'town'], ['🌳', '나무가 많은 숲', 'forest']] } }
+          ],
+          town: [
+            { p: ['town', ['KS', 25, 25], '마을에 피카츄가 두 마리 있어요! 하나는 진짜, 하나는 {H|이} 변신한 거예요. {H|은} 변신해도 얼굴이 동글동글 그대로래요!', '#K:surprise'] },
+            { m: { t: 'solve', k: 'pattern', seq: ['⚡', '💗', '⚡', '💗', '⚡'], a: '💗', opts: ['⚡', '💗', '🍎'], q: '{H|이} 변신 노래를 불러요! “번쩍, 말랑, 번쩍, 말랑, 번쩍! 그다음은?”', done: '정답! {H|이} 펑! 하고 원래 모습으로 돌아왔어요.' } },
+            { m: { t: 'write', w: '공', q: '이번엔 {H|이} 공으로 변신하고 싶대요! 네모 칸에 ‘공’이라고 써 주면 변신해요!', done: '펑! {H|이} 동글동글 공이 됐어요!' } },
+            { end: { id: 'town', e: '⚽', title: '공으로 변신한 메타몽과 논 결말', scene: 'town', chars: ['KS', 'H'], art: '#H:jump ⚽/C/m/bounce',
+                     text: '{KIDS|은} 공으로 변신한 {H|을} 데굴데굴 굴리며 놀았어요. {H|이} “간지러워~” 하며 깔깔 웃었어요. 끝!' } }
+          ],
+          forest: [
+            { p: ['forest', ['KS'], '숲에 왔어요. {H|이} 나무 사이로 쏙! “이번엔 셋으로 나뉘어서 숨을 거야. 진짜 어려울걸?”', '#K:think'] },
+            { m: { t: 'find', pk: 132, e: '🔍', n: 3, decoy: ['🍃', '🍄', '🌸'], tiny: true, q: '{H|이} 셋으로 나뉘어 숨었대요! 세 마리를 모두 찾아 줘!', nope: '그건 아니야! 분홍색 {H|을} 찾아봐!', done: '세 마리 다 찾았다! 셋이 뭉쳐서 다시 하나가 됐어요.' } },
+            { m: { t: 'word', a: '나무', opts: ['나무', '나비', '오리'], hint: { '나무': '🌳', '나비': '🦋', '오리': '🦆' }, q: '{H|이} 마지막으로 변신할 것을 글자로 알려 줬어요. ‘나무’를 찾아봐!', done: '펑! {H|이} 작은 나무로 변신했어요!' } },
+            { end: { id: 'forest', e: '🌳', title: '나무로 변신한 메타몽을 찾은 결말', scene: 'forest', chars: ['KS', 'H'], art: '#H:happy 🐦/T/m/bob',
+                     text: '나무로 변신한 {H}에게 새들이 날아와 앉았어요. {H|은} 꼼짝도 못 하고 “간지러워!” {KIDS|은} 오늘의 숨바꼭질 대장이 되었어요. 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'togepi', hero: 175, title: '{H}의 첫 나들이', tags: '👆 🧩 ✏️ 🔤',
+        cover: ['garden', ['KS', 'H'], '@petals #H:happy'],
+        nodes: {
+          start: [
+            { p: ['garden', ['KS'], '꽃밭 한가운데에 알록달록 무늬가 있는 알이 하나 있어요. 알이 흔들흔들!', '🥚/C/l/bob #K:surprise'] },
+            { m: { t: 'tap', e: '🥚', n: 5, pos: [52, 55], q: '알을 톡톡 다섯 번 살살 두드려 볼까?', sounds: ['톡', '톡톡', '흔들', '흔들흔들', '쩌억!'], done: '쩌억! 알에서 {H|이} 태어났어요! “토게피~!”' } },
+            { p: ['garden', ['KS', 'H'], '{H|은} 세상이 처음이에요. 모든 게 궁금해서 눈을 반짝반짝.', '#H:happy'] },
+            { c: { q: '{H}에게 무엇을 먼저 보여 줄까요?', opts: [['🌷', '알록달록 꽃', 'flower'], ['🦋', '팔랑팔랑 나비', 'butter']] } }
+          ],
+          flower: [
+            { m: { t: 'solve', k: 'count', e: '🌷', n: 5, q: '꽃밭의 튤립이 몇 송이일까요? 하나씩 톡톡 세어 봐!', done: '정답! {H|이} “다섯!” 하고 따라 했어요.' } },
+            { m: { t: 'write', w: '꽃', q: '{H|이} 처음 배우는 글자! 네모 칸에 ‘꽃’이라고 써 줘.', done: '{H|이} “꼬옷!” 하고 따라 말했어요.' } },
+            { end: { id: 'flower', e: '🌸', title: '꽃밭에서 첫 글자를 배운 결말', scene: 'garden', chars: ['KS', 'H'], art: '@petals #H:jump',
+                     text: '{H|은} 꽃잎을 머리에 꽂고 행복하게 웃었어요. {H|이} 웃으면 주변에 행운이 생긴대요. 그날 꽃밭 위에는 무지개가 떴답니다. 끝!' } }
+          ],
+          butter: [
+            { m: { t: 'solve', k: 'pattern', seq: ['🦋', '🌼', '🦋', '🌼', '🦋'], a: '🌼', opts: ['🦋', '🌼', '🍎'], q: '나비가 꽃 사이를 날아요! “나비, 꽃, 나비, 꽃, 나비! 그다음은?”', done: '정답! 나비가 꽃에 살포시 앉았어요.' } },
+            { m: { t: 'word', a: '나비', opts: ['나비', '나무', '바다'], hint: { '나비': '🦋', '나무': '🌳', '바다': '🌊' }, q: '{H|이} 나비를 가리키며 이름을 물어요. ‘나비’ 글자를 찾아봐!' } },
+            { end: { id: 'butter', e: '🦋', title: '나비 친구와 춤춘 결말', scene: 'meadow', chars: ['KS', 'H', 12], art: '#H:jump #12:fly',
+                     text: '버터플이 날아와 {H} 머리 위를 빙글빙글! {H|은} 짧은 팔을 흔들며 나비 춤을 췄어요. 처음 보는 세상은 정말 즐거워요! 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'riolu', hero: 447, title: '{H}의 용감한 파동 수련', tags: '🧩 👆 ✏️ 🔍',
+        cover: ['mountain', ['KS', 'H'], '#H:glow @sparkle'],
+        nodes: {
+          start: [
+            { p: ['mountain', ['KS', 'H'], '산꼭대기에서 {H|이} 수련을 해요. “나도 루카리오 형처럼 멋진 파동을 쓰고 싶어!”', '#H:jump'] },
+            { p: ['mountain', ['KS', 'H', 448], '루카리오가 말했어요. “파동은 마음의 힘이야. 친구를 돕는 마음이 커지면 파동도 커진단다.”', '#448:happy'] },
+            { m: { t: 'solve', k: 'order', items: [{ e: '🧘', l: '숨 고르기' }, { e: '😌', l: '눈 감기' }, { e: '✋', l: '손 내밀기' }], q: '파동 수련은 순서대로! 차례대로 눌러 봐요.', done: '{H}의 손에 작은 파란 빛이 반짝!' } },
+            { c: { q: '누구를 도우러 갈까요?', opts: [['🐣', '나무 위의 아기 구구', 'baby'], ['🍎', '열매를 잃어버린 이브이', 'berry']] } }
+          ],
+          baby: [
+            { p: ['forest', ['KS', 'H', 16], '높은 나무 위에서 아기 구구가 “구구…” 울고 있어요. 너무 높아서 혼자 못 내려온대요.', '#16:sad 🌳/R/xl'] },
+            { m: { t: 'tap', pk: 447, n: 5, pos: [45, 55], drop: '💙', q: '{H|을} 톡톡 다섯 번 응원해서 파동을 모아 줘!', done: '파동이 쑥쑥! {H|이} 파란 빛으로 아기 구구를 살포시 안아 내려 주었어요.' } },
+            { m: { t: 'write', w: '집', q: '아기 구구가 집에 가고 싶대요. 네모 칸에 ‘집’이라고 써 주면 집 가는 길이 보여요!', done: '구구 엄마가 날아와 아기를 꼭 안았어요!' } },
+            { end: { id: 'baby', e: '💙', title: '아기 구구를 구하고 진화한 결말', scene: 'mountain', chars: ['KS', 448, 16], art: '@sparkle #448:glow',
+                     text: '그 순간 {H}의 몸이 파랗게 반짝! 친구를 돕는 마음으로 루카리오로 진화했어요! “이게 진짜 파동이구나!” 끝!' } }
+          ],
+          berry: [
+            { p: ['forest', ['KS', 'H', 133], '이브이가 울상이에요. “할머니께 드릴 열매를 숲에 떨어뜨렸어…”', '#133:sad'] },
+            { m: { t: 'find', e: '🍎', n: 3, decoy: ['🍂', '🌰'], q: '{H}의 파동으로 숲을 살펴봐요! 떨어진 열매 세 개를 찾아 줘!', done: '열매를 다 찾았어요! 이브이가 꼬리를 살랑살랑.' } },
+            { m: { t: 'solve', k: 'maze', pk: 133, grid: ['S.#..', '..#.#', '#...#', '..#.G'], wall: '🌲', goal: '🏡', q: '이브이를 할머니 집까지 데려다줘요! 반짝이는 옆 칸을 눌러 한 칸씩 가요.', done: '할머니 집 도착! 할머니가 따뜻한 열매 수프를 끓여 주셨어요.' } },
+            { end: { id: 'berry', e: '🍎', title: '이브이를 돕고 진화한 결말', scene: 'town', chars: ['KS', 448, 133], art: '@sparkle #448:glow',
+                     text: '돌아오는 길, {H}의 몸이 파랗게 반짝! 루카리오로 진화했어요. 루카리오 형이 말했어요. “친구를 돕는 마음, 그게 가장 큰 파동이야!” 끝!' } }
+          ]
+        }
+      },
+      {
+        id: 'mimikyu', hero: 778, title: '부끄럼쟁이 {H}의 친구 만들기', tags: '🔦 ✏️ 🧩 👆 🔤',
+        cover: ['night', ['KS', 'H'], '@stars #H:shy'],
+        nodes: {
+          start: [
+            { p: ['night', ['KS', 'H'], '{H|은} 늘 피카츄 모양 천을 뒤집어쓰고 있어요. 친구를 사귀고 싶지만 너무 부끄러워서 자꾸 숨어 버린대요.', '#H:shy @stars'] },
+            { m: { t: 'find', dark: true, pk: 778, e: '🔍', n: 1, decoy: ['🍂', '🪨', '🍄'], q: '{H|이} 깜깜한 곳에 숨었어요! 손전등으로 비춰서 {H|을} 찾아 줘!', nope: '거긴 없어! 노란 천을 쓴 친구를 찾아봐!', done: '찾았다! {H|이} “히익!” 하고 놀랐지만, 살짝 웃는 것 같아요.' } },
+            { p: ['night', ['KS', 'H'], '“나… 나랑 친구 해 줄래?” {H|이} 작은 목소리로 물었어요. {KIDS|은} 고개를 끄덕였어요. “그럼! 같이 놀자!”', '#H:happy #K:happy'] },
+            { c: { q: '{H|와} 무엇을 하며 놀까요?', opts: [['🎨', '그림 그리기', 'draw'], ['🎈', '친구들 파티', 'party']] } }
+          ],
+          draw: [
+            { m: { t: 'write', w: '해', scene: 'garden', chars: ['KS', 'H'], q: '{H|이} 해님을 그리고 싶대요! 네모 칸에 ‘해’라고 써 주면 해님 그림이 생겨요.', done: '해님 그림 완성! {H}의 천 얼굴도 방긋 웃어요.' } },
+            { m: { t: 'solve', k: 'match', pairs: [[25, '⚡', '피카츄는 번개'], [778, '👻', '따라큐는 고스트'], [4, '🔥', '파이리는 불꽃']], q: '친구들 그림에 맞는 그림 도장을 찍어요! 친구를 누르고, 알맞은 그림을 눌러 봐!', done: '척척! 멋진 친구 그림이 완성됐어요.' } },
+            { end: { id: 'draw', e: '🎨', title: '그림 친구가 된 결말', scene: 'garden', chars: ['KS', 'H'], art: '#H:happy 🖼️/C/m',
+                     text: '{H|은} 완성된 그림을 꼭 안았어요. 그림 속에는 {H|와} {KIDS}, 그리고 활짝 웃는 해님이 있었어요. “이제 난 부끄럽지 않아!” 끝!' } }
+          ],
+          party: [
+            { m: { t: 'solve', k: 'pattern', seq: ['🎈', '🎉', '🎈', '🎉', '🎈'], a: '🎉', opts: ['🎈', '🎉', '🍄'], scene: 'party', chars: ['KS', 'H'], q: '파티 장식을 규칙대로 달아요! “풍선, 폭죽, 풍선, 폭죽, 풍선! 그다음은?”', done: '정답! 파티장이 알록달록해졌어요.' } },
+            { m: { t: 'tap', pk: 778, n: 5, pos: [55, 55], drop: '💕', q: '파티에 친구들이 오자 {H|이} 너무 떨린대요. 톡톡 다섯 번 응원해 줘!', done: '{H|이} 용기를 내서 “안녕, 친구들!” 하고 인사했어요!' } },
+            { m: { t: 'word', a: '빵', opts: ['빵', '방', '공'], hint: { '빵': '🍞', '방': '🚪', '공': '⚽' }, q: '파티 음식 이름표 중에서 ‘빵’을 찾아봐!' } },
+            { end: { id: 'party', e: '🎉', title: '파티에서 친구가 많이 생긴 결말', scene: 'party', chars: ['KS', 'H', 25, 39], art: '@confetti #H:jump',
+                     text: '피카츄와 푸린이 {H}에게 다가와 손을 내밀었어요. “같이 춤추자!” 부끄럼쟁이 {H}에게 그날 친구가 셋이나 생겼답니다. 끝!' } }
+          ]
+        }
+      }
+    );
     /**
      * ==============================================================
      * [참여 동화] 아이가 고르고·누르고·쓰면서 이어 가는 그림 동화
@@ -8922,6 +9238,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       Object.values(story.nodes).forEach(steps => steps.forEach(s => {
         const cs = (s.p && s.p[1]) || (s.end && s.end.chars) || [];
         cs.forEach(c => { if (typeof c === 'number') extra.add(c); });
+        if (s.m && s.m.pk) extra.add(s.m.pk);
+        if (s.m && s.m.pairs) s.m.pairs.forEach(p => { if (typeof p[0] === 'number') extra.add(p[0]); });
       }));
       ibCast = { hero: story.hero, friend: story.friend || null, kids, cast: [story.hero, story.friend].filter(Boolean) };
       ibCtx = ibKidsCtx(kids);
@@ -9072,7 +9390,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       document.getElementById('ib-book').classList.toggle('ib-writing', m.t === 'write');
       const base = m.scene ? [m.scene, m.chars || ibLastStage[1], m.art || ''] : ibLastStage;
       ibMission = { m, count: 0, wrong: 0, base };
-      ({ tap: ibTapStart, find: ibFindStart, word: ibWordStart, write: ibWriteStart, solve: ibSolveStart })[m.t](m);
+      const st = document.getElementById('ib-stage'); st.onpointermove = st.onpointerdown = st.ontouchmove = null;
+      ({ tap: ibTapStart, find: ibFindStart, word: ibWordStart, write: ibWriteStart, solve: ibSolveStart, catch: ibCatchStart })[m.t](m);
     }
     function ibMissionDone(msg) {
       if (!ibMission) return;
@@ -9083,7 +9402,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       ibSetActions(ibNextBtn());
       ibSay(t, () => ibLater(() => { if (ibMission && ibMission.m === m) ibNext(); }, 900));
     }
-    const IB_TAG = { tap: '👆 톡톡 미션', find: '🔍 찾기 미션', word: '🔤 글자 찾기', write: '✏️ 글자 쓰기', solve: '🧩 문제 해결' };
+    const IB_TAG = { tap: '👆 톡톡 미션', find: '🔍 찾기 미션', word: '🔤 글자 찾기', write: '✏️ 글자 쓰기', solve: '🧩 문제 해결', catch: '🔴 몬스터볼' };
     function ibMissionText(m, extra) {
       return `<span class="ib-mtag">${IB_TAG[m.t]}</span> <span class="text-slate-800">${sbEsc(ibFill(m.q))}</span>${extra || ''}`;
     }
@@ -9130,10 +9449,25 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const spots = IB_SPOTS.slice().sort(() => Math.random() - 0.5);
       const html = items.slice(0, spots.length).sort(() => Math.random() - 0.5).map((it, i) =>
         `<button class="ib-find ${m.tiny ? 'ib-find-tiny' : ''}" style="left:${spots[i][0]}%;top:${spots[i][1]}%" data-ok="${it.ok ? 1 : 0}" onclick="ibFindHit(this)">${it.e}</button>`).join('');
-      ibSetStage(ibStageFor(b[0], m.chars || b[1], m.art || b[2]), html + `<div class="ib-counter">${m.e} <span id="ib-findn">0</span> / ${m.n}</div>`);
-      ibSetText(ibMissionText(m));
+      const dark = m.dark ? '<div id="ib-dark" class="ib-dark" style="--x:50%;--y:55%"></div>' : '';
+      ibSetStage(ibStageFor(b[0], m.chars || b[1], m.art || b[2]), html + dark + `<div class="ib-counter">${m.e} <span id="ib-findn">0</span> / ${m.n}</div>`);
+      ibSetText(ibMissionText(m, m.dark ? '<div class="ib-tip">🔦 손가락으로 화면을 문지르면 손전등이 비춰요!</div>' : ''));
       ibSetActions(ibReplayBtn());
+      if (m.dark) ibDarkBind();
       ibSay(ibFill(m.q));
+    }
+    // 🔦 손전등: 손가락(마우스)이 있는 곳만 밝게 보여요. 어둠 층은 터치를 통과시켜서 그 아래 그림을 누를 수 있어요
+    function ibDarkBind() {
+      const st = document.getElementById('ib-stage');
+      const move = e => {
+        const d = document.getElementById('ib-dark'); if (!d) return;
+        const box = d.parentElement.getBoundingClientRect();
+        const pt = e.touches ? e.touches[0] : e;
+        d.style.setProperty('--x', ((pt.clientX - box.left) / box.width * 100).toFixed(1) + '%');
+        d.style.setProperty('--y', ((pt.clientY - box.top) / box.height * 100).toFixed(1) + '%');
+      };
+      st.onpointermove = move; st.onpointerdown = move;
+      st.ontouchmove = move;
     }
     function ibFindHit(btn) {
       const M = ibMission; if (!M || M.done || M.m.t !== 'find' || btn.disabled) return;
@@ -9231,6 +9565,49 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       ibMissionDone(M.m.done || `참 잘 썼어요! ‘${M.m.w}’!`);
     }
     function ibWriteSkip() { const M = ibMission; if (!M || M.m.t !== 'write') return; ibMissionDone(`괜찮아요! ‘${M.m.w}’${sbJosa(M.m.w, '은')} 다음에 또 써 봐요!`); }
+
+    // 🔴 몬스터볼 던지기: 볼을 톡 던지고 → 흔들흔들 세 번 응원하면 친구가 돼요 (실패하지 않아요)
+    function ibCatchStart(m) {
+      const b = ibMission.base;
+      const pos = m.pos || [50, 40];
+      ibMission.stage = 'throw'; ibMission.wob = 0;
+      ibSetStage(ibStageFor(b[0], m.chars || b[1], m.art || b[2]),
+        `<div id="ib-wild" class="ib-wild" style="left:${pos[0]}%;top:${pos[1]}%">${ibPkImg(m.pk)}</div>
+         <button id="ib-ball" class="ib-ball" style="left:50%;top:86%" onclick="ibCatchTap()"><i></i></button>
+         <div class="ib-hand" style="left:56%;top:88%">👆</div>`);
+      ibSetText(ibMissionText(m));
+      ibSetActions(ibReplayBtn());
+      ibSay(ibFill(m.q));
+    }
+    function ibCatchTap() {
+      const M = ibMission; if (!M || M.done || M.m.t !== 'catch' || M.busy) return;
+      const ball = document.getElementById('ib-ball'), wild = document.getElementById('ib-wild');
+      document.querySelector('#ib-ov .ib-hand')?.remove();
+      if (M.stage === 'throw') {
+        M.busy = true; playTone(660, 0.1);
+        const pos = M.m.pos || [50, 40];
+        ball.classList.add('ib-ball-fly'); ball.style.left = pos[0] + '%'; ball.style.top = (pos[1] + 6) + '%';
+        ibLater(() => { wild.classList.add('ib-suck'); playTone(880, 0.12); }, 650);
+        ibLater(() => {
+          M.busy = false; M.stage = 'wobble'; ball.classList.remove('ib-ball-fly'); ball.classList.add('ib-ball-big');
+          ibSetText(`<span class="ib-mtag">🔴 몬스터볼</span> <span class="text-slate-800">몬스터볼이 흔들흔들! 볼을 톡톡 세 번 눌러서 응원해 줘!</span>`);
+          ibSay('몬스터볼이 흔들흔들! 볼을 톡톡 세 번 눌러서 응원해 줘!');
+        }, 1300);
+        return;
+      }
+      M.wob++;
+      bxReAnimSafe(ball, 'ib-wobble', 500); playTone(420 + M.wob * 110, 0.08);
+      ibSay(['하나!', '둘!', '셋!'][M.wob - 1] || '');
+      if (M.wob >= 3) {
+        M.busy = true;
+        ibLater(() => {
+          ball.classList.add('ib-ball-done');
+          document.getElementById('ib-ov').insertAdjacentHTML('beforeend', '<div class="ib-boom" style="left:50%;top:45%">✨</div>');
+          M.busy = false;
+          ibMissionDone(M.m.done || `잡았다! ${POKEMON_NAMES_1025[M.m.pk - 1]}${sbJosa(POKEMON_NAMES_1025[M.m.pk - 1], '이')} 친구가 되었어요!`);
+        }, 600);
+      }
+    }
 
     // 🧩 문제 해결: 규칙 찾기 / 순서 맞추기 / 짝 맞추기 / 세어 보기 / 미로 길 찾기 (틀려도 다시 해 볼 수 있어요)
     function ibSolveStart(m) {
