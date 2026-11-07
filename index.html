@@ -444,6 +444,50 @@
     .bl-hof { margin-top: .35rem; background: #fef9c3; border-radius: .8rem; padding: .3rem; }
     .bl-hof small { font-size: 10px; color: #a16207; font-weight: 700; }
   </style>
+<style>
+    /* ===== 묶음 메뉴 ===== */
+    header > div > nav { display: none !important; }          /* 예전 메뉴 줄 (기능은 그대로, 화면에서만 숨김) */
+    #fd-top .fd-tabs { display: none; }                       /* 놀이 고르기는 위 칩으로 */
+    #sb-mode-btns { display: none !important; }               /* 동화 종류도 위 칩으로 */
+    .rn-top { display: flex; align-items: center; gap: .4rem; }
+    .rn-gear { width: 2.1rem; height: 2.1rem; border-radius: 999px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; }
+    .rn-gear:active { transform: scale(.94); }
+    #rn-menu { position: absolute; right: .6rem; top: 3rem; z-index: 60; background: #fff; color: #334155; border-radius: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,.2); padding: .5rem; min-width: 12rem; font-family: Jua, sans-serif; }
+    #rn-menu.hidden { display: none; }
+    #rn-menu button { display: flex; align-items: center; gap: .5rem; width: 100%; padding: .55rem .7rem; border-radius: .7rem; font-size: .95rem; text-align: left; }
+    #rn-menu button:hover { background: #f1f5f9; }
+    #rn-menu small { display: block; padding: .2rem .7rem .4rem; color: #94a3b8; font-size: .7rem; }
+    #rn-groups { display: flex; justify-content: center; gap: .3rem; padding: 0 .5rem .45rem; max-width: 80rem; margin: 0 auto; }
+    .rn-g { display: flex; align-items: center; gap: .3rem; padding: .35rem .85rem; border-radius: 999px; font-family: Jua, sans-serif; font-size: .95rem; color: #fff; transition: background .15s, transform .1s; }
+    .rn-g:hover { background: rgba(255,255,255,.15); }
+    .rn-g:active { transform: scale(.95); }
+    .rn-g .rn-ge { font-size: 1.15rem; line-height: 1; }
+    .rn-g.on { background: #fff; color: #be123c; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+    #rn-subs { display: flex; gap: .35rem; overflow-x: auto; padding: .45rem .6rem; background: rgba(255,255,255,.96); border-top: 1px solid rgba(0,0,0,.05); scrollbar-width: none; }
+    #rn-subs::-webkit-scrollbar { display: none; }
+    #rn-subs.empty { display: none; }
+    @media (min-width: 768px) { #rn-subs { justify-content: center; } }
+    .rn-c { flex: 0 0 auto; display: flex; align-items: center; gap: .3rem; padding: .3rem .75rem; border-radius: 999px; background: #f1f5f9; color: #475569; font-family: Jua, sans-serif; font-size: .88rem; border: 2px solid transparent; white-space: nowrap; }
+    .rn-c .rn-ce { font-size: 1.1rem; line-height: 1; }
+    .rn-c.on { background: #fff1f2; border-color: #fb7185; color: #be123c; }
+    .rn-c:active { transform: scale(.95); }
+    /* 폰: 묶음 메뉴를 화면 아래 그림 버튼 줄로 */
+    @media (max-width: 767px) {
+      #rn-groups { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; margin: 0; max-width: none; justify-content: space-around; gap: 0; padding: .3rem .2rem calc(.3rem + env(safe-area-inset-bottom));
+        background: linear-gradient(90deg, #dc2626, #e11d48 50%, #f59e0b); box-shadow: 0 -3px 10px rgba(0,0,0,.18); }
+      .rn-g { flex: 1; flex-direction: column; gap: .05rem; padding: .3rem 0 .25rem; border-radius: .9rem; font-size: .72rem; }
+      .rn-g .rn-ge { font-size: 1.45rem; }
+      body { padding-bottom: calc(4.2rem + env(safe-area-inset-bottom)); }
+      header h1 { font-size: .95rem !important; }
+      #toast { bottom: calc(5rem + env(safe-area-inset-bottom)) !important; }
+    }
+    /* 가로로 눕힌 폰처럼 높이가 낮은 화면: 묶음 메뉴를 제목 줄 오른쪽에 붙여 위쪽을 얇게 */
+    @media (min-width: 768px) and (max-height: 520px) {
+      #rn-groups { position: absolute; top: .4rem; right: 3.4rem; padding: 0; margin: 0; gap: .15rem; }
+      .rn-g { padding: .25rem .6rem; font-size: .85rem; }
+      header h1 > span { display: none; }
+    }
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
 
@@ -513,8 +557,14 @@
           <i class="fa-solid fa-download"></i><span class="hidden sm:inline">저장</span>
         </button>
       </nav>
-
+      <div class="rn-top"><button class="rn-gear" onclick="rnMenu(event)" title="부모님 메뉴" aria-label="부모님 메뉴">⚙️</button></div>
     </div>
+    <div id="rn-menu" class="hidden">
+      <button onclick="downloadAppFile(); rnMenu()">📥 앱 파일로 저장</button>
+      <small>인터넷이 없어도 열 수 있게 이 앱을 파일 하나로 저장해요.</small>
+    </div>
+    <nav id="rn-groups" aria-label="메뉴"><button class="rn-g on" data-k="dex" onclick="rnGo('dex')"><span class="rn-ge">📖</span><span>도감</span></button><button class="rn-g" data-k="hangul" onclick="rnGo('hangul')"><span class="rn-ge">🔤</span><span>한글</span></button><button class="rn-g" data-k="story" onclick="rnGo('story')"><span class="rn-ge">📚</span><span>동화</span></button><button class="rn-g" data-k="math" onclick="rnGo('math')"><span class="rn-ge">🔢</span><span>수학</span></button><button class="rn-g" data-k="play" onclick="rnGo('play')"><span class="rn-ge">🎮</span><span>놀이</span></button><button class="rn-g" data-k="adv" onclick="rnGo('adv')"><span class="rn-ge">⚔️</span><span>모험</span></button></nav>
+    <div id="rn-subs" class="empty"></div>
   </header>
 
   <!-- MAIN CONTENT AREA -->
@@ -2378,11 +2428,11 @@
     .cd-step { position: absolute; translate: -50% -50%; font-size: 1.4rem; opacity: .85; pointer-events: none; animation: mm-pop .3s; }
     .cd-side { display: flex; flex-direction: column; align-items: center; gap: .5rem; width: 100%; }
     .cd-prog { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .3rem; min-height: 3.2rem; width: 100%; background: #fff; border: 2px dashed #a5b4fc; border-radius: 1rem; padding: .35rem; }
-    .cd-card { position: relative; width: 2.8rem; height: 2.8rem; border-radius: .7rem; background: #eef2ff; border: 2px solid #a5b4fc; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
-    .cd-card b { position: absolute; right: -4px; bottom: -6px; min-width: 1.2rem; height: 1.2rem; border-radius: 999px; background: #6366f1; color: #fff; font-family: Jua, sans-serif; font-weight: normal; font-size: .8rem; line-height: 1.2rem; text-align: center; }
-    .cd-card.empty { background: none; border-style: dashed; border-color: #c7d2fe; }
-    .cd-card.now { background: #fde68a; border-color: #f59e0b; transform: scale(1.12); }
-    .cd-card.bad { background: #fecaca; border-color: #ef4444; }
+    .cd-grp { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: .7rem; background: #eef2ff; border: 2px solid #a5b4fc; }
+    .cd-grp.empty { width: 2.6rem; height: 2.6rem; background: none; border-style: dashed; border-color: #c7d2fe; }
+    .cd-ar { width: 2.1rem; height: 2.1rem; border-radius: .45rem; font-size: 1.35rem; display: flex; align-items: center; justify-content: center; }
+    .cd-ar.now { background: #fde68a; box-shadow: 0 0 0 2px #f59e0b; }
+    .cd-ar.bad { background: #fecaca; box-shadow: 0 0 0 2px #ef4444; }
     .cd-lim { width: 100%; text-align: center; font-family: Jua, sans-serif; font-size: .8rem; color: #6366f1; }
     .cd-hintline { font-size: .8rem; color: #a5b4fc; font-weight: 700; }
     .cd-pad { display: grid; grid-template-columns: repeat(3, 3.8rem); grid-template-rows: repeat(2, 3.4rem); gap: .35rem; }
@@ -3263,7 +3313,7 @@
       }
 
       const diffLabel = diff === 'easy' ? '쉬움 (데미지 감면 & 초보 친화)' : diff === 'hard' ? '어려움 (치명적 공격 & 강한 AI)' : '보통 (표준 상성 배틀)';
-      showToast(`배틀 난이도가 [${diffLabel}]으로 설정되었습니다!`);
+      if (document.readyState === 'complete') showToast(`배틀 난이도가 [${diffLabel}]으로 설정되었습니다!`);
     }
 
     function createBattlePokemon(num) {
@@ -8312,7 +8362,7 @@ const BX_DATA = {"s":{"1":["Bulbasaur",["overgrow","chlorophyll"],["powerwhip","
     function bxFitHead() {
       const scr = document.getElementById('battle-stadium-screen');
       const hd = document.querySelector('header');
-      if (scr) scr.style.setProperty('--bx-head', (hd ? Math.ceil(hd.getBoundingClientRect().height) : 0) + 'px');
+      if (scr) scr.style.setProperty('--bx-head', (hd ? Math.ceil(hd.getBoundingClientRect().height) : 0) + (typeof rnBotH === 'function' ? rnBotH() : 0) + 'px');
     }
     window.addEventListener('resize', () => { const scr = document.getElementById('battle-stadium-screen'); if (scr && !scr.classList.contains('hidden')) bxFitHead(); });
 
@@ -11559,7 +11609,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     const RW_BALL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff" stroke="#334155" stroke-width="4"/><path d="M4,32 A28,28 0 0 1 60,32Z" fill="#ef4444" stroke="#334155" stroke-width="4"/><path d="M4,32H60" stroke="#334155" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="#fff" stroke="#334155" stroke-width="4"/></svg>');
     let rwS = null, rwBarLen = -1;
     // 위에 붙어 있는 메뉴 줄 높이 (화면을 올릴 때 메뉴에 가리지 않게)
-    function rwHdr() { const h = Math.round(document.querySelector('header')?.getBoundingClientRect().height || 0); document.documentElement.style.setProperty('--rw-hdr', h + 'px'); return h; }
+    function rwHdr() { const h = Math.round(document.querySelector('header')?.getBoundingClientRect().height || 0); const b = typeof rnBotH === 'function' ? rnBotH() : 0; document.documentElement.style.setProperty('--rw-hdr', (h + b) + 'px'); return h; }   // --rw-hdr: 위 메뉴 + 아래 메뉴 줄 높이
     function rwScrollTo(el) { if (!el) return; const top = el.getBoundingClientRect().top + window.scrollY - rwHdr() - 8; try { window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); } catch (e) { window.scrollTo(0, Math.max(0, top)); } }
 
     function rwLoad() {
@@ -11762,7 +11812,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       document.getElementById('fd-d').textContent = FD_SETS[set].desc;
       rwHdr(); rwRenderBars();
       fdRenderTop();
-      if (!fdG || changed || !FD_SETS[set].games.includes(fdG.kind)) fdStart();
+      if (!fdG || changed || fdG.kind !== fdS.game) fdStart();
       else if (fdG.kind === 'puzzle') pzRelayout();
       else if (fdG.kind === 'care' && fdG.screen === 'home') crHome(true);   // 날짜가 바뀌었을 수 있어요
     }
@@ -11796,7 +11846,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     function fdScroll() {
       const el = document.getElementById('fd-game'); if (!el) return;
       const r = el.getBoundingClientRect(), list = document.getElementById('fd-list').getBoundingClientRect();
-      if (list.bottom > window.innerHeight || r.top < rwHdr()) rwScrollTo(el);
+      if (list.bottom > window.innerHeight - (typeof rnBotH === 'function' ? rnBotH() : 0) || r.top < rwHdr()) rwScrollTo(el);
     }
     // ---------- 큰 화면 ----------
     const fdFull = () => !!document.getElementById('fd-play')?.classList.contains('fd-full');
@@ -12125,7 +12175,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const area = document.getElementById('pz-area'); if (!area) return;
       const avail = document.getElementById('fd-game').clientWidth || 360;
       const land = window.innerWidth > window.innerHeight && window.innerWidth >= 700, full = fdFull();
-      const vh = window.innerHeight - rwHdr(), avH = full ? fdAvailH() : vh - (land ? 80 : 70);
+      const vh = window.innerHeight - rwHdr() - (typeof rnBotH === 'function' ? rnBotH() : 0), avH = full ? fdAvailH() : vh - (land ? 80 : 70);
       const trayR = land ? 0 : fdS.age <= 4 ? 0.8 : 0.62;
       let Wb = Math.min(avail, full ? 1400 : 640, avH / (0.75 + trayR));
       if (land) Wb = Math.min(avail * (full ? 0.7 : 0.64), avH / 0.75);
@@ -12308,7 +12358,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     // ============ 피카츄 길 코딩 ============
     const CD_DIR = { U: [0, -1, '⬆️', '위로'], D: [0, 1, '⬇️', '아래로'], L: [-1, 0, '⬅️', '왼쪽으로'], R: [1, 0, '➡️', '오른쪽으로'] };
     // 3세: 누르면 바로 움직여요. 4세부터 화살표를 먼저 놓고 출발. 6세 열매 들르기, 7세 카드 수 제한 + 여러 칸 카드
-    // len: 가장 짧은 길의 칸 수, runs: 꺾는 횟수+1 이상, detour: 직선거리보다 돌아가야 하는 칸 수, cards: 7세 최소 카드 수
+    // len: 가장 짧은 길의 칸 수, runs: 꺾는 횟수+1 이상, detour: 직선거리보다 돌아가야 하는 칸 수, cards: 7세 최소 화살표 상자 수 (같은 방향 = 한 상자)
     const CD_CFG = [
       { n: 3, rocks: 0, len: [2, 3], runs: 2, direct: true },
       { n: 3, rocks: 1, len: [3, 4], runs: 2, far: 2 },
@@ -12363,11 +12413,11 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         const runs = cdMinCards(n, rocks, s, berry, goal, 99);                          // 꺾는 횟수 + 1
         if (runs < cfg.runs - relax) continue;
         lv = { n, s, goal, berry, rocks, path, steps, runs };
-        if (cfg.counts) { lv.min = cdMinCards(n, rocks, s, berry, goal); if (lv.min < cfg.cards[0] - relax || lv.min > cfg.cards[1]) { lv = null; continue; } lv.limit = lv.min + 1; }
+        if (cfg.counts) { lv.min = runs; if (lv.min < cfg.cards[0] - relax || lv.min > cfg.cards[1]) { lv = null; continue; } lv.limit = lv.min + 1; }
       }
       fdG = { kind: 'code', cfg, lv, prog: [], pos: lv.s.slice(), ate: false, run: false, fails: 0, pks: [25] };
       fdG.say = cfg.direct ? '화살표를 눌러서 피카츄를 몬스터볼까지 데려다 줘요!'
-        : `피카츄가 몬스터볼까지 가는 길을 화살표로 놓아 봐요.${lv.berry ? ' 가는 길에 딸기를 꼭 먹어야 해요.' : ''}${cfg.counts ? ` 카드는 ${lv.limit}장까지! 같은 방향 화살표를 연달아 누르면 한 카드로 합쳐져서, 카드 한 장으로 3칸까지 갈 수 있어요.` : ''} 다 놓으면 출발을 눌러요.`;
+        : `피카츄가 몬스터볼까지 가는 길을 화살표로 놓아 봐요.${lv.berry ? ' 가는 길에 딸기를 꼭 먹어야 해요.' : ''}${cfg.counts ? ` 화살표 상자는 ${lv.limit}개까지! 같은 방향 화살표는 한 상자에 들어가요. 방향을 덜 바꾸는 길을 찾아봐요.` : ''} 다 놓으면 출발을 눌러요.`;
       const cell = i => { const x = i % n, y = Math.floor(i / n); return `<span class="cd-cell ${(x + y) % 2 ? 'b' : ''}" data-x="${x}" data-y="${y}">${lv.rocks.has(i) ? fdIcon(i % 3 ? '🪨' : '🌳', 'cd-rock') : ''}</span>`; };
       const at = (p, inner, cls) => `<span class="cd-at ${cls}" style="left:${(p[0] + 0.5) * 100 / n}%;top:${(p[1] + 0.5) * 100 / n}%;width:${100 / n}%">${inner}</span>`;
       document.getElementById('fd-game').innerHTML = `<div class="cd-wrap">
@@ -12381,7 +12431,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             <div class="cd-pad">${['U', 'L', 'D', 'R'].map(d => `<button class="cd-key k${d}" onclick="cdKey('${d}')">${CD_DIR[d][2]}</button>`).join('')}</div>
           </div>
         </div>`;
-      document.getElementById('fd-list').innerHTML = `<div class="cd-msg" id="cd-msg">${cfg.direct ? '화살표를 누르면 피카츄가 한 칸씩 움직여요.' : cfg.counts ? `카드는 ${lv.limit}장까지! 같은 화살표를 연달아 누르면 한 카드로 합쳐져요 (3칸까지).` : '화살표를 순서대로 놓고 ▶ 출발!'}</div>`;
+      document.getElementById('fd-list').innerHTML = `<div class="cd-msg" id="cd-msg">${cfg.direct ? '화살표를 누르면 피카츄가 한 칸씩 움직여요.' : cfg.counts ? `화살표 상자는 ${lv.limit}개까지! 같은 방향 화살표는 한 상자에 들어가요.` : '화살표를 순서대로 놓고 ▶ 출발!'}</div>`;
       fdBottom(cfg.direct ? `<button class="fd-btn" onclick="cdHint()">💡 힌트</button>` : `<button class="fd-btn fd-primary" onclick="cdRun()">▶ 출발</button><button class="fd-btn" onclick="cdBack()">⌫ 하나 지우기</button><button class="fd-btn" onclick="cdClear()">🗑 모두</button><button class="fd-btn" onclick="cdHint()">💡 힌트</button>`);
       cdDrawProg();
       fdSay(fdG.say);
@@ -12395,24 +12445,23 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     }
     function cdDrawProg() {
       const g = fdG, el = document.getElementById('cd-prog'); if (!el) return;
-      const lim = g.lv.limit;
-      el.innerHTML = g.prog.map((c, i) => `<button class="cd-card" data-i="${i}" onclick="cdCycle(${i})">${CD_DIR[c.d][2]}${g.cfg.counts ? `<b>${c.k}</b>` : ''}</button>`).join('')
-        + (lim ? Array.from({ length: Math.max(0, lim - g.prog.length) }, () => '<span class="cd-card empty"></span>').join('') : (g.prog.length ? '' : '<span class="cd-hintline">여기에 화살표가 놓여요</span>'));
-      if (lim) el.insertAdjacentHTML('afterbegin', `<span class="cd-lim">카드 ${g.prog.length}/${lim}</span>`);
+      const lim = g.lv.limit; let st = 0;
+      el.innerHTML = g.prog.map((c, i) => `<span class="cd-grp" data-i="${i}">${Array.from({ length: c.k }, () => `<span class="cd-ar" data-s="${st++}">${CD_DIR[c.d][2]}</span>`).join('')}</span>`).join('')
+        + (lim ? Array.from({ length: Math.max(0, lim - g.prog.length) }, () => '<span class="cd-grp empty"></span>').join('') : (g.prog.length ? '' : '<span class="cd-hintline">여기에 화살표가 놓여요</span>'));
+      if (lim) el.insertAdjacentHTML('afterbegin', `<span class="cd-lim">화살표 상자 ${g.prog.length} / ${lim}</span>`);
     }
     function cdKey(d) {
       const g = fdG; if (!g || g.kind !== 'code' || g.run || g.done) return;
       playTone(560, 0.04);
       if (g.cfg.direct) return cdStep(d, true);
-      // 7세: 같은 방향을 연달아 누르면 앞 카드에 1칸씩 더해져요 (3칸까지)
+      // 7세: 같은 방향 화살표는 앞 상자에 하나 더 들어가요
       const last = g.prog[g.prog.length - 1];
-      if (g.cfg.counts && last && last.d === d && last.k < 3) { last.k++; cdDrawProg(); bxReAnimSafe(document.querySelector(`#cd-prog .cd-card[data-i="${g.prog.length - 1}"]`), 'mm-lit-pulse', 400); return fdSay(`${CD_DIR[d][3]} ${last.k}칸`); }
-      if (g.lv.limit && g.prog.length >= g.lv.limit) return cdMsg(`카드는 ${g.lv.limit}장까지예요. 같은 방향으로 가는 칸은 한 카드에 모아 봐요! 길을 덜 꺾는 쪽을 찾아봐요.`);
+      if (g.cfg.counts && last && last.d === d) { if (last.k >= 12) return; last.k++; cdDrawProg(); return fdSay(CD_DIR[d][3]); }
+      if (g.lv.limit && g.prog.length >= g.lv.limit) return cdMsg(`화살표 상자는 ${g.lv.limit}개까지예요. 방향을 덜 바꾸는 길을 찾아봐요!`);
       if (!g.cfg.counts && g.prog.length >= 14) return;
       g.prog.push({ d, k: 1 }); cdDrawProg(); fdSay(CD_DIR[d][3]);
     }
-    function cdCycle(i) { const g = fdG; if (!g || g.run || !g.cfg.counts) return; const c = g.prog[i]; c.k = c.k % 3 + 1; cdDrawProg(); playTone(600 + c.k * 60, 0.04); fdSay(`${CD_DIR[c.d][3]} ${c.k}칸`); }
-    function cdBack() { const g = fdG; if (!g || g.run) return; g.prog.pop(); cdDrawProg(); playTone(400, 0.04); }
+    function cdBack() { const g = fdG; if (!g || g.run) return; const l = g.prog[g.prog.length - 1]; if (!l) return; if (l.k > 1) l.k--; else g.prog.pop(); cdDrawProg(); playTone(400, 0.04); }   // 화살표 하나씩 지워요
     function cdClear() { const g = fdG; if (!g || g.run) return; g.prog = []; cdDrawProg(); playTone(360, 0.05); }
     // 한 칸 움직이기 (바로 움직이기 모드 + 출발 실행에서 같이 써요)
     function cdStep(d, direct) {
@@ -12429,25 +12478,25 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       if (!g.prog.length) return cdMsg('먼저 화살표를 놓아 볼까요?');
       g.run = true; g.pos = g.lv.s.slice(); g.ate = false; cdPika(g.pos, false);
       document.querySelector('#cd-board .cd-berry')?.classList.remove('eaten');
-      const steps = []; g.prog.forEach((c, i) => { for (let j = 0; j < c.k; j++) steps.push([c.d, i]); });
+      const steps = []; g.prog.forEach((c, i) => { for (let j = 0; j < c.k; j++) steps.push([c.d, i, steps.length]); });
       let k = 0;
       const tick = () => {
         if (fdG !== g) return;
-        document.querySelectorAll('#cd-prog .cd-card').forEach(b => b.classList.remove('now'));
+        document.querySelectorAll('#cd-prog .now').forEach(b => b.classList.remove('now'));
         if (k >= steps.length) return cdEnd('short');
-        const [d, ci] = steps[k++];
-        document.querySelector(`#cd-prog .cd-card[data-i="${ci}"]`)?.classList.add('now');
+        const [d, ci, si] = steps[k++];
+        document.querySelector(`#cd-prog .cd-ar[data-s="${si}"]`)?.classList.add('now');
         const r = cdStep(d, false);
         if (r === 'goal') return setTimeout(() => cdWin(), 350);
-        if (r === 'edge' || r === 'rock') return setTimeout(() => cdEnd(r, ci), 450);
+        if (r === 'edge' || r === 'rock') return setTimeout(() => cdEnd(r, si), 450);
         setTimeout(tick, 420);
       };
       setTimeout(tick, 250);
     }
     function cdEnd(why, ci) {
       const g = fdG; g.run = false; g.fails++;
-      if (ci !== undefined) document.querySelector(`#cd-prog .cd-card[data-i="${ci}"]`)?.classList.add('bad');
-      const t = why === 'rock' ? '앗, 바위에 콩! 빨간 카드부터 고쳐 볼까요?' : why === 'edge' ? '앗, 길 밖으로 나가려고 해요! 빨간 카드를 고쳐 봐요.'
+      if (ci !== undefined) document.querySelector(`#cd-prog .cd-ar[data-s="${ci}"]`)?.classList.add('bad');
+      const t = why === 'rock' ? '앗, 바위에 콩! 빨간 화살표부터 고쳐 볼까요?' : why === 'edge' ? '앗, 길 밖으로 나가려고 해요! 빨간 화살표를 고쳐 봐요.'
         : g.lv.berry && !g.ate ? '딸기를 먹고 가야 해요! 딸기 쪽으로 가는 화살표를 넣어 봐요.' : '몬스터볼까지 아직 못 갔어요. 화살표를 더 놓아 볼까요?';
       cdMsg(t);
       setTimeout(() => { if (fdG !== g || g.run) return; g.pos = g.lv.s.slice(); g.ate = false; cdPika(g.pos, false); document.querySelector('#cd-board .cd-berry')?.classList.remove('eaten'); }, 1400);
@@ -12656,6 +12705,90 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       if (g.cnt >= 3) { g.fin = true; document.getElementById('cr-room').insertAdjacentHTML('beforeend', '<span class="cr-zzz">💤</span>'); setTimeout(() => crFinish('sleep'), 1300); }
       else fdSay('토닥토닥');
     }
+    /**
+     * ==============================================================
+     * [메뉴] 6개 묶음 (도감 · 한글 · 동화 · 수학 · 놀이 · 모험)
+     *  - 폰(좁은 화면)은 화면 아래 그림 버튼 줄, 넓은 화면은 위쪽 한 줄
+     *  - 묶음 안의 놀이는 그림 칩으로 골라요
+     *  - 예전 메뉴 버튼(nav-*)은 숨겨 두고 기존 화면 전환(switchMainView)을 그대로 써요
+     * ==============================================================
+     */
+    const RN_KEY = 'pkmn_nav_v1';
+    const RN_GROUPS = [
+      { k: 'dex', e: '📖', n: '도감', items: [{ e: '📖', n: '도감', v: 'dex' }, { e: '⭐', n: '즐겨찾기', v: 'favs', fav: true }] },
+      { k: 'hangul', e: '🔤', n: '한글', items: [{ e: '✏️', n: '쓰기 놀이터', v: 'study' }, { e: '🧩', n: '빈칸 퀴즈', v: 'quiz' }, { e: '📖', n: '설명 퀴즈', v: 'descquiz' }] },
+      { k: 'story', e: '📚', n: '동화', items: [{ e: '🐾', n: '포켓몬 동화', v: 'story', sb: 'pk' }, { e: '🎮', n: '참여 동화', v: 'story', sb: 'ib' }, { e: '👧', n: '우리 아이 동화', v: 'story', sb: 'kid' }] },
+      { k: 'math', e: '🔢', n: '수학', items: [{ e: '🔢', n: '수학 놀이', v: 'math' }] },
+      { k: 'play', e: '🎮', n: '놀이', items: [
+        { e: '⚡', n: '찌리리공 찾기', v: 'find', g: 'hide' }, { e: '👀', n: '틀린그림', v: 'find', g: 'diff' }, { e: '🧩', n: '퍼즐', v: 'find', g: 'puzzle' },
+        { e: '🃏', n: '짝 맞추기', v: 'play', g: 'memory' }, { e: '🧭', n: '길 코딩', v: 'play', g: 'code' }, { e: '🏠', n: '돌보기', v: 'play', g: 'care' },
+        { e: '❓', n: '누구게?', v: 'guess' }, { e: '🎨', n: '색칠', v: 'coloring' }] },
+      { k: 'adv', e: '⚔️', n: '모험', items: [{ e: '⚔️', n: '배틀 · 리그', v: 'battle' }, { e: '📡', n: '포획', v: 'catch' }] }
+    ];
+    let rnS = null, rnView = 'dex', rnBusy = false, rnReady = false;
+    function rnLoad() { if (rnS) return rnS; try { rnS = JSON.parse(localStorage.getItem(RN_KEY) || 'null'); } catch (e) {} rnS = Object.assign({ g: 'dex', i: 0, last: {} }, rnS || {}); return rnS; }
+    function rnSave() { try { localStorage.setItem(RN_KEY, JSON.stringify(rnS)); } catch (e) {} }
+    const rnBotH = () => { const b = document.getElementById('rn-groups'); return b && getComputedStyle(b).position === 'fixed' ? Math.round(b.getBoundingClientRect().height) : 0; };
+
+    // 지금 화면이 어느 묶음의 몇 번째 놀이인지
+    function rnCurrent() {
+      const v = rnView;
+      for (const g of RN_GROUPS) for (let i = 0; i < g.items.length; i++) {
+        const it = g.items[i]; if (it.v !== v) continue;
+        if (it.g && typeof fdS !== 'undefined' && fdS && fdS.games && fdS.games[v] !== it.g) continue;
+        if (it.sb && typeof sbMode !== 'undefined' && sbMode !== it.sb) continue;
+        return { g, i };
+      }
+      for (const g of RN_GROUPS) { const i = g.items.findIndex(it => it.v === v); if (i >= 0) return { g, i }; }
+      return { g: RN_GROUPS[0], i: 0 };
+    }
+    function rnSync() {
+      rnLoad();
+      const { g, i } = rnCurrent();
+      if (rnReady) { rnS.g = g.k; rnS.i = i; rnS.last[g.k] = i; rnSave(); }   // 처음 열 때 앱이 도감을 띄우는 건 저장하지 않아요
+      document.querySelectorAll('#rn-groups .rn-g').forEach(b => b.classList.toggle('on', b.dataset.k === g.k));
+      const subs = document.getElementById('rn-subs');
+      if (g.items.length < 2) { subs.innerHTML = ''; subs.classList.add('empty'); }
+      else {
+        subs.classList.remove('empty');
+        const fav = document.getElementById('fav-count')?.textContent || '0';
+        subs.innerHTML = g.items.map((it, k) => `<button class="rn-c ${k === i ? 'on' : ''}" onclick="rnPick('${g.k}', ${k})"><span class="rn-ce">${it.e}</span>${it.n}${it.fav ? ` (${fav})` : ''}</button>`).join('');
+        subs.querySelector('.rn-c.on')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+      }
+      try { if (typeof rwHdr === 'function') rwHdr(); } catch (e) {}
+    }
+    function rnGo(k) { rnLoad(); const g = RN_GROUPS.find(x => x.k === k); rnPick(k, Math.min(rnS.last[k] || 0, g.items.length - 1)); }
+    function rnPick(k, i) {
+      const g = RN_GROUPS.find(x => x.k === k), it = g && g.items[i]; if (!it || rnBusy) return;
+      rnBusy = true;
+      try {
+        if (it.g) { if (!fdS) fdS = fdLoad(); fdS.games[it.v] = it.g; fdSave(); }
+        switchMainView(it.v);
+        if (it.sb && typeof sbSetMode === 'function' && sbMode !== it.sb) sbSetMode(it.sb);
+      } finally { rnBusy = false; }
+      rnSync();
+      try { window.scrollTo({ top: 0 }); } catch (e) {}
+    }
+    function rnMenu(ev) { ev && ev.stopPropagation(); document.getElementById('rn-menu').classList.toggle('hidden'); }
+    document.addEventListener('click', e => { const m = document.getElementById('rn-menu'); if (m && !m.classList.contains('hidden') && !e.target.closest('#rn-menu')) m.classList.add('hidden'); });
+
+    // 기존 화면 전환에 묶음 메뉴 맞추기를 덧붙여요
+    (function () {
+      const sw = switchMainView;
+      switchMainView = function (v) { const r = sw.apply(this, arguments); rnView = v; if (!rnBusy) rnSync(); return r; };
+      if (typeof sbSetMode === 'function') { const sm = sbSetMode; sbSetMode = function () { const r = sm.apply(this, arguments); if (!rnBusy && rnView === 'story') rnSync(); return r; }; }
+      if (typeof fdSetGame === 'function') { const fg = fdSetGame; fdSetGame = function () { const r = fg.apply(this, arguments); if (!rnBusy) rnSync(); return r; }; }
+    })();
+    // 마지막에 하던 놀이로 열어요
+    window.addEventListener('load', () => setTimeout(() => {
+      try {
+        const f = document.getElementById('fav-count');
+        if (f) new MutationObserver(() => { if (rnCurrent().g.k === 'dex') rnSync(); }).observe(f, { childList: true, characterData: true, subtree: true });
+        rnLoad(); rnReady = true;
+        if (rnS.g && rnS.g !== 'dex') rnPick(rnS.g, rnS.i || 0); else rnSync();
+      } catch (e) { rnSync(); }
+    }, 0));
+    window.addEventListener('resize', () => { try { if (typeof rwHdr === 'function') rwHdr(); } catch (e) {} });
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
