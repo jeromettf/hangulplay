@@ -2308,6 +2308,33 @@
     .sl-board.solved .sl-last { opacity: 1; }
     .sl-board.solved .sl-tile { border-color: transparent; }
     .sl-board.solved .sl-tile b { opacity: 0; }
+
+    /* 큰 화면 */
+    #fd-play { display: flex; flex-direction: column; gap: .6rem; }
+    .fd-foot { display: flex; flex-direction: column; gap: .6rem; }
+    .fd-playbar { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
+    .fd-pname, .fd-minibar { display: none !important; }
+    .fd-fullbtn { font-family: Jua, sans-serif; font-size: .85rem; padding: .3rem .8rem; border-radius: .9rem; background: #fff; border: 2px solid #a5f3fc; color: #0e7490; transition: transform .1s; }
+    .fd-fullbtn:active { transform: scale(.95); }
+    #fd-play.fd-full { position: fixed; inset: 0; margin: 0 !important; z-index: 70; background: linear-gradient(#ecfeff, #f8fafc); gap: .4rem; overflow: hidden;
+      padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); }
+    #fd-play.fd-full .fd-playbar { justify-content: space-between; }
+    #fd-play.fd-full .fd-pname { display: block !important; font-family: Jua, sans-serif; font-size: .95rem; color: #0e7490; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #fd-play.fd-full .fd-minibar { display: grid !important; flex: 1; max-width: 18rem; grid-template-columns: repeat(10, minmax(0, 1.5rem)); }
+    #fd-play.fd-full #fd-game { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+    #fd-play.fd-full .fd-box { max-height: calc(100dvh - var(--fd-res, 180px)); max-width: calc((100dvh - var(--fd-res, 180px)) * 4 / 3); }
+    #fd-play.fd-full .df-pair .fd-box { max-height: none; max-width: min(100%, calc((100dvh - var(--fd-res, 180px) - 8px) / 2 * 4 / 3)); }
+    #fd-play.fd-full .sl-board { width: min(100%, calc((100dvh - var(--fd-res, 180px)) * 4 / 3)); }
+    #fd-play.fd-full .fd-foot { gap: .35rem; }
+    #fd-play.fd-full .vt-tip { margin-top: .15rem; }
+    @media (orientation: landscape) {
+      #fd-play.fd-full .fd-foot { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem; }
+      #fd-play.fd-full .df-pair { grid-template-columns: 1fr 1fr; }
+      #fd-play.fd-full .df-pair .fd-box { max-width: min(100%, calc((100dvh - var(--fd-res, 120px)) * 4 / 3)); }
+      #fd-play.fd-full .vt-tip { display: none; }
+    }
+    .vt-vp.tall .vt-mini { width: 18%; }
+    #fd-play.fd-full .vt-vp.tall { max-width: calc((100dvh - var(--fd-res, 180px)) * var(--vt-ar, .75)); }
       </style>
       <div class="bg-white p-3 rounded-2xl shadow-sm border border-cyan-200 space-y-2">
         <div class="flex items-center justify-between gap-2">
@@ -2323,9 +2350,18 @@
         <div class="rw-barwrap"><span class="font-jua text-[11px] text-amber-600 shrink-0">스티커</span><div class="rw-bar"></div><span class="shrink-0 text-lg">🎁</span></div>
       </div>
       <div id="fd-top" class="bg-white p-2.5 rounded-2xl border border-slate-200 space-y-2"></div>
-      <div id="fd-game"></div>
-      <div id="fd-list"></div>
-      <div id="fd-bottom"></div>
+      <div id="fd-play">
+        <div class="fd-playbar">
+          <span id="fd-pname" class="fd-pname"></span>
+          <div class="rw-bar fd-minibar"></div>
+          <button id="fd-full-btn" onclick="fdToggleFull()" class="fd-fullbtn">⛶ 크게</button>
+        </div>
+        <div id="fd-game"></div>
+        <div class="fd-foot">
+          <div id="fd-list"></div>
+          <div id="fd-bottom"></div>
+        </div>
+      </div>
     </section>
     <div id="rw-ov" class="hidden"></div>
 
@@ -11615,12 +11651,13 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     function fdStart() {
       fdStopSpeech();
       const g = fdS.game, tok = ++fdUid;
+      const nm = document.getElementById('fd-pname'); if (nm) nm.textContent = `${FD_GAMES[g][0]} ${FD_GAMES[g][1]}${g === 'puzzle' && fdS.age >= 6 && fdS.pzMode === 'slide' ? ' (밀기)' : ''} · ${fdS.age}세`;
       document.getElementById('fd-game').innerHTML = '<div class="fd-wait">그림을 준비하고 있어요…</div>';
       document.getElementById('fd-list').innerHTML = ''; document.getElementById('fd-bottom').innerHTML = '';
       fdCheckPk(ok => {
         if (tok !== fdUid) return;
         if (g === 'hide') hdNew(ok); else if (g === 'diff') dfNew(ok); else if (fdS.age >= 6 && fdS.pzMode === 'slide') slNew(ok); else pzNew(ok);
-        setTimeout(fdScroll, 60);
+        if (!fdFull()) setTimeout(fdScroll, 60); else fdRes();
       });
     }
     function fdBottom(btns) {
@@ -11632,6 +11669,33 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const r = el.getBoundingClientRect(), list = document.getElementById('fd-list').getBoundingClientRect();
       if (list.bottom > window.innerHeight || r.top < rwHdr()) rwScrollTo(el);
     }
+    // ---------- 큰 화면 ----------
+    const fdFull = () => !!document.getElementById('fd-play')?.classList.contains('fd-full');
+    function fdSetFull(on) {
+      const el = document.getElementById('fd-play'); if (!el) return;
+      el.classList.toggle('fd-full', on);
+      document.body.style.overflow = on ? 'hidden' : '';
+      document.getElementById('fd-full-btn').textContent = on ? '✕ 작게' : '⛶ 크게';
+      // 카드 받기 창도 보여야 해서 페이지 전체를 전체 화면으로 해요
+      try {
+        const de = document.documentElement;
+        if (on && de.requestFullscreen && !document.fullscreenElement) de.requestFullscreen().catch(() => {});
+        if (!on && document.fullscreenElement === de && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      } catch (e) {}
+      playTone(on ? 620 : 480, 0.05);
+      fdRes();
+      if (fdG && fdG.vt && !fdG.done && fdG.tall !== vtTall()) fdStart();
+      setTimeout(() => { fdRes(); if (fdG && fdG.kind === 'puzzle' && !fdG.slide) pzRelayout(false); if (!on) fdScroll(); }, 120);
+    }
+    function fdToggleFull() { fdSetFull(!fdFull()); }
+    // 놀이판 말고 위아래 줄이 차지하는 높이 → CSS가 놀이판 크기를 맞춰요
+    function fdRes() { const el = document.getElementById('fd-play'); if (el && fdFull()) el.style.setProperty('--fd-res', Math.round(window.innerHeight - fdAvailH()) + 'px'); }
+    document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && fdFull()) fdSetFull(false); });
+    // 큰 화면에서 놀이판이 쓸 수 있는 높이
+    function fdAvailH() {
+      const h = id => document.getElementById(id)?.getBoundingClientRect().height || 0;
+      return window.innerHeight - (document.querySelector('#fd-play .fd-playbar')?.getBoundingClientRect().height || 0) - h('fd-list') - h('fd-bottom') - 28;
+    }
     function fdReplay() { if (fdG && fdG.say) fdSay(fdG.say); }
     // 다 하면 스티커를 주고, 카드가 생기면 보여 줘요
     function fdDone(n, msg) {
@@ -11642,6 +11706,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       playSuccessChime();
       document.getElementById('fd-list').innerHTML = `<div class="mm-fb">🎉 ${msg}<br><small>스티커 ${n}개를 받았어요!</small></div>`;
       document.getElementById('fd-bottom').innerHTML = `<button class="fd-btn fd-primary" onclick="fdStart()">다음 그림 ▶</button>`;
+      fdRes();
       fdSay(`${msg} 스티커 ${n}개를 받았어요!`, () => { if (cards.length) rwShowCards(cards); });
     }
     function fdRing(box, x, y, r, cls) {
@@ -11682,20 +11747,24 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       { n: 85, d: 9, Z: 2.1, kinds: [['poke', 0.55], ['great', 0.15], ['ultra', 0.15], ['premier', 0.15]], rot: 180, flip: 0.2, tg: [100, 101], pile: true }
     ];
     let vtTick = null;
+    const vtTall = () => fdFull() && window.innerHeight > window.innerWidth * 1.15;
     function vtKind(kinds) { let r = Math.random(); for (const [k, p] of kinds) { if ((r -= p) <= 0) return k; } return kinds[0][0]; }
     function hdNew() {
       const cfg = VT_CFG[fdS.age - 3], Z = cfg.Z;
-      const dw = cfg.d / Z, ar = 4 / 3;                    // 지름: 그림 너비의 %, 세로는 4/3배
+      // 큰 화면을 세로로 쓰면 그림도 세로로 길게 (3:4) 만들어 화면을 꽉 채워요
+      const tall = vtTall(), ar = tall ? Math.max(0.56, Math.min(0.9, (document.getElementById('fd-game').clientWidth || 360) / Math.max(200, fdAvailH()))) : 4 / 3;  // ar = 그림 너비 ÷ 높이
+      // 세로로 긴 그림은 넓이가 커지니 공도 조금 크게 (공 수는 그대로, 빽빽함은 비슷하게)
+      const dw = cfg.d / Z * (tall ? Math.min(1.4, Math.sqrt(4 / (3 * ar))) : 1);   // 지름: 그림 너비의 %, 세로는 ar배
       const scene = fdPick(['meadow', 'field', 'garden', 'hill', 'town', 'party', 'forest', 'lake']);
       const N = cfg.n + cfg.tg.length, pts = [];
       const far = (x, y, m) => pts.every(p => Math.hypot(p.x - x, (p.y - y) / ar) >= m);
       if (cfg.pile) {
         // 무더기 몇 개를 만들고, 공을 겹치게 쌓아요
-        const piles = Array.from({ length: Z > 2 ? 8 : 6 }, () => ({ x: 8 + Math.random() * 84, y: 30 + Math.random() * 62 }));
+        const piles = Array.from({ length: (Z > 2 ? 8 : 6) + (tall ? 2 : 0) }, () => ({ x: 8 + Math.random() * 84, y: (tall ? 22 : 30) + Math.random() * (tall ? 70 : 62) }));
         let guard = 0;
         while (pts.length < N && guard++ < 20000) {
           const p = piles[pts.length % piles.length];
-          const x = p.x + (Math.random() - 0.5) * dw * 5, y = p.y + (Math.random() - 0.5) * dw * 3.2;
+          const x = p.x + (Math.random() - 0.5) * dw * 5, y = p.y + (Math.random() - 0.5) * dw * 2.4 * ar;
           if (x < dw / 2 + 1 || x > 99 - dw / 2 || y < 22 || y > 99 - dw * ar / 2) continue;
           if (far(x, y, dw * (guard > 12000 ? 0.45 : 0.62))) pts.push({ x, y });
         }
@@ -11716,20 +11785,20 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       // 찾을 친구는 가운데가 가려지지 않게 위로 올려요
       items.filter(t => t.tgt).forEach(t => { items.forEach(o => { if (o !== t && Math.hypot(o.x - t.x, (o.y - t.y) / ar) < dw * 0.6 && o.z >= t.z) t.z = o.z + 1; }); });
       const targets = items.filter(t => t.tgt);
-      fdG = { kind: 'hide', vt: true, items, targets, found: 0, Z, dw, pks: targets.map(t => t.tgt), tx: 0, ty: 0, secs: 0, hint: 0, miss: 0 };
+      fdG = { kind: 'hide', vt: true, tall, ar, items, targets, found: 0, Z, dw, pks: targets.map(t => t.tgt), tx: 0, ty: 0, secs: 0, hint: 0, miss: 0 };
       const names = [...new Set(targets.map(t => VT_NAME[t.tgt]))];
       const cnt = n => targets.filter(t => t.tgt === n).length;
       const what = names.map(nm => { const n = +Object.keys(VT_NAME).find(k => VT_NAME[k] === nm); return cnt(n) > 1 ? `${nm} ${MM_CNT[cnt(n)]} 마리` : nm; }).join('와 ');
       fdG.say = `몬스터볼 사이에 ${what}${sbJosa(what, '이')} 숨어 있어요! 찾아서 콕 눌러 봐요.${Z > 1 ? ' 그림이 커서 손가락으로 끌면 둘러볼 수 있어요.' : ''}`;
       const img = t => `<img class="vt-it ${t.tgt ? 'vt-tg' : ''}" data-k="${items.indexOf(t)}" src="${t.tgt ? VT_IMG[t.tgt] : VT_BALL[t.kind]}" style="left:${t.x}%;top:${t.y}%;width:${t.s}%;z-index:${t.z};rotate:${t.r}deg" alt="" draggable="false">`;
-      document.getElementById('fd-game').innerHTML = `<div class="fd-box vt-vp ${Z > 1 ? 'big' : ''}" id="vt-vp">
+      document.getElementById('fd-game').innerHTML = `<div class="fd-box vt-vp ${Z > 1 ? 'big' : ''} ${tall ? 'tall' : ''}" id="vt-vp" style="${tall ? `aspect-ratio:${ar};--vt-ar:${ar}` : ''}">
           <div class="vt-world" id="vt-world" style="width:${Z * 100}%;height:${Z * 100}%"><img class="mm-bg" src="${SBA.url(scene)}" alt="">${items.map(img).join('')}</div>
-          ${Z > 1 ? `<div class="vt-mini"><span id="vt-mini-r" style="width:${100 / Z}%;height:${100 / Z}%"></span></div><div class="vt-drag">👆 끌어서 둘러보기</div>` : ''}
+          ${Z > 1 ? `<div class="vt-mini" style="${tall ? `aspect-ratio:${ar}` : ''}"><span id="vt-mini-r" style="width:${100 / Z}%;height:${100 / Z}%"></span></div><div class="vt-drag">👆 끌어서 둘러보기</div>` : ''}
         </div>`;
       document.getElementById('fd-list').innerHTML = `<div class="hd-list">${[...new Set(targets.map(t => t.tgt))].map(n => `<span class="hd-chip" id="vt-c-${n}"><img src="${VT_IMG[n]}" alt=""><b>${VT_NAME[n]} <span class="vt-n">0</span>/${cnt(n)}</b></span>`).join('')}</div>
         <p class="vt-tip">몬스터볼은 가운데 단추가 있어요. ${names.join('·')}${sbJosa(names[names.length - 1], '은')} 눈이 있어요!</p>`;
       fdBottom(`<button class="fd-btn" onclick="vtHint(true)">💡 힌트</button>`);
-      if (Z > 1) vtPan(-(Math.random() * (Z - 1)) * 0.5, -(Math.random() * (Z - 1)) * 0.5, false, true);
+      if (Z > 1) { const far0 = items.filter(t => !t.tgt && targets.every(q => Math.hypot(q.x - t.x, (q.y - t.y) / ar) > 30)); const st = fdPick(far0.length ? far0 : items); vtCenterOn(st.x, st.y, false); }   // 공 무더기 쪽에서 시작 (찌리리공과는 떨어진 곳)
       vtBind();
       clearInterval(vtTick);
       const g = fdG;
@@ -11807,7 +11876,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const t = g.targets.find(x => !x.got); if (!t) return;
       g.hint = Math.min(3, g.hint + 1);
       const rv = [0, 30, 18, 10][g.hint] / g.Z;              // 화면 너비 기준 반지름
-      const off = rv * 0.45, x = t.x + (Math.random() - 0.5) * off, y = t.y + (Math.random() - 0.5) * off * 4 / 3;
+      const off = rv * 0.45, x = t.x + (Math.random() - 0.5) * off, y = t.y + (Math.random() - 0.5) * off * g.ar;
       document.getElementById('vt-hint')?.remove();
       const ring = fdRing(document.getElementById('vt-world'), x, y, rv, 'fd-hint'); ring.id = 'vt-hint';
       vtCenterOn(x, y, true);
@@ -11920,10 +11989,11 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const g = fdG; if (!g || g.kind !== 'puzzle') return;
       const area = document.getElementById('pz-area'); if (!area) return;
       const avail = document.getElementById('fd-game').clientWidth || 360;
-      const land = window.innerWidth > window.innerHeight && window.innerWidth >= 700, vh = window.innerHeight - rwHdr();
+      const land = window.innerWidth > window.innerHeight && window.innerWidth >= 700, full = fdFull();
+      const vh = window.innerHeight - rwHdr(), avH = full ? fdAvailH() : vh - (land ? 80 : 70);
       const trayR = land ? 0 : fdS.age <= 4 ? 0.8 : 0.62;
-      let Wb = Math.min(avail, 640, (vh - 70) / (0.75 + trayR));
-      if (land) Wb = Math.min(avail * 0.64, (vh - 80) / 0.75);
+      let Wb = Math.min(avail, full ? 1400 : 640, avH / (0.75 + trayR));
+      if (land) Wb = Math.min(avail * (full ? 0.7 : 0.64), avH / 0.75);
       Wb = Math.max(240, Wb);
       const s = Wb / 400, Hb = 300 * s;
       const trayW = land ? Math.max(160, avail - Wb - 12) : Wb, trayH = land ? Hb : Hb * trayR;
@@ -12027,7 +12097,9 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         if (g.st.every((v, k) => v === k)) { document.getElementById('sl-board').classList.add('solved'); fdDone(4, '밀기 퍼즐 완성!'); }
       } else { const el = document.querySelector(`#sl-board .sl-tile[data-t="${t}"]`); bxReAnimSafe(el, 'mm-nope', 400); }
     }
-    window.addEventListener('resize', () => { if (fdG && fdG.kind === 'puzzle' && !fdG.slide && !document.getElementById('view-find')?.classList.contains('hidden')) pzRelayout(false); });
+    let fdRot = 0;
+    window.addEventListener('resize', () => { clearTimeout(fdRot); fdRot = setTimeout(() => { if (fdG && fdG.vt && !fdG.done && fdG.tall !== vtTall()) fdStart(); }, 300); });
+    window.addEventListener('resize', () => { fdRes(); if (fdG && fdG.kind === 'puzzle' && !fdG.slide && !document.getElementById('view-find')?.classList.contains('hidden')) pzRelayout(false); });
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
