@@ -12308,12 +12308,13 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     // ============ 피카츄 길 코딩 ============
     const CD_DIR = { U: [0, -1, '⬆️', '위로'], D: [0, 1, '⬇️', '아래로'], L: [-1, 0, '⬅️', '왼쪽으로'], R: [1, 0, '➡️', '오른쪽으로'] };
     // 3세: 누르면 바로 움직여요. 4세부터 화살표를 먼저 놓고 출발. 6세 열매 들르기, 7세 카드 수 제한 + 여러 칸 카드
+    // len: 가장 짧은 길의 칸 수, runs: 꺾는 횟수+1 이상, detour: 직선거리보다 돌아가야 하는 칸 수, cards: 7세 최소 카드 수
     const CD_CFG = [
-      { n: 3, rocks: 0, len: [2, 3], direct: true },
-      { n: 3, rocks: 1, len: [2, 4] },
-      { n: 4, rocks: 3, len: [3, 6] },
-      { n: 5, rocks: 5, len: [5, 8], berry: true },
-      { n: 6, rocks: 7, len: [6, 11], berry: true, counts: true }
+      { n: 3, rocks: 0, len: [2, 3], runs: 2, direct: true },
+      { n: 3, rocks: 1, len: [3, 4], runs: 2, far: 2 },
+      { n: 4, rocks: 3, len: [4, 6], runs: 3, detour: 2, far: 3 },
+      { n: 5, rocks: 5, len: [6, 9], runs: 3, detour: 2, far: 3, berry: true },
+      { n: 6, rocks: 7, len: [8, 12], runs: 4, detour: 2, far: 4, berry: true, counts: true, cards: [4, 5] }
     ];
     function cdBfs(n, rocks, a, b) {
       const key = p => p[1] * n + p[0], prev = new Map([[key(a), null]]), q = [a];
@@ -12325,8 +12326,9 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const path = []; let p = b; while (p) { path.unshift(p); p = prev.get(key(p)); } return path;
     }
     // 7세: 카드 한 장이 1~3칸 → 가장 적은 카드 수 (열매를 먹었는지까지 상태로 봐요)
-    function cdMinCards(n, rocks, s, berry, goal) {
-      const id = (x, y, d, r, f) => ((((y * n + x) * 4 + d) * 4 + r) * 2 + f);
+    function cdMinCards(n, rocks, s, berry, goal, cap) {
+      cap = cap || 3;
+      const id = (x, y, d, r, f) => ((((y * n + x) * 4 + d) * 100 + Math.min(r, 99)) * 2 + f);
       const dirs = Object.values(CD_DIR), dist = new Map(), dq = [];
       const push = (st, c, front) => { const k = id(...st); if (dist.has(k) && dist.get(k) <= c) return; dist.set(k, c); front ? dq.unshift([st, c]) : dq.push([st, c]); };
       dirs.forEach((d, di) => { const nx = s[0] + d[0], ny = s[1] + d[1]; if (nx < 0 || ny < 0 || nx >= n || ny >= n || rocks.has(ny * n + nx)) return; push([nx, ny, di, 1, berry && nx === berry[0] && ny === berry[1] ? 1 : berry ? 0 : 1], 1); });
@@ -12336,7 +12338,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         dirs.forEach((d, nd) => {
           const nx = x + d[0], ny = y + d[1]; if (nx < 0 || ny < 0 || nx >= n || ny >= n || rocks.has(ny * n + nx)) return;
           const nf = f || (berry && nx === berry[0] && ny === berry[1]) ? 1 : 0;
-          if (nd === di && r < 3) push([nx, ny, nd, r + 1, nf], c, true); else push([nx, ny, nd, 1, nf], c + 1, false);
+          if (nd === di && r < cap) push([nx, ny, nd, r + 1, nf], c, true); else push([nx, ny, nd, 1, nf], c + 1, false);
         });
       }
       return 99;
@@ -12344,7 +12346,10 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     function cdNew() {
       const cfg = CD_CFG[fdS.age - 3], n = cfg.n;
       let lv = null;
-      for (let t = 0; t < 400 && !lv; t++) {
+      const man = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+      // 조건을 다 맞추는 길을 찾고, 정 안 되면 조금씩 풀어 줘요
+      for (let t = 0; t < 4000 && !lv; t++) {
+        const relax = t > 3000 ? 1 : 0;
         const cells = fdShuffle(Array.from({ length: n * n }, (_, i) => [i % n, Math.floor(i / n)]));
         const s = cells[0], goal = cells[1], berry = cfg.berry ? cells[2] : null;
         const rocks = new Set(cells.slice(cfg.berry ? 3 : 2, (cfg.berry ? 3 : 2) + cfg.rocks).map(p => p[1] * n + p[0]));
@@ -12353,12 +12358,16 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         const path = p1.concat(p2.slice(1)), steps = path.length - 1;
         if (steps < cfg.len[0] || steps > cfg.len[1]) continue;
         if (cfg.berry && p2.length < 3) continue;
-        lv = { n, s, goal, berry, rocks, path, steps };
-        if (cfg.counts) { lv.min = cdMinCards(n, rocks, s, berry, goal); if (lv.min > 5 || lv.min >= steps) { lv = null; continue; } lv.limit = lv.min + 1; }
+        if (cfg.far && man(s, goal) < cfg.far - relax) continue;                       // 몬스터볼이 너무 가까우면 안 돼요
+        if (cfg.detour && steps - man(s, goal) < cfg.detour - relax) continue;          // 곧장 갈 수 없고 돌아가야 해요
+        const runs = cdMinCards(n, rocks, s, berry, goal, 99);                          // 꺾는 횟수 + 1
+        if (runs < cfg.runs - relax) continue;
+        lv = { n, s, goal, berry, rocks, path, steps, runs };
+        if (cfg.counts) { lv.min = cdMinCards(n, rocks, s, berry, goal); if (lv.min < cfg.cards[0] - relax || lv.min > cfg.cards[1]) { lv = null; continue; } lv.limit = lv.min + 1; }
       }
       fdG = { kind: 'code', cfg, lv, prog: [], pos: lv.s.slice(), ate: false, run: false, fails: 0, pks: [25] };
       fdG.say = cfg.direct ? '화살표를 눌러서 피카츄를 몬스터볼까지 데려다 줘요!'
-        : `피카츄가 몬스터볼까지 가는 길을 화살표로 놓아 봐요.${lv.berry ? ' 가는 길에 딸기를 꼭 먹어야 해요.' : ''}${cfg.counts ? ` 카드는 ${lv.limit}장까지! 카드를 누르면 1칸, 2칸, 3칸으로 바뀌어요.` : ''} 다 놓으면 출발을 눌러요.`;
+        : `피카츄가 몬스터볼까지 가는 길을 화살표로 놓아 봐요.${lv.berry ? ' 가는 길에 딸기를 꼭 먹어야 해요.' : ''}${cfg.counts ? ` 카드는 ${lv.limit}장까지! 같은 방향 화살표를 연달아 누르면 한 카드로 합쳐져서, 카드 한 장으로 3칸까지 갈 수 있어요.` : ''} 다 놓으면 출발을 눌러요.`;
       const cell = i => { const x = i % n, y = Math.floor(i / n); return `<span class="cd-cell ${(x + y) % 2 ? 'b' : ''}" data-x="${x}" data-y="${y}">${lv.rocks.has(i) ? fdIcon(i % 3 ? '🪨' : '🌳', 'cd-rock') : ''}</span>`; };
       const at = (p, inner, cls) => `<span class="cd-at ${cls}" style="left:${(p[0] + 0.5) * 100 / n}%;top:${(p[1] + 0.5) * 100 / n}%;width:${100 / n}%">${inner}</span>`;
       document.getElementById('fd-game').innerHTML = `<div class="cd-wrap">
@@ -12372,7 +12381,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             <div class="cd-pad">${['U', 'L', 'D', 'R'].map(d => `<button class="cd-key k${d}" onclick="cdKey('${d}')">${CD_DIR[d][2]}</button>`).join('')}</div>
           </div>
         </div>`;
-      document.getElementById('fd-list').innerHTML = `<div class="cd-msg" id="cd-msg">${cfg.direct ? '화살표를 누르면 피카츄가 한 칸씩 움직여요.' : '화살표를 순서대로 놓고 ▶ 출발!'}</div>`;
+      document.getElementById('fd-list').innerHTML = `<div class="cd-msg" id="cd-msg">${cfg.direct ? '화살표를 누르면 피카츄가 한 칸씩 움직여요.' : cfg.counts ? `카드는 ${lv.limit}장까지! 같은 화살표를 연달아 누르면 한 카드로 합쳐져요 (3칸까지).` : '화살표를 순서대로 놓고 ▶ 출발!'}</div>`;
       fdBottom(cfg.direct ? `<button class="fd-btn" onclick="cdHint()">💡 힌트</button>` : `<button class="fd-btn fd-primary" onclick="cdRun()">▶ 출발</button><button class="fd-btn" onclick="cdBack()">⌫ 하나 지우기</button><button class="fd-btn" onclick="cdClear()">🗑 모두</button><button class="fd-btn" onclick="cdHint()">💡 힌트</button>`);
       cdDrawProg();
       fdSay(fdG.say);
@@ -12395,7 +12404,10 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const g = fdG; if (!g || g.kind !== 'code' || g.run || g.done) return;
       playTone(560, 0.04);
       if (g.cfg.direct) return cdStep(d, true);
-      if (g.lv.limit && g.prog.length >= g.lv.limit) return cdMsg(`카드는 ${g.lv.limit}장까지예요. 카드를 눌러서 여러 칸 가게 해 봐요!`);
+      // 7세: 같은 방향을 연달아 누르면 앞 카드에 1칸씩 더해져요 (3칸까지)
+      const last = g.prog[g.prog.length - 1];
+      if (g.cfg.counts && last && last.d === d && last.k < 3) { last.k++; cdDrawProg(); bxReAnimSafe(document.querySelector(`#cd-prog .cd-card[data-i="${g.prog.length - 1}"]`), 'mm-lit-pulse', 400); return fdSay(`${CD_DIR[d][3]} ${last.k}칸`); }
+      if (g.lv.limit && g.prog.length >= g.lv.limit) return cdMsg(`카드는 ${g.lv.limit}장까지예요. 같은 방향으로 가는 칸은 한 카드에 모아 봐요! 길을 덜 꺾는 쪽을 찾아봐요.`);
       if (!g.cfg.counts && g.prog.length >= 14) return;
       g.prog.push({ d, k: 1 }); cdDrawProg(); fdSay(CD_DIR[d][3]);
     }
