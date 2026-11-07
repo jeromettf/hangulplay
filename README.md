@@ -4,6 +4,7 @@
 
 - 포켓몬 도감, 한글 쓰기, 퀴즈, 색칠놀이
 - 그림 동화책 · 참여 동화
+- 수학 놀이 (3~7세, 세기부터 시계·돈 계산까지 7단계)
 - 배틀 스타디움 (컴퓨터 · 2인 · 관장/챔피언)
 
 배틀 엔진: [Pokémon Showdown](https://github.com/smogon/pokemon-showdown) 시뮬레이터 (MIT License).

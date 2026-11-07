@@ -497,6 +497,9 @@
         <button id="nav-story" onclick="switchMainView('story')" class="tab-btn px-2.5 py-1.5 rounded-xl font-jua text-xs sm:text-sm flex items-center gap-1 transition-all hover:bg-white/20">
           <i class="fa-solid fa-book text-pink-200"></i><span>동화책 📚</span>
         </button>
+        <button id="nav-math" onclick="switchMainView('math')" class="tab-btn px-2.5 py-1.5 rounded-xl font-jua text-xs sm:text-sm flex items-center gap-1 transition-all hover:bg-white/20">
+          <i class="fa-solid fa-calculator text-amber-200"></i><span>수학 놀이 🔢</span>
+        </button>
         <button id="nav-favs" onclick="switchMainView('favs')" class="tab-btn px-2 py-1.5 rounded-xl font-jua text-xs sm:text-sm flex items-center gap-1 transition-all hover:bg-white/20">
           <i class="fa-solid fa-star text-yellow-300"></i><span>(<span id="fav-count">0</span>)</span>
         </button>
@@ -1973,6 +1976,200 @@
         <p class="font-jua text-slate-500 text-sm">아직 찜한 포켓몬이 없어요!</p>
         <p class="text-xs text-slate-400">도감에서 마음에 드는 카드의 별표(★)를 눌러보세요.</p>
       </div>
+    </section>
+
+    <!-- 수학 놀이 -->
+    <section id="view-math" class="hidden space-y-2.5 max-w-2xl mx-auto">
+      <style>
+    /* ===== 수학 놀이 ===== */
+    #view-math .hidden { display: none !important; }
+    .mm-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; padding: .7rem; }
+    .mm-label { font-family: Jua, sans-serif; color: #64748b; font-size: .8rem; margin-right: .2rem; }
+    .mm-pill { font-family: Jua, sans-serif; font-size: .82rem; padding: .3rem .7rem; border-radius: 999px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; transition: transform .1s; }
+    .mm-pill:active { transform: scale(.95); }
+    .mm-pill.on { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+    .mm-help { font-size: 11px; color: #64748b; font-weight: 700; line-height: 1.5; }
+    .mm-go { width: 100%; font-family: Jua, sans-serif; font-size: 1.05rem; padding: .7rem; border-radius: 1rem; background: linear-gradient(135deg, #fbbf24, #f97316); color: #fff; box-shadow: 0 4px 0 #c2410c; transition: transform .1s; }
+    .mm-go:active { transform: translateY(2px); box-shadow: 0 2px 0 #c2410c; }
+    .mm-go small { font-size: .75rem; opacity: .9; }
+    .mm-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: .5rem; }
+    .mm-stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: .1rem; background: #fff; border: 2px solid #fde68a; border-radius: 1rem; padding: .55rem .3rem .45rem; font-family: Jua, sans-serif; transition: transform .1s; }
+    .mm-stage:active { transform: scale(.96); }
+    .mm-stage.cur { border-color: #f97316; box-shadow: 0 0 0 3px #fed7aa; }
+    .mm-stage-n { position: absolute; left: .4rem; top: .3rem; width: 1.3rem; height: 1.3rem; border-radius: 999px; background: #fef3c7; color: #b45309; font-size: .75rem; line-height: 1.3rem; }
+    .mm-stage-e { font-size: 2rem; line-height: 1; }
+    .mm-stage-name { font-size: .95rem; color: #334155; }
+    .mm-stage-age { font-size: .7rem; color: #94a3b8; }
+    .mm-stage-stars { font-size: .65rem; letter-spacing: -1px; color: #f59e0b; }
+    .mm-stage-tag { position: absolute; right: .3rem; top: .3rem; font-size: .6rem; background: #f97316; color: #fff; padding: 0 .35rem; border-radius: 999px; }
+    .mm-ico { display: inline-block; width: 1.2em; height: 1.2em; vertical-align: -.25em; object-fit: contain; }
+    .mm-emo { width: auto; height: auto; }
+    .mm-ico-l { width: 2.2rem; height: 2.2rem; font-size: 2rem; }
+    .mm-ico-xl { width: 4.5rem; height: 4.5rem; font-size: 4rem; }
+
+    .mm-stickbar { display: flex; align-items: center; gap: .3rem; }
+    .mm-stickers { display: grid; grid-template-columns: repeat(10, minmax(0, 2.6rem)); justify-content: space-between; gap: 3px; flex: 1; }
+    .mm-stk { aspect-ratio: 1; border-radius: 999px; border: 2px dashed #fcd34d; background: #fffbeb; color: #fcd34d; font-size: .6rem; display: flex; align-items: center; justify-content: center; font-family: Jua, sans-serif; overflow: hidden; }
+    .mm-stk.on { border-style: solid; border-color: #f59e0b; background: #fff; animation: mm-pop .4s; }
+    .mm-stk img { width: 100%; height: 100%; object-fit: contain; }
+
+    .mm-box { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 58vh; margin: 0 auto; border-radius: 1.2rem; overflow: hidden; background: #f0f9ff; }
+    .mm-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .mm-layer { position: absolute; inset: 0; }
+    .mm-thing { position: absolute; transform: translate(-50%, -50%); width: 15%; aspect-ratio: 1; background: none; border: 0; padding: 0; transition: transform .15s; }
+    .mm-thing img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 3px rgba(0,0,0,.18)); pointer-events: none; }
+    .mm-thing:active { transform: translate(-50%, -50%) scale(.92); }
+    .mm-badge { position: absolute; right: -4%; top: -4%; min-width: 1.5rem; height: 1.5rem; border-radius: 999px; background: #f97316; color: #fff; font-family: Jua, sans-serif; font-size: .9rem; line-height: 1.5rem; text-align: center; box-shadow: 0 2px 0 #c2410c; animation: mm-pop .3s; }
+    .mm-lit { filter: drop-shadow(0 0 10px #fde047) drop-shadow(0 0 4px #facc15); transform: translate(-50%, -50%) scale(1.12) !important; }
+    .mm-dot.mm-lit, .mm-two .mm-lit { transform: translate(-50%, -50%) scale(1.25) !important; }
+    .mm-arrive { animation: mm-arrive .7s both; }
+    .mm-leave { animation: mm-leave 1s both; }
+    .mm-bye { position: absolute; right: 0; top: -10%; font-size: 1.2rem; }
+    @keyframes mm-arrive { from { opacity: 0; transform: translate(60%, -50%) scale(.6); } to { opacity: 1; transform: translate(-50%, -50%); } }
+    @keyframes mm-leave { from { opacity: 1; } to { opacity: .28; filter: grayscale(.6); } }
+    @keyframes mm-pop { 0% { transform: scale(.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+    .mm-nope { animation: mm-nope .4s; }
+    @keyframes mm-nope { 0%, 100% { translate: 0; } 25% { translate: -6px; } 75% { translate: 6px; } }
+    .mm-wiggle { animation: mm-wiggle .3s 4; }
+    @keyframes mm-wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -12deg; } 75% { rotate: 12deg; } }
+    .mm-lit-pulse { animation: mm-pulse .5s; }
+    @keyframes mm-pulse { 50% { scale: 1.25; filter: drop-shadow(0 0 8px #fde047); } }
+
+    .mm-qtext { background: #fff; border: 1px solid #fde68a; border-radius: 1rem; padding: .6rem .8rem; font-size: 1.15rem; line-height: 1.55; color: #1e293b; word-break: keep-all; }
+    .mm-qtext small { font-size: .78rem; color: #94a3b8; }
+    .mm-say { margin-left: .25rem; color: #f59e0b; }
+    .mm-eq { margin-top: .3rem; font-size: 1.5rem; color: #7c3aed; letter-spacing: .05em; }
+    .mm-bignum { font-size: 1.6rem; color: #ea580c; }
+    .mm-opts { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+    .mm-opt { min-width: 4.6rem; min-height: 4.2rem; padding: .35rem .6rem; border-radius: 1rem; background: #fff; border: 3px solid #fcd34d; box-shadow: 0 4px 0 #fbbf24; font-family: Jua, sans-serif; color: #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform .1s; }
+    .mm-opt b { font-size: 1.8rem; line-height: 1.1; font-weight: normal; }
+    .mm-opt:active { transform: translateY(3px); box-shadow: 0 1px 0 #fbbf24; }
+    .mm-opt.mm-wide b { font-size: 1.25rem; }
+    .mm-opt.mm-wide { min-height: 3rem; font-size: 1rem; }
+    .mm-opt.mm-primary { background: #22c55e; border-color: #16a34a; color: #fff; box-shadow: 0 4px 0 #15803d; }
+    .mm-ok { background: #dcfce7 !important; border-color: #22c55e !important; }
+    .mm-dots { font-size: .5rem; color: #f59e0b; letter-spacing: 1px; line-height: 1.1; }
+    .mm-fb { margin-top: .4rem; text-align: center; font-family: Jua, sans-serif; font-size: 1.15rem; color: #15803d; background: #f0fdf4; border-radius: 1rem; padding: .45rem; animation: mm-pop .35s; }
+    .mm-fb small { font-size: .85rem; color: #475569; }
+    .mm-fb-soft { color: #92400e; background: #fffbeb; }
+
+    .mm-two { position: absolute; inset: 6% 3%; display: flex; align-items: stretch; justify-content: space-around; gap: 3%; }
+    .mm-group, .mm-basket { position: relative; flex: 1; background: rgba(255,255,255,.72); border: 3px solid #fcd34d; border-radius: 1.2rem; }
+    .mm-group:active, .mm-basket:active { scale: .97; }
+    .mm-dot { position: absolute; transform: translate(-50%, -50%); font-size: clamp(1.1rem, 5.5vw, 2rem); width: 1.3em; height: 1.3em; display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+    .mm-dot .mm-ico { width: 100%; height: 100%; }
+    .mm-vs { align-self: center; font-family: Jua, sans-serif; color: #f97316; font-size: 1.2rem; }
+    .mm-floor { align-items: flex-end; }
+    .mm-who { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; background: rgba(255,255,255,.55); border: 3px solid #fde68a; border-radius: 1.2rem; padding-bottom: .3rem; }
+    .mm-who-img { display: flex; align-items: flex-end; justify-content: center; width: 100%; }
+    .mm-who-img img { height: 100%; max-width: 92%; object-fit: contain; object-position: bottom; filter: drop-shadow(0 4px 3px rgba(0,0,0,.2)); }
+    .mm-who-name { font-family: Jua, sans-serif; font-size: .95rem; color: #334155; background: #fff; border-radius: 999px; padding: 0 .5rem; margin-top: .2rem; }
+    .mm-who-w { font-family: Jua, sans-serif; font-size: .8rem; color: #7c3aed; min-height: 1em; }
+    .mm-who:disabled { opacity: 1; }
+    .mm-baskets { position: absolute; inset: 8% 3%; display: flex; gap: 3%; }
+
+    .mm-shape { width: 16%; }
+    .mm-shape-svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 2px rgba(0,0,0,.2)); }
+    .mm-shape.mm-found { opacity: .5; }
+    .mm-shape.mm-found::after { content: '✔'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 2rem; }
+    .mm-shape.mm-lit { opacity: 1; }
+    .mm-hintline { display: flex; align-items: center; justify-content: center; gap: .4rem; font-family: Jua, sans-serif; font-size: 1.2rem; color: #6d28d9; }
+    .mm-hintline .mm-shape-svg { width: 2.6rem; height: 2.6rem; }
+    .mm-seq { position: absolute; inset: 0 3%; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 2%; }
+    .mm-seq-i { width: 13%; aspect-ratio: 1; background: rgba(255,255,255,.85); border-radius: 22%; display: flex; align-items: center; justify-content: center; font-size: clamp(1.2rem, 6vw, 2.4rem); box-shadow: 0 3px 0 rgba(0,0,0,.08); }
+    .mm-seq-i .mm-ico { width: 72%; height: 72%; }
+    .mm-seq-q { border: 3px dashed #f97316; color: #f97316; }
+
+    .mm-stones { position: absolute; left: 3%; right: 3%; top: 52%; display: flex; justify-content: space-between; }
+    .mm-stone { width: 17%; aspect-ratio: 1.3; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #e7e5e4, #a8a29e); box-shadow: 0 5px 0 #78716c; display: flex; align-items: center; justify-content: center; font-family: Jua, sans-serif; font-size: clamp(1.2rem, 6vw, 2.4rem); color: #1e293b; }
+    .mm-stone.q { background: radial-gradient(circle at 40% 35%, #fff7ed, #fdba74); color: #c2410c; animation: mm-pulse 1.2s infinite; }
+    .mm-stone-pk { position: absolute; left: 4%; top: 20%; width: 18%; }
+    .mm-stone-pk img { width: 100%; }
+    .mm-writebox { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); height: 90%; aspect-ratio: 1; background: rgba(255,255,255,.88); border-radius: 1.2rem; border: 3px dashed #c4b5fd; }
+    .mm-writebox canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    .mm-frames { position: absolute; inset: 0 3%; display: flex; flex-direction: column; justify-content: center; gap: 4%; }
+    .mm-frame { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2%; padding: 2%; background: rgba(255,255,255,.85); border: 3px solid #f97316; border-radius: 1rem; width: 88%; margin: 0 auto; }
+    .mm-layer > .mm-frame { position: absolute; left: 6%; right: 6%; top: 50%; transform: translateY(-50%); width: auto; }
+    .mm-cell { aspect-ratio: 1; border: 2px dashed #fdba74; border-radius: .6rem; background: #fff; display: flex; align-items: center; justify-content: center; }
+    .mm-cell .mm-ico { width: 75%; height: 75%; }
+    .mm-cell.full { border-style: solid; border-color: #fb923c; }
+    .mm-cell.mine { background: #fef3c7; animation: mm-pop .3s; }
+    .mm-split { position: absolute; inset: 4% 3%; display: flex; flex-direction: column; gap: 4%; }
+    .mm-split-top { text-align: center; background: rgba(255,255,255,.85); border-radius: 1rem; padding: 2%; font-size: clamp(1rem, 5vw, 1.8rem); }
+    .mm-split .mm-two { position: static; flex: 1; }
+    .mm-basket2 { flex: 1; background: rgba(255,255,255,.8); border: 3px solid #fcd34d; border-radius: 1rem; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; font-size: clamp(1rem, 5vw, 1.8rem); }
+    .mm-basket2.q { font-family: Jua, sans-serif; color: #f97316; font-size: 2.5rem; border-style: dashed; }
+
+    .mm-clockwrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 4%; }
+    .mm-clock { height: 86%; filter: drop-shadow(0 4px 4px rgba(0,0,0,.18)); }
+    .mm-clock-pk { width: 22%; }
+    .mm-clock-pk img { width: 100%; }
+    .mm-shop { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3%; }
+    .mm-shop-item { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,.88); border-radius: 1.2rem; padding: .5rem 1.2rem; }
+    .mm-price { font-family: Jua, sans-serif; font-size: 1.5rem; color: #b45309; }
+    .mm-paid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 2.6rem; max-width: 92%; background: rgba(255,255,255,.7); border-radius: 1rem; padding: 4px 8px; }
+    .mm-sum { font-family: Jua, sans-serif; font-size: 1.15rem; color: #334155; background: #fff; border-radius: 999px; padding: .1rem .8rem; }
+    .mm-coin { width: 4.2rem; height: 4.2rem; border-radius: 999px; font-family: Jua, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; box-shadow: inset 0 -4px 0 rgba(0,0,0,.15), 0 3px 0 rgba(0,0,0,.15); transition: transform .1s; }
+    .mm-coin b { font-size: 1.3rem; font-weight: normal; }
+    .mm-coin small { font-size: .7rem; }
+    .mm-coin:active { transform: scale(.92); }
+    .mm-coin.c10 { background: radial-gradient(circle at 35% 30%, #f6c89a, #c27c46); color: #5b2e0e; }
+    .mm-coin.c50 { background: radial-gradient(circle at 35% 30%, #f1f5f9, #a3aab5); color: #334155; }
+    .mm-coin.c100 { background: radial-gradient(circle at 35% 30%, #f8fafc, #94a3b8); color: #1e293b; border: 3px solid #cbd5e1; }
+    .mm-coin.sm { width: 2.3rem; height: 2.3rem; }
+    .mm-coin.sm b { font-size: .8rem; }
+    .mm-slots { display: flex; align-items: center; justify-content: center; gap: .4rem; }
+    .mm-slot { width: 3.6rem; height: 3.6rem; border-radius: 1rem; border: 3px dashed #c4b5fd; background: #fff; display: flex; align-items: center; justify-content: center; font-family: Jua, sans-serif; color: #c4b5fd; font-size: 1.3rem; }
+    .mm-slot.ok { border-style: solid; border-color: #8b5cf6; }
+    .mm-slot img { width: 90%; height: 90%; object-fit: contain; }
+    .mm-arrow { color: #a78bfa; }
+
+    #mm-cardov { position: fixed; inset: 0; z-index: 80; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .mm-cardbox { background: #fff; border-radius: 1.5rem; padding: 1rem; width: min(360px, 100%); max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: .7rem; animation: mm-pop .4s; }
+    .mm-cardhead { font-family: Jua, sans-serif; text-align: center; color: #b45309; font-size: 1.05rem; }
+    .mm-pcard { background: linear-gradient(160deg, #fef3c7, #fde68a 60%, #fbbf24); border: 6px solid #facc15; border-radius: 1.2rem; padding: .8rem; text-align: center; }
+    .mm-pcard img { width: 70%; margin: 0 auto; filter: drop-shadow(0 6px 4px rgba(0,0,0,.2)); }
+    .mm-pcard-name { font-family: Jua, sans-serif; font-size: 1.6rem; color: #1e293b; }
+    .mm-pcard-sub { font-size: .8rem; color: #78350f; font-weight: 700; }
+    .mm-album { width: min(520px, 100%); }
+    .mm-album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: .4rem; }
+    .mm-mini { background: #fffbeb; border: 2px solid #fde68a; border-radius: .8rem; text-align: center; font-family: Jua, sans-serif; font-size: .75rem; padding: .2rem; }
+    .mm-mini img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+
+    @media (orientation: landscape) and (min-width: 700px) {
+      #view-math { max-width: 64rem; }
+      #mm-play.mm-wide-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: .7rem; align-items: start; }
+      #mm-play.mm-wide-layout .mm-top { grid-column: 1 / -1; }
+      #mm-play.mm-wide-layout .mm-box { max-height: 70vh; }
+    }
+      </style>
+      <div class="bg-white p-3 rounded-2xl shadow-sm border border-amber-200 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="font-jua text-base text-slate-800">🔢 포켓몬 수학 놀이</h2>
+            <p class="text-[11px] text-slate-500 font-bold">세기부터 시계·돈 계산까지, 포켓몬이랑 놀면서 익혀요.</p>
+          </div>
+          <button onclick="mmShowAlbum()" class="shrink-0 font-jua text-xs px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 active:scale-95 transition">📒 카드 <span id="mm-cardcount">0</span></button>
+        </div>
+        <div class="mm-stickbar"><span class="font-jua text-[11px] text-amber-600 shrink-0">스티커</span><div id="mm-stickers" class="mm-stickers"></div><span class="shrink-0 text-lg">🎁</span></div>
+      </div>
+      <div id="mm-setup" class="space-y-2.5"></div>
+      <div id="mm-play" class="hidden mm-wide-layout space-y-2">
+        <div class="mm-top flex items-center justify-between gap-2 font-jua text-xs">
+          <button onclick="mmBack()" class="shrink-0 px-2.5 py-1 rounded-xl bg-white border border-amber-200 text-slate-600 active:scale-95 transition"><i class="fa-solid fa-arrow-left"></i> 단계</button>
+          <span id="mm-title" class="text-amber-700 text-sm truncate flex-1 text-center"></span>
+          <label class="shrink-0 flex items-center gap-0.5 cursor-pointer select-none text-slate-600" title="읽어 주기"><input id="mm-voice" type="checkbox" checked onchange="if (!this.checked) mmStopSpeech()" class="accent-amber-500">🔊</label>
+          <button onclick="mmNext()" class="shrink-0 px-2 py-1 rounded-xl bg-white border border-amber-200 text-slate-600 active:scale-95 transition" title="다른 문제">⏭</button>
+        </div>
+        <div id="mm-stage"></div>
+        <div class="space-y-2">
+          <div id="mm-text" class="mm-qtext"></div>
+          <div id="mm-ans"></div>
+          <div id="mm-feedback"></div>
+        </div>
+      </div>
+      <div id="mm-cardov" class="hidden"></div>
     </section>
 
   </main>
@@ -4785,8 +4982,9 @@
       if (viewKey !== 'descquiz' && typeof pauseDescQuiz === 'function') pauseDescQuiz();
       if (viewKey !== 'story' && typeof sbStopReading === 'function' && (sbReading || sbTimers.length)) sbStopReading();
       if (viewKey !== 'story' && typeof ibStopSpeech === 'function') ibStopSpeech();
+      if (viewKey !== 'math' && typeof mmStopSpeech === 'function') mmStopSpeech();
       if (viewKey !== 'battle' && typeof bxStopSpeech === 'function') bxStopSpeech();
-      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'favs'].forEach(v => {
+      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'favs'].forEach(v => {
         const sec = document.getElementById(`view-${v}`);
         const tab = document.getElementById(`nav-${v}`);
         if (sec) sec.classList.toggle('hidden', v !== viewKey);
@@ -4819,6 +5017,8 @@
         initDescQuizView();
       } else if (viewKey === 'story') {
         initStoryView();
+      } else if (viewKey === 'math') {
+        mmInit();
       }
     }
 
@@ -9367,7 +9567,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             { m: { t: 'find', e: '🔶', n: 3, decoy: ['🍃', '🌼'], scene: 'garden', chars: ['KS', 'H'], q: '꽃밭에 흩어진 화분 조각 세 개를 조심조심 찾아요!', done: '조각을 다 모았어요! 이제 예쁘게 붙여 볼까요?' } },
             { m: { t: 'solve', k: 'pattern', seq: ['🔶', '🔵', '🔶', '🔵', '🔶'], a: '🔵', opts: ['🔶', '🔵', '🍃'], q: '조각을 규칙대로 붙여요! “주황, 파랑, 주황, 파랑, 주황! 그다음은?”', done: '알록달록 멋진 조각 액자가 완성됐어요!' } },
             { end: { id: 'art', e: '🎨', title: '깨진 조각이 작품이 된 결말', scene: 'garden', chars: ['KS', 'H'], art: '#H:jump 🖼️/C/m @sparkle',
-                     text: '할머니가 조각 액자를 창가에 걸어 두셨어요. “깨진 화분이 더 멋진 작품이 됐네!” {H|은} 생각했어요. “솔직하게 말하길 정말 잘했다. 그래서 할머니랑 이렇게 멋진 걸 만들었잖아!” 끝!' } }
+                     text: '할머니가 조각 액자를 창가에 걸어 두셨어요. “깨진 화분이 더 멋진 작품이 됐네!” “솔직하게 말하길 잘했다. 그래서 할머니랑 이렇게 멋진 걸 만들었잖아!” {H}의 꼬리가 살랑살랑 흔들렸어요. 끝!' } }
           ],
           plant: [
             { m: { t: 'solve', k: 'order', items: [{ e: '🧺', l: '흙 담기' }, { e: '🌱', l: '씨앗 심기' }, { e: '💧', l: '물 주기' }], scene: 'garden', chars: ['KS', 'H'], q: '새 화분에 꽃을 심어요! 차례대로 눌러 봐요.', done: '새 화분에서 파란 싹이 쏙 올라왔어요!' } },
@@ -9392,7 +9592,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             { m: { t: 'solve', k: 'order', items: [{ e: '🍎', l: '열매 넣기' }, { e: '💧', l: '물 붓기' }, { e: '🔥', l: '보글보글 끓이기' }], scene: 'kitchen', chars: ['KS', 'H'], q: '맛있는 수프는 순서대로! 차례대로 눌러 봐요.', done: '보글보글~ 따끈한 열매 수프 완성!' } },
             { m: { t: 'solve', k: 'count', e: '🍲', n: 4, scene: 'kitchen', chars: ['KS', 'H'], q: '수프 그릇이 몇 개 있는지 세어 봐요! 하나씩 톡톡!', done: '딱 맞아요! 모두 한 그릇씩 먹을 수 있어요.' } },
             { end: { id: 'soup', e: '🍲', title: '다 함께 수프를 먹은 결말', scene: 'snow', chars: ['KS', 'H', 19, 16, 172], art: '@snowfall #H:happy #172:jump',
-                     text: '모두 둘러앉아 따끈한 수프를 후루룩! 꼬렛이 말했어요. “혼자 먹을 때보다 훨씬 맛있다!” {H|은} 생각했어요. “나누니까 열매는 줄었는데, 기쁨은 더 많아졌네!” 끝!' } }
+                     text: '모두 둘러앉아 따끈한 수프를 후루룩! 꼬렛이 말했어요. “혼자 먹을 때보다 훨씬 맛있다!” 열매 바구니는 가벼워졌지만, {H}의 마음은 꽉 찬 것 같았어요. 끝!' } }
           ],
           pick: [
             { m: { t: 'solve', k: 'match', pairs: [[19, '🍎', '꼬렛은 사과'], [16, '🍇', '구구는 포도'], [172, '🍓', '피츄는 딸기']], q: '친구마다 좋아하는 열매가 달라요! 친구를 누르고, 좋아하는 열매를 눌러 봐!', done: '척척! 모두 좋아하는 열매를 받았어요.' } },
@@ -9411,7 +9611,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             { p: ['meadow', ['KS', 'H', 1], '{H}의 볼이 빵빵하게 부풀었어요. “으으, 다 쌓았는데!” 그때 {KIDS|이} 말했어요. “속상할 땐 마음을 진정하는 방법이 있어!”', '#H:angry'] },
             { m: { t: 'solve', k: 'order', items: [{ e: '✋', l: '잠깐 멈추기' }, { e: '💨', l: '후~ 숨 쉬기' }, { e: '💬', l: '말로 하기' }], q: '속상할 땐 이렇게 해요! 차례대로 눌러 봐요.', done: '좋아요! 이제 같이 숨을 쉬어 볼까요?' } },
             { m: { t: 'tap', pk: 56, n: 4, pos: [50, 52], sounds: ['후~', '하~', '후~', '휴!'], q: '{H|와} 함께 숨을 크게 쉬어요! 톡 누를 때마다 후~', done: '빵빵하던 볼이 쏙 들어갔어요. 마음이 차분해졌어요.' } },
-            { m: { t: 'think', q: '이제 이상해씨에게 뭐라고 말할까요?', opts: [['💬', '“나 속상했어. 우리 다시 같이 쌓자!”', true, '이상해씨가 말했어요. “덩굴로 건드려서 미안해. 좋아, 같이 쌓자!”'], ['😤', '“저리 가!”', false, '음, 그러면 이상해씨도 시무룩해질지도 몰라요. 마음을 말로 해 볼까요?']] } },
+            { m: { t: 'think', q: '이제 이상해씨에게 뭐라고 말할까요?', opts: [['💬', '“나 속상했어. 우리 다시 같이 쌓자!”', true, '이상해씨가 말했어요. “덩굴로 건드려서 미안해. 좋아, 같이 쌓자!”'], ['🚶', '아무 말 없이 혼자 가기', false, '말하지 않으면 이상해씨는 왜 그런지 몰라요. 마음을 말로 해 볼까요?']] } },
             { c: { q: '무엇을 함께 쌓을까요?', opts: [['🏰', '멋진 성', 'castle'], ['🗼', '하늘까지 높은 탑', 'tower']] } }
           ],
           castle: [
@@ -9529,7 +9729,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         nodes: {
           start: [
             { p: ['town', ['KS', 'H'], '오늘은 고마운 분들께 마음을 전하는 날이에요. {H|은} 깡충깡충 뛰며 생각했어요. “누구에게 고맙다고 할까?”', '#H:jump'] },
-            { m: { t: 'think', q: '누군가 나를 도와줬을 때 뭐라고 하면 좋을까요?', opts: [['🙏', '“고마워요!”', true, '맞아요! 고마운 마음은 말로 전하면 더 커져요.'], ['🤐', '아무 말 안 하기', false, '마음속으로만 생각하면 상대는 몰라요. 말로 전해 볼까요?']] } },
+            { m: { t: 'think', q: '누군가 나를 도와줬을 때 뭐라고 하면 좋을까요?', opts: [['🙏', '“고마워요!”', true, '맞아요! 고마운 마음은 말로 전하면 더 커져요.'], ['⏰', '“나중에 말해야지.” 하고 넘어가기', false, '고마운 마음은 그때그때 말하면 더 기뻐해요. 지금 말해 볼까요?']] } },
             { m: { t: 'find', e: '✉️', n: 3, decoy: ['🍂', '🌸'], q: '편지지 세 장을 찾아 줘요! 고마운 분들께 편지를 쓸 거예요.', done: '편지지를 다 찾았어요!' } },
             { c: { q: '누구에게 먼저 편지를 드릴까요?', opts: [['🍳', '맛있는 밥을 해 주시는 분', 'cook'], ['🧹', '마을을 깨끗하게 해 주시는 분', 'clean']] } }
           ],
@@ -9537,7 +9737,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             { p: ['kitchen', ['KS', 'H', 113], '부엌에서 럭키가 맛있는 밥을 짓고 있어요. 날마다 따끈한 밥을 해 주셨지요.', '#113:happy'] },
             { m: { t: 'write', w: '고마워', q: '편지에 마음을 담아요. 네모 칸에 ‘고마워’라고 써 볼까요?', done: '정성 가득한 편지 완성!' } },
             { end: { id: 'cook', e: '💌', title: '럭키에게 고마움을 전한 결말', scene: 'kitchen', chars: ['KS', 'H', 113], art: '#113:happy @hearts',
-                     text: '편지를 받은 럭키가 활짝 웃었어요. “이렇게 고마운 마음을 받으니 하루가 반짝반짝해!” {H|은} 생각했어요. “매일 해 주시는 밥도 정말 고마운 일이었구나.” 끝!' } }
+                     text: '편지를 받은 럭키가 활짝 웃었어요. “이렇게 고마운 마음을 받으니 하루가 반짝반짝해!” {H|은} 그날 저녁, 밥을 먹기 전에 “잘 먹겠습니다!” 하고 더 크게 인사했어요. 끝!' } }
           ],
           clean: [
             { p: ['town', ['KS', 'H'], '마을 길을 쓸고 계신 아저씨를 만났어요. 아저씨 덕분에 마을 길이 늘 깨끗했지요.', '🧹/R/m'] },
@@ -9579,7 +9779,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         nodes: {
           start: [
             { p: ['kitchen', ['KS', 'H'], '{H|은} 이빨이 뾰족뾰족 멋진 포켓몬이에요. 오늘 간식으로 달콤한 사탕을 냠냠 먹었어요.', '#H:happy 🍭/C/m'] },
-            { m: { t: 'think', q: '사탕을 다 먹었어요. 이제 무엇을 할까요?', opts: [['🪥', '양치하기', true, '좋아요! 칫솔을 챙기러 욕실로 출발!'], ['😴', '그냥 낮잠 자기', false, '음, 이 사이에 숨은 충치 벌레들이 신나서 춤을 출지도 몰라요! 다시 골라 볼까요?']] } },
+            { m: { t: 'think', q: '사탕을 다 먹었어요. 이제 무엇을 할까요?', opts: [['🪥', '양치하기', true, '좋아요! 칫솔을 챙기러 욕실로 출발!'], ['🥛', '물만 한 모금 마시기', false, '물도 좋지만, 이 사이에 낀 사탕은 칫솔로 닦아야 떨어져요. 다시 골라 볼까요?']] } },
             { p: ['bathroom', ['KS', 'H'], '거울을 보니, {H}의 이 사이에 쪼그만 충치 벌레들이 “히히, 사탕이다!” 하고 놀고 있어요.', '#H:surprise'] },
             { m: { t: 'solve', k: 'order', items: [{ e: '🪥', l: '치약 묻히기' }, { e: '😁', l: '구석구석 닦기' }, { e: '💧', l: '물로 헹구기' }], q: '양치는 이렇게! 차례대로 눌러 봐요.', done: '충치 벌레들이 “으악, 거품이다!” 하고 도망갔어요!' } },
             { c: { q: '이제 무엇을 해 볼까요?', opts: [['🍎', '몸에 좋은 간식 고르기', 'snack'], ['🧼', '손 깨끗이 씻기 놀이', 'wash']] } }
@@ -9605,7 +9805,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           start: [
             { p: ['town', ['KS', 'H'], '{H|은} 포켓몬 센터의 간호사예요. 오늘은 {KIDS|이} {H}의 조수가 되었어요!', '#H:happy #K:happy'] },
             { p: ['town', ['KS', 'H', 25], '첫 번째 손님은 콧물이 훌쩍훌쩍 나는 피카츄예요. “에… 에취!”', '#25:think'] },
-            { m: { t: 'think', q: '피카츄가 에취! 해요. 뭐라고 말해 줄까요?', opts: [['🤗', '“괜찮아? 우리가 도와줄게!”', true, '피카츄가 코를 훌쩍이며 웃었어요. “고마워…”'], ['🙊', '“저리 가!”', false, '피카츄가 시무룩해질 것 같아요. 다정하게 말해 볼까요?']] } },
+            { m: { t: 'think', q: '피카츄가 에취! 해요. 뭐라고 말해 줄까요?', opts: [['🤗', '“괜찮아? 우리가 도와줄게!”', true, '피카츄가 코를 훌쩍이며 웃었어요. “고마워…”'], ['🙅', '“감기 옮을까 봐 멀리 있을래.”', false, '조심하는 마음도 좋아요. 그래도 마스크를 쓰고 도와줄 수 있을 거예요!']] } },
             { m: { t: 'solve', k: 'match', pairs: [[25, '🧣', '감기 걸린 피카츄에게 목도리'], [7, '🩹', '넘어진 꼬부기에게 반창고'], [4, '💧', '목마른 파이리에게 물']], q: '아픈 친구들에게 필요한 걸 찾아 줘요! 친구를 누르고, 알맞은 걸 눌러 봐!', done: '친구들이 한결 편안해졌어요!' } },
             { c: { q: '다음엔 무엇을 할까요?', opts: [['🛏️', '아기 포켓몬 재워 주기', 'baby'], ['🍲', '따끈한 죽 만들기', 'soup']] } }
           ],
@@ -9619,7 +9819,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
             { m: { t: 'solve', k: 'order', items: [{ e: '🥕', l: '채소 썰기' }, { e: '🍚', l: '쌀 넣기' }, { e: '🔥', l: '보글보글 끓이기' }], scene: 'kitchen', chars: ['KS', 'H'], q: '맛있는 죽은 순서대로! 차례대로 눌러 봐요.', done: '따끈한 죽 완성!' } },
             { m: { t: 'solve', k: 'count', e: '🍲', n: 3, scene: 'kitchen', chars: ['KS', 'H'], q: '아픈 친구가 셋이에요. 죽 그릇이 몇 개 있는지 세어 봐요!', done: '딱 세 그릇! 모두 먹을 수 있어요.' } },
             { end: { id: 'soup', e: '🍲', title: '따끈한 죽을 나눠 준 결말', scene: 'town', chars: ['KS', 'H', 25, 7, 4], art: '#25:happy #7:happy #4:happy',
-                     text: '죽을 먹은 친구들이 방긋 웃었어요. “럭키, 고마워! 벌써 다 나은 것 같아!” {H|은} 생각했어요. “누군가 아플 때 작은 도움을 주면 큰 힘이 되는구나.” 끝!' } }
+                     text: '죽을 먹은 친구들이 방긋 웃었어요. “럭키, 고마워! 벌써 다 나은 것 같아!” {H|은} 빈 그릇을 정리하며 콧노래를 불렀어요. 작은 도움이 친구들에게 큰 힘이 되었으니까요. 끝!' } }
           ]
         }
       },
@@ -9630,7 +9830,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           start: [
             { p: ['town', ['KS', 'H', 312], '{H|와} 마이농은 단짝 쌍둥이예요. 오늘은 {KIDS|와} 함께 마을 산책을 나왔어요!', '#H:jump #312:jump'] },
             { p: ['town', ['KS', 'H', 312], '건너편 놀이터로 가려면 길을 건너야 해요. 횡단보도 앞에 신호등이 있어요.', '🚦/R/m'] },
-            { m: { t: 'think', q: '신호등이 빨간불이에요. 어떻게 할까요?', opts: [['✋', '멈춰서 초록불 기다리기', true, '좋아요! 빨간불엔 멈춰서 기다려요.'], ['🏃', '빨리 뛰어서 건너기', false, '빨간불엔 자동차가 지나가요. 초록불까지 기다려 볼까요?']] } },
+            { m: { t: 'think', q: '신호등이 빨간불이에요. 어떻게 할까요?', opts: [['✋', '멈춰서 초록불 기다리기', true, '좋아요! 빨간불엔 멈춰서 기다려요.'], ['🚗', '자동차가 안 보이면 건너기', false, '자동차가 안 보여도 빨간불엔 기다려요. 갑자기 나타날 수 있거든요.']] } },
             { m: { t: 'solve', k: 'order', items: [{ e: '🟢', l: '초록불 확인하기' }, { e: '👀', l: '좌우 살피기' }, { e: '✋', l: '손 들고 건너기' }], q: '초록불이 켜졌어요! 길을 건너는 순서대로 눌러 봐요.', done: '안전하게 건넜어요! 플러시와 마이농이 하이파이브!' } },
             { c: { q: '어디로 놀러 갈까요?', opts: [['🎈', '풍선이 가득한 공원', 'park'], ['📚', '그림책이 많은 도서관', 'library']] } }
           ],
@@ -9768,28 +9968,28 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
 
     // 결말 직전에 캐릭터가 겪은 일을 떠올리며 자연스럽게 하는 한마디 (이야기 흐름 속 마음 정리)
     const IB_ENDNOTES = {
-      pika: { rainbow: '{H|이} 말했어요. “처음에 네가 열매를 따 줘서 힘이 났어. 서로 도우니까 여기까지 왔네!”', stars: '{H|이} 웃었어요. “깜깜해도 함께 가니까 하나도 안 무서웠어!”' },
-      charm: { sun: '{H|이} 말했어요. “비가 와서 속상했지만, 도움을 부탁하길 잘했어!”', lantern: '{H|이} 꼬리 불꽃을 흔들었어요. “포기하지 않고 다른 방법을 찾으니까 되네!”' },
-      squirt: { pearl: '{H|이} 말했어요. “보물보다 더 좋은 건 함께 찾은 너야!”', chest: '꼬마돌이 웃었어요. “혼자 지킬 땐 심심했는데, 나누니까 훨씬 즐겁다!”' },
-      bulba: { sun: '디그다가 말했어요. “햇볕은 나눠 쓰니까 모두 따뜻하구나!”', song: '{H|이} 말했어요. “매일 아끼고 돌봐 주면 꽃도 웃어 줘.”' },
-      snorlax: { picnic: '잠만보가 배를 두드렸어요. “상냥하게 깨워 줘서 고마워!”', band: '꼬렛이 웃었어요. “미안하다고 말해 줘서 우리 친구가 됐잖아!”' },
-      jiggly: { win: '{H|이} 알통몬에게 말했어요. “응원해 줘서 고마워. 다음엔 같이 무대에 서자!”', sleep: '{H|은} 편히 쉬는 친구들을 보니 마음이 따뜻해졌어요.' },
-      eevee: { flareon: '부스터가 말했어요. “모습은 바뀌었어도, 나는 여전히 너의 친구야!”', vaporeon: '샤미드가 말했어요. “모습은 바뀌었어도, 나는 여전히 너의 친구야!”', jolteon: '쥬피썬더가 말했어요. “모습은 바뀌었어도, 나는 여전히 너의 친구야!”' },
-      dragonite: { letter: '{H|이} 말했어요. “끝까지 찾아서 배달하길 잘했다. 편지 한 장이 이렇게 큰 기쁨이 되는구나!”', island: '{H|이} 뿌듯하게 말했어요. “맡은 일을 끝까지 해내니 정말 기분 좋다!”' },
-      mew: { garden: '{H|이} 말했어요. “숨는 것보다 함께 노는 게 더 재밌다!”', ghost: '팬텀이 수줍게 웃었어요. “먼저 다가와 줘서 고마워.”' },
-      psyduck: { rain: '{H|이} 말했어요. “내 마음을 알아줘서 고마워, 고라!”', ice: '{H|이} 말했어요. “아플 때 곁에 있어 줘서 고마워!”' },
-      darkcave: { crystal: '{H|이} 말했어요. “무서운 소리의 주인도 사실은 도움이 필요한 친구였네!”', lullaby: '푸린이 말했어요. “무서울 땐 함께 노래하면 용기가 나!”', lake: '꼬마돌이 말했어요. “모르는 길도 친구를 믿고 함께 가면 괜찮아!”' },
-      umbreon: { moon: '{H|이} 말했어요. “함께 찾아 줘서 고마워. 친구가 있으면 깜깜한 밤도 무섭지 않아.”', lake: '{H|이} 말했어요. “포기하지 않고 끝까지 찾아 줘서 고마워!”' },
-      pichu: { flower: '{H|이} 말했어요. “처음엔 떨렸는데, 해 보니까 할 수 있었어!”', river: '{H|이} 말했어요. “조심조심 하나씩 하니까 해냈어!”' },
-      marill: { berry: '{H|이} 말했어요. “나를 생각하며 만들어 준 마음이 제일 맛있어!”', choco: '{H|이} 말했어요. “나를 위해 준비해 준 마음이 제일 큰 선물이야!”' },
-      piplup: { belly: '{H|이} 말했어요. “1등도 좋지만, 친구랑 같이 타니까 훨씬 신나!”' },
-      quaxly: { lake: '{H|이} 말했어요. “무서웠는데 하나씩 해 보니 할 수 있었어!”', sea: '{H|이} 말했어요. “떨렸는데 해 보니까 정말 재밌어!”' },
-      slowpoke: { bridge: '야도란이 말했어요. “느려도 괜찮아. 나는 나만의 속도로 가면 돼.”', pond: '{H|이} 말했어요. “천천히 가도 친구랑 함께면 행복해.”' },
-      ditto: { town: '{H|이} 말했어요. “무엇으로 변신해도 재밌지만, 그냥 나일 때도 참 좋아!”', forest: '{H|이} 말했어요. “있는 그대로의 나랑 놀아 줘서 고마워!”' },
-      togepi: { flower: '{H|이} 방긋 웃었어요. “처음은 서툴러도 괜찮아. 천천히 배우면 돼!”', butter: '{H|이} 말했어요. “궁금한 게 가득한 세상은 정말 재밌어!”' },
-      riolu: { baby: '루카리오가 말했어요. “친구를 돕고 싶은 마음, 그게 가장 큰 힘이란다.”' },
-      mimikyu: { draw: '{H|이} 말했어요. “천천히 기다려 줘서 고마워.”', party: '{H|이} 말했어요. “먼저 인사하니까 친구가 금방 생겼어!”' },
-      auto: { forest: '{H|이} 말했어요. “수수께끼를 함께 푸니까 더 재밌었어!”', sea: '{H|이} 말했어요. “포기하지 않고 끝까지 하니까 열렸어!”' }
+      pika: { rainbow: '{H|은} 무지개를 보며 열매를 따 주던 순간을 떠올렸어요. “서로 도우니까 여기까지 왔네!”', stars: '“깜깜해도 같이 가니까 하나도 안 무서웠어.” {H}의 볼이 찌릿 빛났어요.' },
+      charm: { sun: '{H|은} 꼬리를 살랑 흔들었어요. 혼자 끙끙대지 않고 도움을 부탁하길 잘했어요.', lantern: '“포기하지 않고 다른 방법을 찾으니까 되네!”' },
+      squirt: { pearl: '“보물보다 더 좋은 건 함께 찾은 너야.” {H|이} 속삭였어요.', chest: '혼자 상자를 지키던 꼬마돌은 이제 하나도 심심하지 않아요.' },
+      bulba: { sun: '디그다가 햇볕 자리를 넓게 비켜 주며 웃었어요. “같이 쬐니까 더 따뜻하다!”', song: '{H|은} 내일도 꽃들에게 노래를 불러 주기로 했어요.' },
+      snorlax: { picnic: '“상냥하게 깨워 줘서 고마워.” 잠만보가 배를 퉁퉁 두드렸어요.', band: '쿵 소리에 놀랐던 꼬렛은 이제 북 악단의 대장이 되었어요.' },
+      jiggly: { win: '{H|은} 무대에서 내려와 알통몬의 손을 꼭 잡았어요. “응원해 줘서 고마워!”', sleep: '{H|은} 새근새근 잠든 친구들을 보며 살며시 웃었어요.' },
+      eevee: { flareon: '모습은 바뀌었지만, {KIDS|을} 보는 눈빛은 예전 그대로였어요.', vaporeon: '모습은 바뀌었지만, {KIDS|을} 보는 눈빛은 예전 그대로였어요.', jolteon: '모습은 바뀌었지만, {KIDS|을} 보는 눈빛은 예전 그대로였어요.' },
+      dragonite: { letter: '{H|은} 빈 가방을 메고 하늘로 날아올랐어요. 끝까지 찾아서 배달하길 정말 잘했어요.', island: '“맡은 일을 끝까지 해내니까 정말 기분 좋다!”' },
+      mew: { garden: '“숨는 것보다 같이 노는 게 더 재밌다!” {H|이} 꽃잎 사이로 빙글 돌았어요.', ghost: '팬텀은 이제 혼자가 아니에요. 먼저 다가와 준 친구들이 생겼으니까요.' },
+      psyduck: { rain: '“내 마음을 알아줘서 고마워, 고라!”', ice: '{H|은} 곁에 있어 준 {KIDS}에게 아이스크림 한 숟갈을 내밀었어요.' },
+      darkcave: { crystal: '무서운 소리의 주인은 길을 잃은 친구였어요. 이제 고오스도 우리 친구예요.', lullaby: '“무서울 땐 같이 노래하면 용기가 나!”', lake: '꼬마돌이 엄지를 척 들었어요. “모르는 길도 친구를 믿고 가면 괜찮아!”' },
+      umbreon: { moon: '“함께 찾아 줘서 고마워. 친구가 있으면 깜깜한 밤도 무섭지 않아.”', lake: '{H}의 무늬가 한 번 더 반짝였어요. 끝까지 찾아 준 친구에게 보내는 인사였어요.' },
+      pichu: { flower: '“처음엔 떨렸는데, 해 보니까 할 수 있었어!”', river: '{H|은} 다음엔 혼자서도 징검다리를 건너 보기로 했어요.' },
+      marill: { berry: '“나를 생각하며 만들어 준 마음이 제일 맛있어!”', choco: '{H|은} 남은 케이크를 친구들 접시에 하나씩 올려 주었어요.' },
+      piplup: { belly: '{H|은} 금메달을 잠깐 내려놓고 꾸꾸리와 한 번 더 미끄럼을 탔어요. “같이 타니까 훨씬 신나!”' },
+      quaxly: { lake: '“무서웠는데 하나씩 해 보니 할 수 있었어!”', sea: '{H|은} 다음엔 더 먼 파도까지 가 보기로 했어요.' },
+      slowpoke: { bridge: '“느려도 괜찮아. 나는 나만의 속도로 가면 돼.”', pond: '천천히 가도 친구들과 함께라서 {H|은} 행복했어요.' },
+      ditto: { town: '“변신도 재밌지만, 그냥 나일 때도 참 좋아!”', forest: '{H|은} 원래 모습으로 돌아와 {KIDS|와} 손을 꼭 잡았어요.' },
+      togepi: { flower: '“처음은 서툴러도 괜찮아. 천천히 배우면 돼!”', butter: '{H|은} 내일은 또 무엇을 만날지 벌써 궁금해졌어요.' },
+      riolu: { baby: '형 루카리오가 어깨를 토닥였어요. “친구를 돕고 싶은 마음, 그게 가장 큰 힘이란다.”' },
+      mimikyu: { draw: '“천천히 기다려 줘서 고마워.”', party: '그날 밤 {H|은} 새 친구들의 이름을 하나하나 불러 보며 잠이 들었어요.' },
+      auto: { forest: '“수수께끼를 같이 푸니까 더 재밌었어!”', sea: '“포기하지 않고 끝까지 하니까 열렸어!”' }
     };
     const IB_VALUES = { pika: '🤝 서로 돕기', charm: '💪 포기하지 않기', squirt: '🎁 나눔', bulba: '🌱 돌봄', snorlax: '😊 상냥함', jiggly: '👏 응원', eevee: '🌈 나다움',
       dragonite: '✉️ 책임감', mew: '🤗 먼저 다가가기', psyduck: '💗 배려', darkcave: '🦁 용기', umbreon: '🌙 우정', pichu: '🧺 스스로 하기', marill: '🎂 마음 선물',
@@ -10103,8 +10303,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       ibSetStage(ibStageFor(b[0], m.chars || b[1], m.art || b[2]));
       ibSetText(ibMissionText(m));
       ibSetActions(`<div class="ib-choices">${m.opts.map((o, i) => `<button onclick="ibThinkPick(${i}, this)" class="ib-choice ib-think"><span class="ib-choice-e">${o[0]}</span><span class="ib-choice-t">${sbEsc(ibFill(o[1]))}</span></button>`).join('')}</div>` + ibReplayBtn());
-      const nums = ['첫 번째', '두 번째', '세 번째'];
-      ibSay(ibFill(m.q) + ' ' + m.opts.map((o, i) => `${nums[i]}, ${ibFill(o[1])}.`).join(' '));
+      ibSay(ibFill(m.q) + ' ' + m.opts.map(o => ibFill(o[1]).replace(/[“”"]/g, '')).join(', 아니면 ') + '?');
     }
     function ibThinkPick(i, btn) {
       const M = ibMission; if (!M || M.done || M.m.t !== 'think' || btn.disabled) return;
@@ -10395,6 +10594,668 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       if (book && !document.fullscreenElement && book.classList.contains('ib-full')) ibSetFull(false);
     });
     window.addEventListener('resize', () => { if (ibStory && !document.getElementById('ib-book').classList.contains('hidden')) ibFitToHeader(); });
+    /**
+     * ==============================================================
+     * [포켓몬 수학 놀이] 3~7세 · 7단계
+     *  1 세기 / 2 비교 / 3 모양·규칙 / 4 숫자 알기 / 5 더하기·빼기 / 6 10 만들기 / 7 생활 수학
+     *  - 자동 모드: 나이에 맞는 단계에서 시작해 잘 맞히면 올라가고, 어려워하면 내려가요
+     *  - 골라서 모드: 단계를 직접 골라요 (단계 안에서 난이도는 자동)
+     *  - 틀리면 정답을 바로 알려 주지 않고 같이 세어 보며 도와줘요
+     *  - 맞힐 때마다 스티커, 10개 모으면 포켓몬 카드
+     * ==============================================================
+     */
+    const MM_KEY = 'pkmn_math_v1';
+    const MM_STAGES = [
+      { n: 1, name: '세기', age: '3~4세', e: '🍎', scene: 'meadow' },
+      { n: 2, name: '비교하기', age: '3~5세', e: '⚖️', scene: 'field' },
+      { n: 3, name: '모양·규칙', age: '3~5세', e: '⭐', scene: 'garden' },
+      { n: 4, name: '숫자 알기', age: '4~5세', e: '🔢', scene: 'town' },
+      { n: 5, name: '더하기·빼기', age: '5~6세', e: '➕', scene: 'forest' },
+      { n: 6, name: '10 만들기', age: '6~7세', e: '🔟', scene: 'lake' },
+      { n: 7, name: '생활 수학', age: '6~7세', e: '🕒', scene: 'town' }
+    ];
+    // 아이들이 잘 아는 포켓몬 (실제 키·몸무게는 도감 자료를 써요)
+    const MM_PK = [25, 1, 4, 7, 39, 52, 133, 143, 54, 35, 172, 175, 183, 393, 906, 909, 912, 132, 79, 151, 94, 6, 9, 3, 149, 131, 129, 95, 74, 16, 10, 197, 448, 778];
+    const MM_ICONS = ['⚡', '💧', '🔥', '🌙', '⭐', '🍎', '🌸', '🍄', '🎈', '💎', '🍓', '🐚'];
+
+    let mmS = null, mmQ = null, mmBusy = false, mmSession = 0, mmTimers = [], mmSpeaking = false;
+
+    function mmLoad() {
+      let st = null; try { st = JSON.parse(localStorage.getItem(MM_KEY) || 'null'); } catch (e) {}
+      st = st || {};
+      return Object.assign({ age: 5, mode: 'auto', stage: 4, d: {}, stars: {}, stickers: [], cards: [], streak: 0, miss: 0 }, st);
+    }
+    function mmSave() { try { localStorage.setItem(MM_KEY, JSON.stringify(mmS)); } catch (e) {} }
+    const mmRand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+    const mmPick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const mmShuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const mmName = n => POKEMON_NAMES_1025[n - 1];
+    const mmHt = n => OFFICIAL_DEX.rows[n - 1][3] / 10;   // m
+    const mmWt = n => OFFICIAL_DEX.rows[n - 1][4] / 10;   // kg
+    const MM_NATIVE = ['영', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열', '열하나', '열둘', '열셋', '열넷', '열다섯', '열여섯', '열일곱', '열여덟', '열아홉', '스물'];
+    const MM_CNT = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열', '열한', '열두', '열세', '열네', '열다섯', '열여섯', '열일곱', '열여덟', '열아홉', '스무'];
+    const mmMari = n => `${MM_CNT[n] || n} 마리`;
+    const mmGae = n => `${MM_CNT[n] || n} 개`;
+    const mmIco = (e, cls) => { const u = (typeof SBI !== 'undefined') ? SBI.url(e) : ''; return u ? `<img class="mm-ico ${cls || ''}" src="${u}" alt="${e}" draggable="false">` : `<span class="mm-ico mm-emo ${cls || ''}">${e}</span>`; };
+    const mmPkImg = (n, cls, style) => `<img class="${cls || ''}" style="${style || ''}" src="${getPokemonArtworkUrl(n)}" onerror="this.onerror=null;this.src='${getPokemonPixelUrl(n)}'" alt="${mmName(n)}" draggable="false">`;
+    const mmDots = n => `<span class="mm-dots">${'●'.repeat(Math.min(n, 10))}${n > 10 ? '<br>' + '●'.repeat(n - 10) : ''}</span>`;
+
+    // 숫자로 끝나는 말도 조사가 맞게 붙어요 (3이에요, 2예요, 6을, 5를)
+    function mmBat(w) { const t = String(w); const c = t[t.length - 1]; if (/\d/.test(c)) return '013678'.includes(c); const k = t.charCodeAt(t.length - 1); return k >= 0xAC00 && k <= 0xD7A3 && (k - 0xAC00) % 28 > 0; }
+    function mmJ(w, j) { const b = mmBat(w); return ({ '이': b ? '이' : '가', '은': b ? '은' : '는', '을': b ? '을' : '를', '와': b ? '과' : '와' })[j] || j; }
+    const mmIe = w => `${w}${mmBat(w) ? '이에요' : '예요'}`;
+    // ---------- 말하기 ----------
+    function mmClearTimers() { mmTimers.forEach(t => clearTimeout(t)); mmTimers = []; }
+    function mmStopSpeech() {
+      if (!mmSpeaking && !mmTimers.length) return;
+      mmSession++; mmClearTimers(); mmSpeaking = false;
+      try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {}
+    }
+    function mmSay(text, cb) {
+      mmSession++; mmClearTimers();
+      const session = mmSession;
+      const clean = String(text || '').replace(/[“”"‘’]/g, '').replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu, '').trim();
+      let done = false;
+      const finish = () => { if (done || session !== mmSession) return; done = true; mmSpeaking = false; if (cb) cb(); };
+      const muted = !document.getElementById('mm-voice')?.checked;
+      if (!clean || muted || !('speechSynthesis' in window)) { mmTimers.push(setTimeout(finish, muted ? 300 + clean.length * 20 : 150)); return; }
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(clean);
+        u.lang = 'ko-KR'; u.rate = 0.9;
+        const v = getKoreanVoice(); if (v) u.voice = v;
+        u.onend = finish; u.onerror = finish;
+        mmSpeaking = true;
+        window.speechSynthesis.speak(u);
+        mmTimers.push(setTimeout(finish, 2200 + clean.length * 190));
+      } catch (e) { finish(); }
+    }
+    function mmLater(fn, ms) { const s = mmSession; mmTimers.push(setTimeout(() => { if (s === mmSession) fn(); }, ms)); }
+
+    // ---------- 시작 화면 ----------
+    function mmInit() {
+      if (!mmS) mmS = mmLoad();
+      mmRenderSetup();
+      mmRenderStickers();
+    }
+    function mmStartStageForAge(age) { return ({ 3: 1, 4: 2, 5: 4, 6: 5, 7: 6 })[age] || 1; }
+    function mmSetAge(a) { mmS.age = a; mmS.stage = mmStartStageForAge(a); MM_STAGES.forEach(st => { if (!mmS.d[st.n]) mmS.d[st.n] = 1; }); mmSave(); playTone(520, 0.04); mmRenderSetup(); }
+    function mmSetMode(m) { mmS.mode = m; mmSave(); playTone(520, 0.04); mmRenderSetup(); }
+    function mmRenderSetup() {
+      const box = document.getElementById('mm-setup'); if (!box) return;
+      document.getElementById('mm-play').classList.add('hidden'); box.classList.remove('hidden');
+      const ages = [3, 4, 5, 6, 7].map(a => `<button class="mm-pill ${mmS.age === a ? 'on' : ''}" onclick="mmSetAge(${a})">${a}세</button>`).join('');
+      const modes = `<button class="mm-pill ${mmS.mode === 'auto' ? 'on' : ''}" onclick="mmSetMode('auto')">🚀 자동으로 올라가기</button><button class="mm-pill ${mmS.mode === 'pick' ? 'on' : ''}" onclick="mmSetMode('pick')">🧭 단계 골라서 하기</button>`;
+      const cards = MM_STAGES.map(st => {
+        const stars = Math.min(5, Math.floor((mmS.stars[st.n] || 0) / 3));
+        const cur = mmS.mode === 'auto' && mmS.stage === st.n;
+        return `<button class="mm-stage ${cur ? 'cur' : ''}" onclick="mmStart(${st.n})">
+          <span class="mm-stage-n">${st.n}</span><span class="mm-stage-e">${mmIco(st.e)}</span>
+          <span class="mm-stage-name">${st.name}</span><span class="mm-stage-age">${st.age}</span>
+          <span class="mm-stage-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5 - stars)}</span>${cur ? '<span class="mm-stage-tag">지금 단계</span>' : ''}</button>`;
+      }).join('');
+      box.innerHTML = `
+        <div class="mm-card space-y-2">
+          <div class="flex flex-wrap items-center gap-1.5"><span class="mm-label">나이</span>${ages}</div>
+          <div class="flex flex-wrap items-center gap-1.5"><span class="mm-label">방식</span>${modes}</div>
+          <p class="mm-help">${mmS.mode === 'auto' ? `자동 모드는 ${mmS.age}세에 맞는 단계에서 시작해요. 잘 맞히면 다음 단계로, 어려워하면 쉬운 문제로 바꿔 줘요.` : '하고 싶은 단계를 골라요. 단계 안에서 문제 난이도는 자동으로 맞춰져요.'}</p>
+        </div>
+        ${mmS.mode === 'auto' ? `<button class="mm-go" onclick="mmStart(0)">▶ 시작하기 <small>(${mmS.stage}단계 · ${MM_STAGES[mmS.stage - 1].name})</small></button>` : ''}
+        <div class="mm-stages">${cards}</div>`;
+    }
+    function mmStart(n) {
+      if (!mmS) mmS = mmLoad();
+      mmS.playStage = n || 0;
+      if (n && mmS.mode === 'auto') mmS.stage = n;
+      mmS.streak = 0; mmS.miss = 0; mmSave();
+      document.getElementById('mm-setup').classList.add('hidden');
+      document.getElementById('mm-play').classList.remove('hidden');
+      playSuccessChime();
+      mmNext();
+      try { document.getElementById('mm-play').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
+    function mmBack() { mmStopSpeech(); mmQ = null; mmRenderSetup(); }
+
+    // ---------- 문제 고르기 (자동 난이도) ----------
+    function mmCurStage() {
+      if (mmS.mode === 'pick' && mmS.playStage) return mmS.playStage;
+      const base = mmS.stage;
+      if (base > 1 && Math.random() < 0.25) return mmRand(1, base - 1);   // 가끔 복습
+      return base;
+    }
+    function mmNext() {
+      mmStopSpeech(); mmBusy = false;
+      const st = mmCurStage();
+      const d = mmS.d[st] || 1;
+      mmQ = MM_GEN[st](d);
+      mmQ.stage = st; mmQ.d = d; mmQ.tries = 0;
+      mmRender();
+    }
+    function mmRender() {
+      const q = mmQ, st = MM_STAGES[q.stage - 1];
+      document.getElementById('mm-title').innerHTML = `${mmIco(st.e)} ${q.stage}단계 · ${st.name} <small>난이도 ${'●'.repeat(q.d)}${'○'.repeat(3 - q.d)}</small>`;
+      const bg = typeof SBA !== 'undefined' ? SBA.url(q.scene || st.scene) : '';
+      const stage = document.getElementById('mm-stage');
+      stage.innerHTML = `<div class="mm-box">${bg ? `<img class="mm-bg" src="${bg}" alt="">` : ''}<div class="mm-layer">${q.stageHtml || ''}</div></div>`;
+      document.getElementById('mm-text').innerHTML = `<span>${q.text}</span> <button class="mm-say" onclick="mmReplay()" title="다시 듣기"><i class="fa-solid fa-volume-high"></i></button>`;
+      document.getElementById('mm-ans').innerHTML = q.ansHtml || '';
+      document.getElementById('mm-feedback').innerHTML = '';
+      if (q.after) q.after();
+      mmSay(q.say);
+    }
+    function mmReplay() { if (mmQ) mmSay(mmQ.say); }
+
+    const mmIsMain = q => mmS.mode !== 'auto' || q.stage === mmS.stage;
+    function mmMissOnce(q) { if (q.tries === 1 && mmIsMain(q)) { mmS.miss++; mmS.streak = 0; } }
+    function mmAnswer(v, btn) {
+      const q = mmQ; if (!q || mmBusy) return;
+      const ok = q.check ? q.check(v) : String(v) === String(q.answer);
+      if (ok) return mmRight(btn);
+      q.tries++;
+      if (btn) bxReAnimSafe(btn, 'mm-nope', 400);
+      playTone(220, 0.12, 'sawtooth');
+      mmMissOnce(q);
+      if (q.tries === 1) {
+        if (q.help) q.help(); else mmSay('다시 한번 생각해 볼까요?');
+      } else {
+        mmBusy = true;
+        const showTxt = q.reveal ? q.reveal() : `정답은 ${mmIe(q.answer)}.`;
+        document.getElementById('mm-feedback').innerHTML = `<div class="mm-fb mm-fb-soft">💡 ${showTxt}</div>`;
+        mmSay(showTxt + ' 다음 문제도 같이 해 봐요!', () => mmLater(mmAdjust(false), 900));
+      }
+    }
+    function mmRight(btn) {
+      const q = mmQ; mmBusy = true;
+      if (btn) btn.classList.add('mm-ok');
+      playSuccessChime();
+      const praise = mmPick(['딩동댕! 맞았어요!', '정답이에요! 최고!', '우와, 잘했어요!', '맞아요! 멋져요!']);
+      const extra = q.explain ? ' ' + q.explain() : '';
+      document.getElementById('mm-feedback').innerHTML = `<div class="mm-fb">🎉 ${praise}${extra ? `<br><small>${extra}</small>` : ''}</div>`;
+      mmS.stars[q.stage] = (mmS.stars[q.stage] || 0) + 1;
+      if (q.tries === 0 && mmIsMain(q)) { mmS.streak++; mmS.miss = 0; }
+      mmAddSticker(q.pk || mmPick(MM_PK));
+      mmSay(praise + extra, () => mmLater(mmAdjust(true), 700));
+    }
+    // 난이도 조절: 처음에 3번 연속 맞히면 한 칸 올리고, 2번 연속 처음에 틀리면 한 칸 내려요
+    function mmAdjust(right) {
+      return () => {
+        const st = mmQ.stage, auto = mmS.mode === 'auto';
+        if (mmIsMain(mmQ)) {
+          if (mmS.streak >= 3) {
+            mmS.streak = 0;
+            if ((mmS.d[st] || 1) < 3) mmS.d[st] = (mmS.d[st] || 1) + 1;
+            else if (auto && mmS.stage < 7) { mmS.stage++; mmS.d[mmS.stage] = mmS.d[mmS.stage] || 1; mmToast(`🎊 ${mmS.stage}단계 「${MM_STAGES[mmS.stage - 1].name}」로 올라가요!`); }
+          } else if (mmS.miss >= 2) {
+            mmS.miss = 0;
+            if ((mmS.d[st] || 1) > 1) mmS.d[st]--;
+            else if (auto && mmS.stage > 1) { mmS.stage--; mmS.d[mmS.stage] = Math.min(mmS.d[mmS.stage] || 1, 2); }
+          }
+        }
+        mmSave();
+        if (mmCardPending) mmShowCard(mmCardPending); else mmNext();
+      };
+    }
+    function mmToast(t) { try { showToast(t); } catch (e) {} }
+
+    // ---------- 스티커 · 카드 ----------
+    let mmCardPending = 0;
+    function mmAddSticker(pk) {
+      mmS.stickers.push(pk);
+      if (mmS.stickers.length >= 10) {
+        mmS.stickers = [];
+        const pool = MM_PK.filter(n => !mmS.cards.includes(n));
+        const card = pool.length ? mmPick(pool) : mmRand(1, 151);
+        mmS.cards.push(card);
+        mmCardPending = card;   // 칭찬 말이 끝나면 카드를 보여 줘요
+        mmSave(); mmRenderStickers();
+        return;
+      }
+      mmSave(); mmRenderStickers();
+    }
+    function mmRenderStickers() {
+      const el = document.getElementById('mm-stickers'); if (!el || !mmS) return;
+      el.innerHTML = Array.from({ length: 10 }, (_, i) => mmS.stickers[i] ? `<span class="mm-stk on">${mmPkImg(mmS.stickers[i])}</span>` : `<span class="mm-stk">${i + 1}</span>`).join('');
+      const c = document.getElementById('mm-cardcount'); if (c) c.textContent = mmS.cards.length;
+    }
+    function mmShowCard(n) {
+      const ov = document.getElementById('mm-cardov');
+      const types = OFFICIAL_DEX.rows[n - 1][2].map(i => TYPE_NAMES[i]).join('·');
+      ov.innerHTML = `<div class="mm-cardbox"><div class="mm-cardhead">🎁 스티커 10개 달성! 새 카드를 받았어요</div>
+        <div class="mm-pcard">${mmPkImg(n)}<div class="mm-pcard-name">${mmName(n)}</div><div class="mm-pcard-sub">${types} · 키 ${mmHt(n)}m · 몸무게 ${mmWt(n)}kg</div></div>
+        <button class="mm-go" onclick="mmCloseCard()">계속하기 ▶</button></div>`;
+      ov.classList.remove('hidden');
+      playSuccessChime();
+      mmSay(`축하해요! ${mmName(n)} 카드를 받았어요!`);
+    }
+    function mmCloseCard() { document.getElementById('mm-cardov').classList.add('hidden'); mmCardPending = 0; mmNext(); }
+    function mmShowAlbum() {
+      if (!mmS) mmS = mmLoad();
+      const ov = document.getElementById('mm-cardov');
+      ov.innerHTML = `<div class="mm-cardbox mm-album"><div class="mm-cardhead">📒 내가 모은 카드 ${mmS.cards.length}장</div>
+        <div class="mm-album-grid">${mmS.cards.length ? mmS.cards.map(n => `<div class="mm-mini">${mmPkImg(n)}<span>${mmName(n)}</span></div>`).join('') : '<p class="mm-help">문제를 맞히고 스티커 10개를 모으면 카드가 생겨요!</p>'}</div>
+        <button class="mm-go" onclick="document.getElementById('mm-cardov').classList.add('hidden')">닫기</button></div>`;
+      ov.classList.remove('hidden');
+    }
+
+    // ---------- 배치 도우미 ----------
+    // 겹치지 않게 그림 자리를 정해요 (상자 안 % 좌표)
+    function mmSpots(n, area) {
+      const [x0, y0, x1, y1] = area || [10, 18, 90, 86];
+      const cols = Math.ceil(Math.sqrt(n * 1.6)), rows = Math.ceil(n / cols);
+      const cells = [];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([x0 + (c + 0.5) * (x1 - x0) / cols, y0 + (r + 0.5) * (y1 - y0) / rows]);
+      return mmShuffle(cells).slice(0, n).map(([x, y]) => [x + mmRand(-3, 3), y + mmRand(-3, 3)]);
+    }
+    const mmOpts = (ans, lo, hi, k = 3) => { const s = new Set([ans]); let guard = 0; while (s.size < k && guard++ < 50) { const v = ans + mmPick([-2, -1, 1, 2]); if (v >= lo && v <= hi) s.add(v); } return mmShuffle([...s]); };
+    const mmNumBtns = (opts, dots) => `<div class="mm-opts">${opts.map(v => `<button class="mm-opt" data-v="${v}" onclick="mmAnswer(${v}, this)"><b>${v}</b>${dots ? mmDots(v) : ''}</button>`).join('')}</div>`;
+    function mmCountAloud(sel, n, done) {
+      // 그림을 하나씩 짚으며 같이 세어 줘요
+      const els = [...document.querySelectorAll(sel)].slice(0, n);
+      els.forEach(e => e.classList.remove('mm-lit'));
+      let i = 0;
+      const step = () => {
+        if (i >= els.length) { if (done) done(); return; }
+        els[i].classList.add('mm-lit'); playTone(500 + i * 50, 0.05);
+        mmSay(MM_NATIVE[i + 1]); i++;
+        mmLater(step, 750);
+      };
+      step();
+    }
+
+    // ---------- 1단계: 세기 ----------
+    function mmGenCount(d) {
+      const n = d === 1 ? mmRand(1, 5) : d === 2 ? mmRand(3, 8) : mmRand(5, 10);
+      const pk = mmPick(MM_PK);
+      const spots = mmSpots(n);
+      return {
+        pk, answer: n, scene: 'meadow',
+        say: `${mmName(pk)}${mmJ(mmName(pk), '이')} 몇 마리 있을까요? 하나씩 톡톡 누르면서 세어 봐요!`,
+        text: `${mmName(pk)}${mmJ(mmName(pk), '이')} 몇 마리 있을까요? <small>(하나씩 눌러 세어 봐요)</small>`,
+        stageHtml: spots.map(([x, y]) => `<button class="mm-thing mm-pk" style="left:${x}%;top:${y}%" onclick="mmTapCount(this)">${mmPkImg(pk)}</button>`).join(''),
+        ansHtml: mmNumBtns(mmOpts(n, 1, 10), true),
+        help() { mmSay('같이 세어 볼까요?', () => mmCountAloud('#mm-stage .mm-thing', n, () => mmSay(`모두 ${mmMari(n)}! 숫자를 골라 봐요.`))); },
+        reveal: () => `${mmName(pk)}${mmJ(mmName(pk), '은')} 모두 ${mmIe(n)}. ${mmMari(n)}!`,
+        explain: () => `${mmMari(n)}!`
+      };
+    }
+    let mmTapN = 0;
+    function mmTapCount(btn) {
+      if (btn.dataset.n) return;
+      const k = document.querySelectorAll('#mm-stage .mm-thing[data-n]').length + 1;
+      btn.dataset.n = k; btn.insertAdjacentHTML('beforeend', `<span class="mm-badge">${k}</span>`);
+      playTone(480 + k * 60, 0.06); mmSay(MM_NATIVE[k] || String(k));
+    }
+
+    // ---------- 2단계: 비교 ----------
+    function mmGenCompare(d) {
+      const kind = d === 1 ? mmPick(['more', 'more', 'tall']) : d === 2 ? mmPick(['more', 'less', 'tall', 'heavy']) : mmPick(['less', 'tall', 'heavy', 'heavy']);
+      if (kind === 'more' || kind === 'less') {
+        const gap = d === 1 ? mmRand(3, 4) : d === 2 ? 2 : 1;
+        let a = mmRand(1, 9 - gap), b = a + gap; if (Math.random() < 0.5) [a, b] = [b, a];
+        const e = mmPick(['⚪', '🍎', '🍓', '🎈', '⭐']);
+        const ans = kind === 'more' ? (a > b ? 'L' : 'R') : (a < b ? 'L' : 'R');
+        const grp = (n, side) => `<button class="mm-group" data-v="${side}" onclick="mmAnswer('${side}', this)">${mmSpots(n, [8, 8, 92, 92]).map(([x, y]) => `<span class="mm-dot" style="left:${x}%;top:${y}%">${mmIco(e)}</span>`).join('')}</button>`;
+        const word = kind === 'more' ? '더 많은' : '더 적은';
+        return {
+          answer: ans, scene: 'field',
+          say: `어느 쪽이 ${word} 쪽일까요? 그 쪽을 눌러 봐요!`, text: `어느 쪽이 <b>${word}</b> 쪽일까요?`,
+          stageHtml: `<div class="mm-two">${grp(a, 'L')}<span class="mm-vs">VS</span>${grp(b, 'R')}</div>`,
+          help() { mmSay('왼쪽부터 같이 세어 볼까요?', () => mmCountAloud('.mm-group[data-v="L"] .mm-dot', a, () => mmSay(`왼쪽은 ${mmGae(a)}. 이번엔 오른쪽!`, () => mmCountAloud('.mm-group[data-v="R"] .mm-dot', b, () => mmSay(`오른쪽은 ${mmGae(b)}. 어느 쪽이 ${word} 쪽일까요?`))))); },
+          reveal: () => `왼쪽은 ${a}개, 오른쪽은 ${b}개라서 ${ans === 'L' ? '왼쪽' : '오른쪽'}이 ${word} 쪽이에요.`,
+          explain: () => `왼쪽 ${a}개, 오른쪽 ${b}개!`
+        };
+      }
+      // 키 · 몸무게: 실제 도감 자료로 비교해요
+      const by = kind === 'tall' ? mmHt : mmWt;
+      const ratio = d === 1 ? 2.5 : d === 2 ? 1.6 : 1.25;
+      let p1, p2, guard = 0;
+      do { p1 = mmPick(MM_PK); p2 = mmPick(MM_PK); guard++; } while ((p1 === p2 || Math.max(by(p1), by(p2)) / Math.min(by(p1), by(p2)) < ratio) && guard < 200);
+      const big = by(p1) > by(p2) ? p1 : p2;
+      const unit = kind === 'tall' ? 'm' : 'kg';
+      const maxH = Math.max(mmHt(p1), mmHt(p2));
+      const card = (p) => {
+        const h = kind === 'tall' ? Math.max(18, mmHt(p) / maxH * 78) : 62;
+        return `<button class="mm-who" data-v="${p}" onclick="mmAnswer(${p}, this)"><span class="mm-who-img" style="height:${h}%">${mmPkImg(p)}</span><span class="mm-who-name">${mmName(p)}</span></button>`;
+      };
+      const word = kind === 'tall' ? '키가 더 클까요' : '더 무거울까요';
+      return {
+        pk: big, answer: big, scene: kind === 'tall' ? 'hill' : 'field',
+        say: `${mmName(p1)}${mmJ(mmName(p1), '와')} ${mmName(p2)}, 누가 ${word}?`, text: `누가 <b>${word}</b>?`,
+        stageHtml: `<div class="mm-two mm-floor">${card(p1)}${card(p2)}</div>`,
+        help() { mmSay(kind === 'tall' ? '그림 키를 잘 비교해 봐요. 머리 꼭대기가 더 높은 쪽은?' : '어떤 포켓몬이 더 크고 묵직해 보이나요? 다시 골라 봐요!'); },
+        reveal: () => `${mmName(big)}${mmJ(mmName(big), '이')} ${kind === 'tall' ? '키가 더 커요' : '더 무거워요'}. ${mmName(p1)} ${by(p1)}${unit}, ${mmName(p2)} ${by(p2)}${unit}.`,
+        explain: () => `${mmName(p1)} ${by(p1)}${unit}, ${mmName(p2)} ${by(p2)}${unit}`
+      };
+    }
+
+    // ---------- 3단계: 모양 · 규칙 ----------
+    const MM_SHAPES = {
+      circle: { ko: '동그라미', svg: c => `<circle cx="32" cy="32" r="26" fill="${c}"/>` },
+      triangle: { ko: '세모', svg: c => `<path d="M32,6 L60,56 L4,56Z" fill="${c}" stroke-linejoin="round"/>` },
+      square: { ko: '네모', svg: c => `<rect x="7" y="7" width="50" height="50" rx="4" fill="${c}"/>` },
+      star: { ko: '별', svg: c => `<path d="M32,4 L39,24 L60,24 L43,37 L49,58 L32,45 L15,58 L21,37 L4,24 L25,24Z" fill="${c}"/>` },
+      heart: { ko: '하트', svg: c => `<path d="M32,56 C14,44 6,34 6,22 C6,12 14,6 22,6 C27,6 30,9 32,13 C34,9 37,6 42,6 C50,6 58,12 58,22 C58,34 50,44 32,56Z" fill="${c}"/>` }
+    };
+    const mmShapeSvg = (k, c) => `<svg viewBox="0 0 64 64" class="mm-shape-svg"><g filter="none">${MM_SHAPES[k].svg(c)}</g></svg>`;
+    function mmGenShapePattern(d) {
+      if (Math.random() < 0.45) {
+        const pool = d === 1 ? ['circle', 'triangle', 'square'] : ['circle', 'triangle', 'square', 'star', 'heart'];
+        const target = mmPick(pool);
+        const n = d === 1 ? 4 : d === 2 ? 6 : 8;
+        const nT = d === 3 ? mmRand(2, 3) : 1;
+        const items = [...Array(nT).fill(target), ...Array.from({ length: n - nT }, () => mmPick(pool.filter(k => k !== target)))];
+        const cols = ['#f87171', '#60a5fa', '#facc15', '#4ade80', '#c084fc', '#fb923c'];
+        const spots = mmSpots(items.length);
+        const shuffled = mmShuffle(items);
+        const tName = MM_SHAPES[target].ko;
+        return {
+          answer: target, need: nT, found: 0, scene: 'garden',
+          check: () => false,
+          say: nT > 1 ? `${tName} 모양을 모두 찾아봐요! ${nT}개 있어요.` : `${tName} 모양을 찾아봐요!${target === 'circle' ? ' 몬스터볼처럼 동글동글한 모양이에요.' : ''}`,
+          text: `<b>${tName}</b> 모양을 ${nT > 1 ? `모두 찾아봐요! (${nT}개)` : '찾아봐요!'}`,
+          stageHtml: shuffled.map((k, i) => `<button class="mm-thing mm-shape" data-k="${k}" style="left:${spots[i][0]}%;top:${spots[i][1]}%" onclick="mmShapeTap(this)">${mmShapeSvg(k, cols[i % cols.length])}</button>`).join(''),
+          ansHtml: `<div class="mm-hintline">${mmShapeSvg(target, '#a78bfa')} <span>${tName}</span></div>`,
+          help() { document.querySelectorAll('#mm-stage .mm-shape').forEach(b => { if (b.dataset.k === target) bxReAnimSafe(b, 'mm-wiggle', 1200); }); mmSay(`살랑살랑 흔들리는 게 ${mmIe(tName)}. 찾아봐요!`); },
+          reveal: () => { document.querySelectorAll('#mm-stage .mm-shape').forEach(b => { if (b.dataset.k === target) b.classList.add('mm-lit'); }); return `반짝이는 게 ${tName} 모양이에요.`; }
+        };
+      }
+      // 규칙 찾기
+      const k = d === 1 ? 'AB' : d === 2 ? mmPick(['AAB', 'ABB']) : mmPick(['ABC', 'AABB']);
+      const syms = mmShuffle(MM_ICONS).slice(0, 3);
+      const unit = k.split('').map(c => syms[c.charCodeAt(0) - 65]);
+      const len = unit.length * 2 + (k.length === 2 ? 1 : 0);
+      const seq = Array.from({ length: len + 1 }, (_, i) => unit[i % unit.length]);
+      const ans = seq.pop();
+      const opts = [...new Set([ans, ...mmShuffle(syms)])].slice(0, 3);   // 정답이 맨 앞이라 늘 들어가요
+      const name = e => ({ '⚡': '번개', '💧': '물방울', '🔥': '불꽃', '🌙': '달', '⭐': '별', '🍎': '사과', '🌸': '꽃', '🍄': '버섯', '🎈': '풍선', '💎': '보석', '🍓': '딸기', '🐚': '조개' })[e] || '';
+      return {
+        answer: ans, scene: 'garden',
+        say: `규칙을 찾아봐요! ${seq.map(name).join(', ')}, 그다음은 뭘까요?`, text: '규칙을 찾아봐요! <b>그다음</b>은 뭘까요?',
+        stageHtml: `<div class="mm-seq">${seq.map(e => `<span class="mm-seq-i">${mmIco(e)}</span>`).join('')}<span class="mm-seq-i mm-seq-q">❓</span></div>`,
+        ansHtml: `<div class="mm-opts">${mmShuffle(opts).map(e => `<button class="mm-opt" data-v="${e}" onclick="mmAnswer('${e}', this)">${mmIco(e, 'mm-ico-l')}</button>`).join('')}</div>`,
+        help() { const its = document.querySelectorAll('#mm-stage .mm-seq-i:not(.mm-seq-q)'); its.forEach((e, i) => setTimeout(() => bxReAnimSafe(e, 'mm-lit-pulse', 500), i * 500)); mmSay(`같이 읽어 볼까요? ${seq.map(name).join(', ')}. 다음은?`); },
+        reveal: () => `${seq.slice(-unit.length).map(name).join(', ')} 다음은 ${mmIe(name(ans))}.`,
+        after() { document.querySelector('#mm-stage .mm-seq-q')?.setAttribute('data-ans', ans); }
+      };
+    }
+    function mmShapeTap(btn) {
+      const q = mmQ; if (!q || mmBusy || btn.disabled) return;
+      if (btn.dataset.k === q.answer) {
+        btn.disabled = true; btn.classList.add('mm-found'); q.found++; playTone(620 + q.found * 80, 0.08);
+        if (q.found >= q.need) mmRight(null);
+      } else mmAnswer('x', btn);
+    }
+
+    // ---------- 4단계: 숫자 알기 ----------
+    function mmGenNumber(d) {
+      const r = Math.random();
+      if (r < 0.25) return mmGenWriteDigit(d);
+      if (r < 0.62) {
+        // 숫자 징검다리: 빈 돌에 들어갈 숫자
+        const len = 5, max = d === 1 ? 6 : d === 2 ? 10 : 20;
+        const back = d === 3 && Math.random() < 0.35;
+        const start = back ? mmRand(len, max) : mmRand(1, max - len + 1);
+        const seq = Array.from({ length: len }, (_, i) => back ? start - i : start + i);
+        const hole = mmRand(1, len - 1);
+        const ans = seq[hole];
+        return {
+          answer: ans, scene: 'river',
+          say: `숫자 징검다리예요! ${back ? '거꾸로 세어요. ' : ''}빈 돌에 들어갈 숫자는 뭘까요?`, text: `숫자 징검다리! <b>빈 돌</b>에 들어갈 숫자는? ${back ? '<small>(거꾸로)</small>' : ''}`,
+          stageHtml: `<div class="mm-stones">${seq.map((v, i) => `<span class="mm-stone ${i === hole ? 'q' : ''}">${i === hole ? '?' : v}</span>`).join('')}</div><div class="mm-stone-pk">${mmPkImg(25)}</div>`,
+          ansHtml: mmNumBtns(mmOpts(ans, 0, max + 1), false),
+          help() { mmSay(`같이 읽어 볼까요? ${seq.map((v, i) => i === hole ? '음…' : v).join(', ')}.`); },
+          reveal: () => `${seq[hole - 1]} 다음은 ${mmIe(ans)}.`
+        };
+      }
+      // 숫자 보고 그만큼 있는 쪽 찾기
+      const n = d === 1 ? mmRand(1, 5) : d === 2 ? mmRand(3, 9) : mmRand(6, 10);
+      const opts = mmOpts(n, 1, 10);
+      const e = mmPick(['⚪', '🍎', '⭐', '🍓']);
+      return {
+        answer: n, scene: 'town',
+        say: `숫자 ${n}! ${n}만큼 있는 바구니를 찾아봐요.`, text: `숫자 <b class="mm-bignum">${n}</b> 만큼 있는 바구니는?`,
+        stageHtml: `<div class="mm-baskets">${opts.map(v => `<button class="mm-basket" data-v="${v}" onclick="mmAnswer(${v}, this)">${mmSpots(v, [10, 12, 90, 88]).map(([x, y]) => `<span class="mm-dot" style="left:${x}%;top:${y}%">${mmIco(e)}</span>`).join('')}</button>`).join('')}</div>`,
+        help() { mmSay('바구니마다 하나씩 세어 볼까요? 첫 번째 바구니부터!', () => mmCountAloud(`.mm-basket[data-v="${opts[0]}"] .mm-dot`, opts[0], () => mmSay(`첫 번째는 ${opts[0]}. ${n}${mmJ(n, '을')} 찾아봐요!`))); },
+        reveal: () => `${n}개 있는 바구니가 정답이에요.`
+      };
+    }
+    // 숫자 따라 쓰기: 연한 숫자 위에 따라 쓰면, 글자 모양과 겹치는지 검사해요
+    function mmGenWriteDigit(d) {
+      const n = d === 1 ? mmRand(1, 5) : mmRand(0, 9);
+      return {
+        answer: n, scene: 'town', write: true,
+        say: `숫자 ${n}${mmJ(n, '을')} 따라 써 봐요! 연한 숫자 위에 손가락으로 그려요.`, text: `숫자 <b>${n}</b>${mmJ(n, '을')} 따라 써 봐요!`,
+        stageHtml: `<div class="mm-writebox"><canvas id="mm-ghost"></canvas><canvas id="mm-ink" style="touch-action:none"></canvas></div>`,
+        ansHtml: `<div class="mm-opts"><button class="mm-opt mm-wide" onclick="mmInkClear()">🧽 지우기</button><button class="mm-opt mm-wide mm-primary" onclick="mmInkCheck(this)">✅ 다 썼어요</button></div>`,
+        check: () => false,
+        after() { setTimeout(() => mmInkSetup(n), 30); },
+        help() { mmSay('연한 숫자의 줄을 따라서 천천히 그려 봐요. 지우고 다시 써도 돼요.'); },
+        reveal: () => `괜찮아요! 숫자 ${n}${mmJ(n, '은')} 다음에 또 써 봐요.`
+      };
+    }
+    let mmInk = null;
+    function mmInkSetup(n) {
+      const g = document.getElementById('mm-ghost'), c = document.getElementById('mm-ink'); if (!g || !c) return;
+      const r = c.getBoundingClientRect();
+      [g, c].forEach(cv => { cv.width = Math.max(10, r.width); cv.height = Math.max(10, r.height); });
+      const gx = g.getContext('2d');
+      gx.clearRect(0, 0, g.width, g.height);
+      gx.fillStyle = 'rgba(148,163,184,.35)';
+      mmDrawDigit(gx, n, g.width, g.height);
+      const ctx = c.getContext('2d'); let on = false;
+      const pt = e => { const rr = c.getBoundingClientRect(); return [e.clientX - rr.left, e.clientY - rr.top]; };
+      c.onpointerdown = e => { e.preventDefault(); on = true; try { c.setPointerCapture(e.pointerId); } catch (x) {} const [x, y] = pt(e); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + .1, y + .1); ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = Math.max(10, c.height * 0.07); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); };
+      c.onpointermove = e => { if (!on) return; e.preventDefault(); const [x, y] = pt(e); ctx.lineTo(x, y); ctx.stroke(); };
+      c.onpointerup = c.onpointercancel = () => { on = false; };
+      mmInk = { n, c, g };
+    }
+    function mmDrawDigit(ctx, n, w, h) {
+      ctx.font = `${Math.round(h * 0.86)}px Jua, "Arial Rounded MT Bold", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(n), w / 2, h * 0.54);
+    }
+    function mmInkClear() { if (mmInk) mmInk.c.getContext('2d').clearRect(0, 0, mmInk.c.width, mmInk.c.height); }
+    // 32×32 칸으로 줄여서: 쓴 선이 숫자 모양 안에 있는지(75%↑), 숫자 모양을 충분히 덮었는지(55%↑) 봐요
+    function mmDigitScore(inkCanvas, n) {
+      const G = 32, w = inkCanvas.width, h = inkCanvas.height;
+      const m = document.createElement('canvas'); m.width = w; m.height = h;
+      const mx = m.getContext('2d'); mx.fillStyle = '#000'; mmDrawDigit(mx, n, w, h);
+      const grid = (cv) => { const d = cv.getContext('2d').getImageData(0, 0, w, h).data; const out = new Uint8Array(G * G);
+        for (let y = 0; y < h; y += 2) for (let x = 0; x < w; x += 2) if (d[(y * w + x) * 4 + 3] > 40) out[Math.min(G - 1, Math.floor(y / h * G)) * G + Math.min(G - 1, Math.floor(x / w * G))] = 1; return out; };
+      const gl = grid(m), ink = grid(inkCanvas);
+      const near = (arr, i, r) => { const x = i % G, y = (i / G) | 0; for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < G && yy < G && arr[yy * G + xx]) return true; } return false; };
+      let inkN = 0, inkIn = 0, glN = 0, glCov = 0;
+      for (let i = 0; i < G * G; i++) { if (ink[i]) { inkN++; if (near(gl, i, 2)) inkIn++; } if (gl[i]) { glN++; if (near(ink, i, 2)) glCov++; } }
+      return { inkN, inside: inkN ? inkIn / inkN : 0, cover: glN ? glCov / glN : 0 };
+    }
+    function mmInkCheck(btn) {
+      if (!mmInk || mmBusy) return;
+      const s = mmDigitScore(mmInk.c, mmInk.n);
+      if (s.inkN >= 8 && s.inside >= 0.75 && s.cover >= 0.55) return mmRight(btn);
+      const q = mmQ; q.tries++;
+      playTone(220, 0.12, 'sawtooth');
+      mmMissOnce(q);
+      if (q.tries === 1) {
+        mmSay(s.inkN < 8 ? '아직 조금밖에 안 썼어요. 연한 숫자를 따라 끝까지 그려 봐요!' : s.inside < 0.75 ? '선이 숫자 밖으로 많이 나갔어요. 지우고 연한 숫자 위에 다시 그려 볼까요?' : '숫자의 빈 곳이 있어요. 연한 부분을 더 따라 그려 봐요!');
+      } else { mmBusy = true; const t = q.reveal(); document.getElementById('mm-feedback').innerHTML = `<div class="mm-fb mm-fb-soft">💡 ${t}</div>`; mmSay(t, () => mmLater(mmAdjust(false), 900)); }
+    }
+
+    // ---------- 5단계: 더하기 · 빼기 ----------
+    function mmGenAddSub(d) {
+      const sub = d === 3 ? Math.random() < 0.6 : d === 2 ? Math.random() < 0.35 : false;
+      const max = d === 1 ? 5 : 10;
+      let a, b;
+      if (sub) { a = mmRand(2, max); b = mmRand(1, a - 1); } else { a = mmRand(1, max - 1); b = mmRand(1, max - a); }
+      const ans = sub ? a - b : a + b;
+      const pk = mmPick(MM_PK);
+      const nm = mmName(pk);
+      const total = sub ? a : a + b;
+      const spots = mmSpots(total, [8, 20, 92, 84]);
+      const html = spots.map(([x, y], i) => {
+        const isNew = !sub && i >= a, leaves = sub && i >= a - b;
+        return `<span class="mm-thing mm-pk ${isNew ? 'mm-arrive' : ''} ${leaves ? 'mm-leave' : ''}" style="left:${x}%;top:${y}%;animation-delay:${isNew || leaves ? 1.2 + (i % 4) * 0.15 : 0}s">${mmPkImg(pk)}${leaves ? '<span class="mm-bye">👋</span>' : ''}</span>`;
+      }).join('');
+      const story = sub ? `${nm} ${mmMari(a)}가 놀고 있었어요. ${mmMari(b)}가 집에 갔어요. 남은 ${nm}${mmJ(nm, '은')} 몇 마리일까요?`
+        : `${nm} ${mmMari(a)}가 놀고 있었어요. ${mmMari(b)}가 더 왔어요. 모두 몇 마리일까요?`;
+      return {
+        pk, answer: ans, scene: mmPick(['forest', 'meadow', 'lake']),
+        say: story, text: `${story.replace(/몇 마리일까요\?/, '<b>몇 마리</b>일까요?')}<div class="mm-eq">${a} ${sub ? '−' : '+'} ${b} = ?</div>`,
+        stageHtml: html,
+        ansHtml: mmNumBtns(mmOpts(ans, 0, 10), true),
+        help() {
+          if (sub) mmSay('남아 있는 친구만 같이 세어 볼까요?', () => mmCountAloud('#mm-stage .mm-pk:not(.mm-leave)', ans, () => mmSay(`남은 건 ${mmMari(ans)}!`)));
+          else mmSay('모두 같이 세어 볼까요?', () => mmCountAloud('#mm-stage .mm-pk', ans, () => mmSay(`모두 ${mmMari(ans)}!`)));
+        },
+        reveal: () => `${a} ${sub ? '빼기' : '더하기'} ${b}${mmJ(b, '은')} ${mmIe(ans)}.`,
+        explain: () => `${a} ${sub ? '빼기' : '더하기'} ${b}${mmJ(b, '은')} ${ans}!`
+      };
+    }
+
+    // ---------- 6단계: 10 만들기 ----------
+    function mmGenTen(d) {
+      const kind = d === 1 ? 'fill' : d === 2 ? mmPick(['fill', 'split']) : mmPick(['split', 'over', 'over']);
+      if (kind === 'fill') {
+        const k = mmRand(d === 1 ? 5 : 2, 9);
+        const ans = 10 - k;
+        return {
+          answer: ans, scene: 'lake', filled: 0,
+          say: `몬스터볼 상자에 ${k}개가 들어 있어요. 10칸을 다 채우려면 몇 개가 더 필요할까요? 빈칸을 눌러서 채워 봐요!`,
+          text: `상자 <b>10칸</b>을 채우려면 몇 개 더? <small>(빈칸을 눌러 채워 봐요)</small>`,
+          stageHtml: `<div class="mm-frame">${Array.from({ length: 10 }, (_, i) => `<button class="mm-cell ${i < k ? 'full' : ''}" ${i < k ? 'disabled' : ''} onclick="mmFillCell(this)">${i < k ? mmIco('⚪') : ''}</button>`).join('')}</div>`,
+          ansHtml: mmNumBtns(mmOpts(ans, 1, 9), false),
+          help() { mmSay('빈칸을 하나씩 눌러서 채워 봐요. 몇 번 눌렀는지 세면 돼요!'); document.querySelectorAll('#mm-stage .mm-cell:not(.full)').forEach(b => bxReAnimSafe(b, 'mm-lit-pulse', 800)); },
+          reveal: () => `${k}${mmJ(k, '와')} ${ans}${mmJ(ans, '을')} 합치면 10이에요.`,
+          explain: () => `${k} 더하기 ${ans}${mmJ(ans, '은')} 10!`
+        };
+      }
+      if (kind === 'split') {
+        const tot = d === 2 ? mmRand(4, 8) : mmRand(6, 10);
+        const left = mmRand(1, tot - 1), ans = tot - left;
+        const e = mmPick(['🍎', '🍓', '⭐']);
+        return {
+          answer: ans, scene: 'meadow',
+          say: `${mmGae(tot)}를 두 바구니에 나눠 담았어요. 왼쪽에 ${mmGae(left)}. 오른쪽에는 몇 개일까요?`,
+          text: `<b>${tot}</b>개를 나눠 담았어요. 왼쪽 ${left}개, 오른쪽은?<div class="mm-eq">${tot} = ${left} + ?</div>`,
+          stageHtml: `<div class="mm-split"><div class="mm-split-top">${Array.from({ length: tot }, () => mmIco(e)).join('')}</div><div class="mm-two"><div class="mm-basket2">${Array.from({ length: left }, () => mmIco(e)).join('')}</div><div class="mm-basket2 q">?</div></div></div>`,
+          ansHtml: mmNumBtns(mmOpts(ans, 1, 9), false),
+          help() { mmSay(`위에 있는 ${tot}개 중에서 왼쪽 ${left}개를 빼고 남은 걸 세어 봐요.`); },
+          reveal: () => `${tot}${mmJ(tot, '은')} ${left}${mmJ(left, '와')} ${mmIe(ans)}.`
+        };
+      }
+      // 10을 넘는 더하기: 10칸 상자 두 개
+      const a = mmRand(6, 9), b = mmRand(11 - a, 9), ans = a + b;
+      const cells = (n) => Array.from({ length: 10 }, (_, i) => `<span class="mm-cell ${i < n ? 'full' : ''}">${i < n ? mmIco('⚪') : ''}</span>`).join('');
+      const toTen = 10 - a;
+      return {
+        answer: ans, scene: 'lake',
+        say: `몬스터볼 ${a}개와 ${b}개를 합치면 몇 개일까요? 먼저 10을 만들어 봐요!`,
+        text: `${a} + ${b} = ?<small> 먼저 10을 만들어 봐요</small>`,
+        stageHtml: `<div class="mm-frames"><div class="mm-frame">${cells(a)}</div><div class="mm-frame">${cells(b)}</div></div>`,
+        ansHtml: mmNumBtns(mmOpts(ans, 10, 18), false),
+        help() { mmSay(`${b}개 중에서 ${toTen}개를 옮기면 첫 상자가 10이 돼요. 그리고 ${b - toTen}개가 남아요. 10 더하기 ${b - toTen}${mmJ(b - toTen, '은')}?`); },
+        reveal: () => `10 더하기 ${b - toTen}, 그래서 ${mmIe(ans)}.`,
+        explain: () => `${a} 더하기 ${b}${mmJ(b, '은')} ${ans}!`
+      };
+    }
+    function mmFillCell(btn) {
+      const q = mmQ; if (!q || mmBusy || btn.classList.contains('full')) return;
+      btn.classList.add('full', 'mine'); btn.innerHTML = mmIco('⚪'); q.filled++;
+      playTone(500 + q.filled * 60, 0.06); mmSay(MM_NATIVE[q.filled]);
+      if (!document.querySelector('#mm-stage .mm-cell:not(.full)')) mmLater(() => mmSay(`다 채웠어요! 몇 개를 더 넣었나요?`), 500);
+    }
+
+    // ---------- 7단계: 생활 수학 ----------
+    function mmGenLife(d) {
+      const kind = d === 1 ? mmPick(['clock', 'shop']) : mmPick(['clock', 'shop', 'weigh']);
+      if (kind === 'clock') {
+        const h = mmRand(1, 12), half = d >= 2 && Math.random() < 0.5;
+        const lab = (hh, hf) => `${hh}시${hf ? ' 30분' : ''}`;
+        const ans = lab(h, half);
+        const set = new Set([ans]); let g = 0;
+        while (set.size < 3 && g++ < 30) { const hh = ((h + mmPick([-2, -1, 1, 2, 6]) + 11) % 12) + 1; set.add(lab(hh, d >= 2 ? Math.random() < 0.5 : half)); }
+        const opts = mmShuffle([...set]);
+        const ha = ((h % 12) + (half ? 0.5 : 0)) * 30, ma = half ? 180 : 0;
+        const svg = `<svg viewBox="0 0 100 100" class="mm-clock"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#f59e0b" stroke-width="5"/>${Array.from({ length: 12 }, (_, i) => { const a = (i + 1) * 30 * Math.PI / 180; return `<text x="${(50 + Math.sin(a) * 35).toFixed(1)}" y="${(50 - Math.cos(a) * 35 + 4).toFixed(1)}" text-anchor="middle" font-size="10" font-family="Jua, sans-serif" fill="#334155">${i + 1}</text>`; }).join('')}
+          <line x1="50" y1="50" x2="${(50 + Math.sin(ha * Math.PI / 180) * 22).toFixed(1)}" y2="${(50 - Math.cos(ha * Math.PI / 180) * 22).toFixed(1)}" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+          <line x1="50" y1="50" x2="${(50 + Math.sin(ma * Math.PI / 180) * 32).toFixed(1)}" y2="${(50 - Math.cos(ma * Math.PI / 180) * 32).toFixed(1)}" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="50" r="3.5" fill="#334155"/></svg>`;
+        const pk = mmPick(MM_PK);
+        return {
+          pk, answer: ans, scene: 'town',
+          say: `${mmName(pk)}${mmJ(mmName(pk), '와')} 만나기로 한 시간이에요. 시계는 몇 시를 가리키고 있을까요? 짧은 빨간 바늘은 시, 긴 파란 바늘은 분이에요.`,
+          text: `시계는 <b>몇 시</b>일까요? <small>(짧은 빨간 바늘 = 시, 긴 파란 바늘 = 분)</small>`,
+          stageHtml: `<div class="mm-clockwrap">${svg}<div class="mm-clock-pk">${mmPkImg(pk)}</div></div>`,
+          ansHtml: `<div class="mm-opts">${opts.map(o => `<button class="mm-opt mm-wide" data-v="${o}" onclick="mmAnswer('${o}', this)"><b>${o}</b></button>`).join('')}</div>`,
+          help() { mmSay(half ? `짧은 빨간 바늘이 ${h}${mmJ(h, '와')} ${h % 12 + 1} 사이에 있고, 긴 파란 바늘이 6을 가리키면 30분이에요.` : `긴 파란 바늘이 12를 가리키면 딱 정시예요. 짧은 빨간 바늘이 가리키는 숫자를 봐요.`); },
+          reveal: () => `시계는 ${mmIe(ans)}.`
+        };
+      }
+      if (kind === 'shop') {
+        const coins = d === 1 ? [10] : d === 2 ? [10, 50] : [10, 50, 100];
+        const price = d === 1 ? mmRand(2, 6) * 10 : d === 2 ? mmRand(6, 12) * 10 : mmRand(12, 28) * 10;
+        const item = mmPick([['⚪', '몬스터볼'], ['🍓', '딸기 열매'], ['🍎', '사과 열매'], ['💎', '반짝 보석'], ['🎈', '풍선']]);
+        return {
+          answer: price, scene: 'town', paid: [],
+          check: () => false,
+          say: `포켓몬 상점이에요! ${item[1]}${mmJ(item[1], '은')} ${price}원이에요. 동전을 눌러서 딱 ${price}원을 내 봐요.`,
+          text: `${mmIco(item[0])} <b>${item[1]}</b> = <b>${price}원</b> · 동전을 눌러 딱 맞게 내 봐요`,
+          stageHtml: `<div class="mm-shop"><div class="mm-shop-item">${mmIco(item[0], 'mm-ico-xl')}<span class="mm-price">${price}원</span></div><div id="mm-paid" class="mm-paid"></div><div id="mm-sum" class="mm-sum">낸 돈: 0원</div></div>`,
+          ansHtml: `<div class="mm-opts">${coins.map(c => `<button class="mm-coin c${c}" onclick="mmPay(${c})"><b>${c}</b><small>원</small></button>`).join('')}<button class="mm-opt mm-wide mm-primary" onclick="mmPayDone(this)">✅ 다 냈어요</button></div>`,
+          help() { const big = coins.filter(c => c <= price).pop(); mmSay(`큰 동전부터 내 봐요. ${big}원짜리를 먼저 내고, 남은 돈은 10원으로 채워요. 동전을 누르면 빼낼 수도 있어요.`); },
+          reveal: () => `${price}원을 딱 맞게 내면 돼요. ${mmCoinSay(price, coins)}`
+        };
+      }
+      // 가벼운 것부터 줄 세우기 (실제 몸무게)
+      let picks, guard = 0;
+      do { picks = mmShuffle(MM_PK).slice(0, 3); guard++; } while (guard < 300 && (() => { const w = picks.map(mmWt).sort((x, y) => x - y); return w[1] / w[0] < 1.8 || w[2] / w[1] < 1.8; })());
+      const order = picks.slice().sort((x, y) => mmWt(x) - mmWt(y));
+      return {
+        answer: order.join(','), scene: 'field', next: 0, order,
+        check: () => false,
+        say: `가벼운 포켓몬부터 차례대로 눌러 봐요! ${picks.map(mmName).join(', ')}.`,
+        text: '<b>가벼운 포켓몬부터</b> 차례대로 눌러요',
+        stageHtml: `<div class="mm-two mm-floor">${picks.map(p => `<button class="mm-who" data-v="${p}" onclick="mmWeighTap(this)"><span class="mm-who-img" style="height:62%">${mmPkImg(p)}</span><span class="mm-who-name">${mmName(p)}</span><span class="mm-who-w"></span></button>`).join('')}</div>`,
+        ansHtml: `<div class="mm-slots">${[1, 2, 3].map(i => `<span class="mm-slot" id="mm-slot-${i}">${i}</span>`).join('<span class="mm-arrow">➜</span>')}</div>`,
+        help() { mmSay('작고 가벼워 보이는 포켓몬부터 골라 봐요. 다시 처음부터 해도 돼요!'); mmQ.next = 0; document.querySelectorAll('#mm-stage .mm-who').forEach(b => { b.disabled = false; b.classList.remove('mm-ok', 'opacity-40'); }); [1, 2, 3].forEach(i => { const s = document.getElementById('mm-slot-' + i); s.textContent = i; s.classList.remove('ok'); }); },
+        reveal: () => `${order.map(p => `${mmName(p)} ${mmWt(p)}킬로그램`).join(', ')} 순서예요.`,
+        explain: () => order.map(p => `${mmName(p)} ${mmWt(p)}kg`).join(' < ')
+      };
+    }
+    function mmCoinSay(price, coins) { let r = price; const parts = []; coins.slice().reverse().forEach(c => { const k = Math.floor(r / c); if (k) { parts.push(`${c}원 ${k}개`); r -= k * c; } }); return parts.join(', ') + '.'; }
+    function mmPay(c) {
+      const q = mmQ; if (!q || mmBusy) return;
+      q.paid.push(c); playTone(700, 0.05); mmPaidDraw();
+    }
+    function mmUnpay(i) { const q = mmQ; if (!q || mmBusy) return; q.paid.splice(i, 1); playTone(400, 0.05); mmPaidDraw(); }
+    function mmPaidDraw() {
+      const q = mmQ, sum = q.paid.reduce((a, b) => a + b, 0);
+      document.getElementById('mm-paid').innerHTML = q.paid.map((c, i) => `<button class="mm-coin sm c${c}" onclick="mmUnpay(${i})"><b>${c}</b></button>`).join('');
+      document.getElementById('mm-sum').textContent = `낸 돈: ${sum}원`;
+      mmSay(`${sum}원`);
+    }
+    function mmPayDone(btn) {
+      const q = mmQ; if (!q || mmBusy) return;
+      const sum = q.paid.reduce((a, b) => a + b, 0);
+      if (sum === q.answer) return mmRight(btn);
+      if (sum > q.answer) { playTone(220, 0.12, 'sawtooth'); mmSay(`${sum - q.answer}원을 더 냈어요. 낸 동전을 눌러서 빼 볼까요?`); }
+      else { playTone(220, 0.12, 'sawtooth'); mmSay(`${q.answer - sum}원이 모자라요. 동전을 더 내 볼까요?`); }
+      q.tries++;
+      mmMissOnce(q);
+      if (q.tries >= 3) { mmBusy = true; const t = q.reveal(); document.getElementById('mm-feedback').innerHTML = `<div class="mm-fb mm-fb-soft">💡 ${t}</div>`; mmSay(t, () => mmLater(mmAdjust(false), 900)); }
+    }
+    function mmWeighTap(btn) {
+      const q = mmQ; if (!q || mmBusy || btn.disabled) return;
+      const p = +btn.dataset.v;
+      if (p === q.order[q.next]) {
+        btn.disabled = true; btn.classList.add('mm-ok');
+        btn.querySelector('.mm-who-w').textContent = `${mmWt(p)}kg`;
+        const s = document.getElementById('mm-slot-' + (q.next + 1)); s.innerHTML = mmPkImg(p); s.classList.add('ok');
+        playTone(600 + q.next * 100, 0.08); mmSay(`${mmName(p)}, ${mmWt(p)}킬로그램`);
+        q.next++;
+        if (q.next >= 3) mmLater(() => mmRight(null), 900);
+      } else mmAnswer('x', btn);
+    }
+
+    const MM_GEN = { 1: mmGenCount, 2: mmGenCompare, 3: mmGenShapePattern, 4: mmGenNumber, 5: mmGenAddSub, 6: mmGenTen, 7: mmGenLife };
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
