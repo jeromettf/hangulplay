@@ -2,7 +2,14 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#dc2626">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="한글 쏙쏙">
   <title>한글 쏙쏙! 포켓몬스터 대도감 & 배틀 스타디움 (1기~9기 1,025마리)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -488,6 +495,154 @@
       header h1 > span { display: none; }
     }
 </style>
+<style>
+    /* ===== 아이 프로필 · 예전 놀이 다듬기 ===== */
+    #kp-menu { padding: .3rem .4rem .5rem; border-bottom: 1px solid #f1f5f9; margin-bottom: .3rem; }
+    .kp-title { font-size: .95rem; color: #be123c; padding: .2rem .3rem; }
+    .kp-row { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; padding: .25rem .3rem; font-size: .85rem; color: #475569; }
+    .kp-row input { flex: 1; min-width: 6rem; border: 2px solid #e2e8f0; border-radius: .6rem; padding: .25rem .5rem; font-family: Jua, sans-serif; color: #1e293b; }
+    #rn-menu .kp-age { width: auto; display: inline-flex; padding: .2rem .55rem; border-radius: 999px; background: #f1f5f9; font-size: .8rem; }
+    #rn-menu .kp-age.on { background: #f43f5e; color: #fff; }
+    #rn-menu { max-width: calc(100vw - 1.2rem); width: 19rem; }
+    #kp-pop { position: fixed; left: 50%; bottom: 1.5rem; z-index: 88; transform: translate(-50%, 140%); opacity: 0; display: flex; align-items: center; gap: .5rem; background: #fff; border: 3px solid #fcd34d; border-radius: 999px; padding: .3rem .9rem .3rem .3rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); font-family: Jua, sans-serif; color: #92400e; transition: transform .35s cubic-bezier(.2,1.4,.4,1), opacity .3s; pointer-events: none; }
+    #kp-pop.show { transform: translate(-50%, 0); opacity: 1; }
+    #kp-pop img { width: 2.4rem; height: 2.4rem; object-fit: contain; border-radius: 999px; background: radial-gradient(circle at 35% 30%, #fff, #fde68a); }
+    #kp-pop b { font-weight: normal; }
+    #kp-pop span { font-size: .8rem; color: #b45309; }
+    @media (max-width: 767px) { #kp-pop { bottom: calc(5rem + env(safe-area-inset-bottom)); } }
+    .kp-range-btn { width: 100%; font-family: Jua, sans-serif; font-size: .8rem; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 1rem; padding: .4rem; }
+    .kp-range.hidden { display: none !important; }
+    .kp-kidrange { font-family: Jua, sans-serif; font-size: .8rem; color: #be123c; background: #fff1f2; border: 2px solid #fda4af; border-radius: 999px; padding: .2rem .7rem; }
+    .kp-picks { display: flex; gap: .35rem; overflow-x: auto; padding: .4rem .2rem; scrollbar-width: none; }
+    .kp-picks:empty { display: none; }
+    .kp-picks::-webkit-scrollbar { display: none; }
+    .kp-pick { flex: 0 0 auto; width: 4.4rem; display: flex; flex-direction: column; align-items: center; background: #fff; border: 2px solid #fde68a; border-radius: .9rem; padding: .2rem; font-family: Jua, sans-serif; font-size: .7rem; color: #334155; }
+    .kp-pick img { width: 3.2rem; height: 3.2rem; object-fit: contain; }
+    .kp-pick:active { transform: scale(.94); }
+    .kp-more { justify-content: center; font-size: 1.4rem; gap: .2rem; }
+    .kp-more span { font-size: .7rem; }
+    .kp-kb-go { width: 100%; font-family: Jua, sans-serif; font-size: 1.2rem; color: #fff; background: linear-gradient(135deg, #22c55e, #0ea5e9); border-radius: 1.2rem; padding: .7rem; box-shadow: 0 4px 0 #0369a1; display: flex; flex-direction: column; align-items: center; }
+    .kp-kb-go small { font-size: .75rem; opacity: .9; }
+    .kp-kb-go:active { transform: translateY(2px); box-shadow: 0 2px 0 #0369a1; }
+    .kp-kb { width: min(520px, 100%); }
+    .kp-kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: .4rem; width: 100%; }
+    .kp-kb-pk { display: flex; flex-direction: column; align-items: center; background: #f8fafc; border: 3px solid #e2e8f0; border-radius: .9rem; padding: .2rem; font-family: Jua, sans-serif; font-size: .72rem; color: #334155; }
+    .kp-kb-pk img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+    .kp-kb-pk.on { border-color: #22c55e; background: #dcfce7; transform: scale(1.04); }
+    .kp-kb-bar span { white-space: nowrap; }
+    .kp-kb-bar { display: flex; align-items: center; gap: .6rem; width: 100%; font-family: Jua, sans-serif; color: #334155; }
+    .kp-kb-bar .rw-go:disabled { opacity: .45; }
+    .kp-kb-x { font-family: Jua, sans-serif; font-size: .85rem; color: #94a3b8; }
+    .kp-eff { font-family: Jua, sans-serif; font-size: .72rem; border-radius: 999px; padding: 0 .4rem; }
+    .kp-eff.good { background: #fef3c7; color: #b45309; animation: kp-pulse 1.4s infinite; display: inline-block; }
+    @keyframes kp-pulse { 50% { scale: 1.1; } }
+    .kp-eff.low { background: #e0f2fe; color: #0369a1; }
+    .kp-eff.no { background: #f1f5f9; color: #64748b; }
+</style>
+<style>
+    /* ===== 미션 · 리포트 · 쉬는 시간 · 도장 · 전시관 · 꾸미기 · 목소리 동화 ===== */
+    .ex-mis-btn { height: 2.1rem; padding: 0 .6rem; border-radius: 999px; background: rgba(255,255,255,.2); color: #fff; display: flex; align-items: center; gap: .2rem; font-family: Jua, sans-serif; font-size: 1rem; white-space: nowrap; }
+    .ex-mis-btn b { font-weight: normal; font-size: .85rem; }
+    .ex-mis-btn.done { background: #fde047; color: #92400e; }
+    .ex-mis-btn.new { animation: kp-pulse 1.4s infinite; }
+    .ex-mis-btn:active { transform: scale(.94); }
+    .ex-pop-e { font-size: 1.8rem; line-height: 1; }
+    .ex-box { width: min(420px, 100%); }
+    .ex-mis { display: flex; align-items: center; gap: .6rem; width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 1rem; padding: .5rem .6rem; font-family: Jua, sans-serif; }
+    .ex-mis.ok { background: #f0fdf4; border-color: #86efac; }
+    .ex-mis-e { font-size: 1.8rem; line-height: 1; }
+    .ex-mis-b { flex: 1; min-width: 0; }
+    .ex-mis-b b { font-weight: normal; color: #334155; font-size: .95rem; }
+    .ex-dots { display: flex; gap: .3rem; margin-top: .25rem; }
+    .ex-dots i { width: 1.1rem; height: 1.1rem; border-radius: 999px; background: #e2e8f0; }
+    .ex-dots i.on { background: radial-gradient(circle at 35% 30%, #fff7, #f59e0b); box-shadow: 0 0 0 2px #fcd34d; }
+    .ex-mis-ok { font-size: 1.5rem; color: #16a34a; }
+    .ex-mis-go { flex: 0 0 auto; font-size: .9rem; color: #fff; background: #f43f5e; border-radius: 999px; padding: .35rem .8rem; box-shadow: 0 3px 0 #be123c; }
+    .ex-mis-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #be123c; }
+    #ex-menu { padding: .3rem 0 .4rem; border-bottom: 1px solid #f1f5f9; margin-bottom: .3rem; }
+    /* 리포트 */
+    .ex-rp-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; width: 100%; }
+    .ex-rp-sum div { background: #fff7ed; border-radius: .9rem; padding: .45rem .2rem; text-align: center; display: flex; flex-direction: column; }
+    .ex-rp-sum b { font-family: Jua, sans-serif; font-weight: normal; font-size: 1.25rem; color: #c2410c; }
+    .ex-rp-sum span { font-size: .7rem; color: #78716c; font-weight: 700; }
+    .ex-rp-bars { display: flex; align-items: flex-end; gap: .35rem; width: 100%; height: 8.5rem; padding: .3rem .2rem 0; border-bottom: 2px solid #e2e8f0; }
+    .ex-rp-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; font-family: Jua, sans-serif; font-size: .75rem; color: #64748b; gap: .15rem; }
+    .ex-rp-col i { width: 70%; min-height: 3px; border-radius: .4rem .4rem 0 0; background: linear-gradient(#fb923c, #f43f5e); }
+    .ex-rp-v { font-size: .65rem; color: #94a3b8; }
+    .ex-rp-cat { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; width: 100%; }
+    .ex-rp-cat div { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-radius: .8rem; padding: .35rem .55rem; font-family: Jua, sans-serif; font-size: .8rem; color: #475569; }
+    .ex-rp-cat b { font-weight: normal; color: #0f766e; font-size: 1rem; }
+    .ex-rp-note { font-size: .68rem; color: #94a3b8; text-align: center; }
+    /* 쉬는 시간 */
+    #ex-break { display: none; }
+    #ex-break.show { display: flex; position: fixed; inset: 0; z-index: 200; align-items: center; justify-content: center; padding: 1rem; background: radial-gradient(circle at 50% 30%, #312e81, #0f172a); }
+    .ex-br-box { width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: .6rem; text-align: center; color: #e0e7ff; font-family: Jua, sans-serif; }
+    .ex-br-pk { position: relative; width: 11rem; }
+    .ex-br-pk img { width: 100%; filter: brightness(.85) saturate(.9); animation: ex-breathe 3.6s ease-in-out infinite; }
+    .ex-zz { position: absolute; right: -.5rem; top: 0; font-size: 2.2rem; animation: ex-zz 2.4s ease-in-out infinite; }
+    @keyframes ex-breathe { 50% { scale: 1.04 .97; } }
+    @keyframes ex-zz { 0% { opacity: 0; translate: 0 10px; } 40% { opacity: 1; } 100% { opacity: 0; translate: 14px -24px; } }
+    .ex-br-box h2 { font-size: 1.5rem; color: #fde68a; }
+    .ex-br-box p { font-size: 1rem; line-height: 1.5; }
+    .ex-br-t { font-size: 2.6rem; color: #fff; letter-spacing: .05em; }
+    .ex-br-done { font-size: 1.2rem; color: #fff; background: linear-gradient(135deg, #22c55e, #0ea5e9); border-radius: 1.2rem; padding: .7rem 1.4rem; box-shadow: 0 4px 0 #0369a1; }
+    .ex-br-done.hidden, .ex-br-q.hidden { display: none; }
+    .ex-br-parent { font-size: .8rem; color: #a5b4fc; text-decoration: underline; margin-top: .6rem; }
+    .ex-br-q { display: flex; gap: .4rem; align-items: center; font-size: 1rem; }
+    .ex-br-q input { width: 5rem; padding: .3rem .5rem; border-radius: .6rem; color: #0f172a; font-family: Jua, sans-serif; font-size: 1.05rem; }
+    .ex-br-q input.bad { animation: mm-shake .4s; outline: 3px solid #f43f5e; }
+    .ex-br-q button { background: #6366f1; color: #fff; border-radius: .6rem; padding: .35rem .8rem; }
+    /* 도감 도장 */
+    .ex-stamp { position: absolute; left: .35rem; bottom: 2.1rem; width: 1.7rem; height: 1.7rem; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: .95rem; background: #fff; border: 2px dashed #f59e0b; rotate: -12deg; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .ex-stamp.caught { border-color: #0ea5e9; }
+    .ex-stamp.card { border-style: solid; border-color: #f43f5e; background: #fff1f2; }
+    .ex-stamp-sum { color: #b45309; }
+    /* 전시관 */
+    .ex-gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .5rem; width: 100%; }
+    .ex-art { display: flex; flex-direction: column; align-items: center; gap: .15rem; background: #fef3c7; padding: .35rem .35rem .25rem; border-radius: .4rem; box-shadow: inset 0 0 0 4px #b45309, 0 3px 6px rgba(0,0,0,.15); font-family: Jua, sans-serif; font-size: .72rem; color: #78350f; }
+    .ex-art img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #fff; border: 2px solid #fde68a; }
+    .ex-art:active { transform: scale(.96); }
+    .ex-frame { width: 100%; padding: .6rem; background: linear-gradient(135deg, #d97706, #92400e); border-radius: .5rem; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+    .ex-frame img { width: 100%; display: block; background: #fff; border: 4px solid #fef3c7; }
+    .ex-art-big .rw-msg small { font-size: .8rem; color: #94a3b8; }
+    .ex-row { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: center; }
+    .ex-del[data-sure] { background: #fee2e2; color: #b91c1c; }
+    /* 꾸미기 */
+    .cr-me { container-type: inline-size; }
+    .ex-acc { position: absolute; z-index: 3; line-height: 1; pointer-events: none; translate: -50% -50%; filter: drop-shadow(0 2px 2px rgba(0,0,0,.2)); }
+    .ex-head { left: 50%; top: 8%; font-size: 30cqw; }
+    .ex-face { left: 50%; top: 38%; font-size: 28cqw; }
+    .ex-neck { left: 50%; top: 74%; font-size: 24cqw; }
+    .ex-side { left: 92%; top: 22%; font-size: 26cqw; animation: ex-float 2.6s ease-in-out infinite; }
+    @keyframes ex-float { 50% { translate: -50% -62%; } }
+    .ex-dc-me { position: relative; width: 11rem; aspect-ratio: 1; background: radial-gradient(circle, #fef9c3, #fde68a); border-radius: 999px; }
+    .ex-dc-pk { left: 50%; top: 52%; width: 78%; }
+    .ex-dc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; width: 100%; }
+    .ex-dc { display: flex; flex-direction: column; align-items: center; background: #f8fafc; border: 3px solid #e2e8f0; border-radius: .9rem; padding: .3rem .1rem; font-family: Jua, sans-serif; }
+    .ex-dc span { font-size: 1.7rem; line-height: 1.2; }
+    .ex-dc small { font-size: .68rem; color: #475569; }
+    .ex-dc.lock { opacity: .55; }
+    .ex-dc.on { border-color: #f43f5e; background: #fff1f2; }
+    .ex-dc:active { transform: scale(.94); }
+    /* 목소리 동화 */
+    #ex-rec-toggle.on { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+    .ex-recbar { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; background: #fff; border: 2px dashed #fca5a5; border-radius: 1rem; padding: .45rem .6rem; font-family: Jua, sans-serif; font-size: .85rem; color: #475569; }
+    .ex-recbar span { flex: 1; min-width: 10rem; }
+    .ex-recbar button { background: #f1f5f9; border-radius: 999px; padding: .3rem .7rem; }
+    .ex-recbar .ex-rec-btn { background: #ef4444; color: #fff; font-size: 1rem; padding: .4rem .9rem; box-shadow: 0 3px 0 #b91c1c; }
+    .ex-recbar.rec { border-style: solid; border-color: #ef4444; }
+    .ex-recbar.rec .ex-rec-btn { animation: kp-pulse 1s infinite; background: #334155; box-shadow: 0 3px 0 #0f172a; }
+    .ex-shelf { background: #fff7ed; border: 2px solid #fed7aa; border-radius: 1.2rem; padding: .5rem .6rem; }
+    .ex-shelf-h { font-family: Jua, sans-serif; color: #c2410c; font-size: .95rem; margin-bottom: .3rem; }
+    .ex-shelf-row { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .2rem; }
+    .ex-sbk { position: relative; flex: 0 0 auto; width: 7.5rem; }
+    .ex-sbk-open { width: 100%; display: flex; flex-direction: column; align-items: center; background: #fff; border: 2px solid #fdba74; border-radius: .9rem; padding: .3rem; font-family: Jua, sans-serif; }
+    .ex-sbk-open img { width: 4rem; height: 4rem; object-fit: contain; }
+    .ex-sbk-open b { font-weight: normal; font-size: .75rem; color: #334155; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .ex-sbk-open small { font-size: .7rem; color: #c2410c; }
+    .ex-sbk-x { position: absolute; top: .2rem; right: .2rem; font-size: .7rem; color: #94a3b8; background: #fff; border-radius: 999px; padding: .05rem .35rem; }
+    .ex-sbk-x.sure { color: #fff; background: #ef4444; }
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
 
@@ -559,7 +714,9 @@
       </nav>
       <div class="rn-top"><button class="rn-gear" onclick="rnMenu(event)" title="부모님 메뉴" aria-label="부모님 메뉴">⚙️</button></div>
     </div>
-    <div id="rn-menu" class="hidden">
+    <div id="rn-menu" class="hidden" onclick="event.stopPropagation()">
+      <div id="kp-menu"></div>
+      <div id="ex-menu"></div>
       <button onclick="downloadAppFile(); rnMenu()">📥 앱 파일로 저장</button>
       <small>인터넷이 없어도 열 수 있게 이 앱을 파일 하나로 저장해요.</small>
     </div>
@@ -647,6 +804,7 @@
       
       <!-- BATTLE SETUP LOBBY SCREEN -->
       <div id="battle-setup-screen" class="space-y-3">
+        <div id="kp-kidbattle"></div>
         <!-- Battle Options Banner -->
         <div class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-500 rounded-3xl p-3.5 sm:p-4 text-white shadow-md flex flex-wrap items-center justify-between gap-2.5">
           <div>
@@ -1192,6 +1350,7 @@
           </button>
         </div>
       </div>
+      <div id="kp-study-picks" class="kp-picks"></div>
 
       <div class="bg-white rounded-3xl p-3.5 sm:p-5 shadow-md border border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         <div class="lg:col-span-5 flex flex-col items-center text-center space-y-2">
@@ -1317,6 +1476,7 @@
               <button onclick="saveColoringArtwork()" class="px-2.5 py-0.5 text-xs font-jua rounded-xl bg-sky-500 hover:bg-sky-600 text-white shadow transition active:scale-95">
                 <i class="fa-solid fa-download"></i> 그림 저장
               </button>
+              <button onclick="exGallery()" class="px-2.5 py-0.5 text-xs font-jua rounded-xl bg-amber-500 hover:bg-amber-600 text-white shadow transition active:scale-95">🖼️ 전시관</button>
             </div>
           </div>
 
@@ -1401,6 +1561,7 @@
           <div class="flex items-center justify-center gap-1 text-xs font-jua">
             <span class="text-slate-400">범위:</span>
             <select id="quiz-gen-filter" onchange="generateNewQuizQuestion()" class="px-2 py-1 bg-slate-100 rounded-xl border border-slate-200">
+              <option value="kid" selected>⭐ 우리 아이 수준</option>
               <option value="all">전체 1,025마리</option>
               <option value="1">1기 관동</option>
               <option value="2">2기 성도</option>
@@ -1863,8 +2024,10 @@
           </div>
         </div>
 
-        <!-- Range Settings -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2 font-jua text-xs">
+        <!-- Range Settings (부모님용, 접어 둠) -->
+        <button class="kp-range-btn" onclick="kpToggleRange(this)">⚙️ 문제 범위 바꾸기 (부모님) ▾</button>
+        <div class="kp-range hidden bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2 font-jua text-xs">
+          <button class="kp-kidrange" onclick="kpUseKidRange('dq')">⭐ 우리 아이 수준으로</button>
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-slate-500"><i class="fa-solid fa-sliders text-teal-500"></i> 출제 범위:</span>
             <select id="dq-gen-from" onchange="onDescQuizRangeChanged()" class="px-2 py-1 bg-slate-100 rounded-xl border border-slate-200"></select>
@@ -1954,8 +2117,10 @@
           </div>
         </div>
 
-        <!-- Range Settings -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2 font-jua text-xs">
+        <!-- Range Settings (부모님용, 접어 둠) -->
+        <button class="kp-range-btn" onclick="kpToggleRange(this)">⚙️ 문제 범위 바꾸기 (부모님) ▾</button>
+        <div class="kp-range hidden bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2 font-jua text-xs">
+          <button class="kp-kidrange" onclick="kpUseKidRange('guess')">⭐ 우리 아이 수준으로</button>
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-slate-500"><i class="fa-solid fa-sliders text-fuchsia-500"></i> 출제 범위:</span>
             <select id="guess-gen-from" onchange="onGuessRangeChanged()" class="px-2 py-1 bg-slate-100 rounded-xl border border-slate-200"></select>
@@ -2528,6 +2693,7 @@
       </div>
     </section>
     <div id="rw-ov" class="hidden"></div>
+    <div id="kp-pop"></div>
 
   </main>
 
@@ -5159,7 +5325,8 @@
       const genFilter = filterEl ? filterEl.value : 'all';
       let validNums = [];
 
-      for (let i = 0; i < POKEMON_NAMES_1025.length; i++) {
+      if (genFilter === 'kid' && typeof kpPool === 'function') validNums = kpPool();   // 아이 나이에 맞는 포켓몬
+      else for (let i = 0; i < POKEMON_NAMES_1025.length; i++) {
         const num = i + 1;
         if (genFilter === 'all' || getGeneration(num).gen === parseInt(genFilter)) validNums.push(num);
       }
@@ -5468,7 +5635,7 @@
 
       setTimeout(() => {
         // Pick truly random Pokémon from 1,025
-        const rNum = Math.floor(Math.random() * 1025) + 1;
+        const rNum = typeof kpPick === 'function' ? kpPick() : Math.floor(Math.random() * 1025) + 1;   // 아이 나이에 맞는 포켓몬
         const name = POKEMON_NAMES_1025[rNum - 1];
         const gen = getGeneration(rNum);
         const genus = getPokemonGenus(rNum);
@@ -6021,7 +6188,7 @@
      * ==============================================================
      */
     const GUESS_GEN_NAMES = ['', '1기 관동', '2기 성도', '3기 호연', '4기 신오', '5기 하나', '6기 칼로스', '7기 알로라', '8기 가라르', '9기 팔데아'];
-    const GUESS_REVEAL_SEC = 3;
+    let GUESS_REVEAL_SEC = 3;   // 나이에 따라 3~6초 (kp 모듈)
     const GUESS_NEXT_DELAY_MS = 1800;   // 정답 음성이 끝난 뒤 다음 문제까지
     const GUESS_SPEECH_FALLBACK_MS = 5000; // 음성 끝 이벤트가 안 오는 브라우저 대비
     let guessRunning = false;
@@ -8865,7 +9032,7 @@ const BX_DATA = {"s":{"1":["Bulbasaur",["overgrow","chlorophyll"],["powerwhip","
         return `<button class="bx-move" style="border-left-color:${color}" ${m.disabled ? 'disabled' : ''} onclick="bxChoose('${side}','move ${i + 1}')">
             <div class="bx-move-name"><span class="truncate">${bxMoveKo(m.id)}</span><span class="bx-type" style="background:${color}">${ko}</span></div>
             <div class="bx-move-meta"><span>${cat} · 위력 ${pow}</span><span>명중 ${acc}</span></div>
-            <div class="bx-move-meta"><span></span><span>${pp}</span></div>
+            <div class="bx-move-meta"><span>${typeof kpMoveHint === 'function' ? kpMoveHint(side, mv) : ''}</span><span>${pp}</span></div>
           </button>`;
       }).join('');
       const canSwitch = !act.trapped && r.side.pokemon.some(p => !p.active && !p.condition.endsWith('fnt'));
@@ -11725,8 +11892,10 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       };
       ov.innerHTML = `<div class="rw-box rw-album">
         <div class="rw-head">📒 포켓몬 카드 앨범 <small>${have} / ${RW_POOL.length}</small></div>
-        <p class="rw-tip">수학 놀이, 그림 찾기, 포켓몬 놀이에서 스티커를 10개 모으면 카드가 한 장 생겨요. 그림자 친구들은 누구일까요?</p>
+        <p class="rw-tip">어느 놀이에서든 스티커를 10개 모으면 카드가 한 장 생겨요. 그림자 친구들은 누구일까요?</p>
         <div class="rw-album-grid">${RW_POOL.map(cell).join('')}${extra.map(cell).join('')}</div>
+        ${(rwS.caught || []).length ? `<div class="rw-head">📡 포획 모드에서 잡은 포켓몬 <small>${rwS.caught.length}마리</small></div>
+        <div class="rw-album-grid">${rwS.caught.map(n => `<div class="rw-mini rw-caught">${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></div>`).join('')}</div>` : ''}
         <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
       ov.classList.remove('hidden');
     }
@@ -12789,6 +12958,877 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       } catch (e) { rnSync(); }
     }, 0));
     window.addEventListener('resize', () => { try { if (typeof rwHdr === 'function') rwHdr(); } catch (e) {} });
+    /**
+     * ==============================================================
+     * [아이 프로필 · 예전 놀이 다듬기]
+     *  - 아이 이름·나이를 한곳에 (⚙️ 부모님 메뉴) → 모든 놀이가 함께 써요
+     *  - 나이에 맞는 포켓몬 범위 (3~4세 잘 알려진 친구들 → 7세 전체)
+     *  - 쓰기·빈칸·누구게?·설명 퀴즈·포획도 스티커를 받아요 (같은 카드 앨범)
+     *  - 저장 안 되던 포획 가방을 저장해요
+     *  - 퀴즈는 열자마자 시작하고, 문제를 읽어 주고, 처음 틀리면 한 번 더 기회
+     *  - 아이용 바로 대결
+     * ==============================================================
+     */
+    const KP_KEY = 'pkmn_profile_v1';
+    // 3~4세: 아이들이 가장 많이 아는 친구들
+    const KP_POOL_S = [25, 1, 4, 7, 133, 39, 52, 143, 54, 35, 172, 132, 151, 150, 6, 9, 3, 94, 129, 130, 131, 26, 2, 5, 8, 16, 10, 74, 79, 92, 113, 124, 175, 393, 906, 909, 912, 778, 448, 197];
+    // 5세: 위 친구들 + 진화형과 인기 포켓몬
+    const KP_POOL_M = [...new Set([...KP_POOL_S, 134, 135, 136, 196, 470, 471, 700, 37, 38, 58, 59, 77, 95, 104, 147, 148, 149, 152, 155, 158, 183, 184, 252, 255, 258, 280, 282, 302, 359, 384, 387, 390, 427, 501, 495, 498, 570, 571, 650, 653, 656, 658, 722, 725, 728, 810, 813, 816, 907, 910, 913, 100, 101, 81, 120, 121, 138, 140, 142, 144, 145, 146, 249, 250, 245, 243, 244])];
+    let kpS = null;
+    function kpLoad() {
+      if (kpS) return kpS;
+      try { kpS = JSON.parse(localStorage.getItem(KP_KEY) || 'null'); } catch (e) {}
+      if (!kpS) {
+        kpS = { name: '', age: 5 };
+        try { const m = JSON.parse(localStorage.getItem('pkmn_math_v1') || 'null'); if (m && m.age) kpS.age = m.age; } catch (e) {}
+        try { const f = JSON.parse(localStorage.getItem('pkmn_find_v1') || 'null'); if (f && f.age) kpS.age = f.age; } catch (e) {}
+        try { const k = JSON.parse(localStorage.getItem(typeof SB_KIDS_KEY !== 'undefined' ? SB_KIDS_KEY : 'x') || 'null'); const n = k && (k[0]?.name || k.kids?.[0]?.name); if (n) kpS.name = n; } catch (e) {}
+      }
+      return kpS;
+    }
+    function kpSave() { try { localStorage.setItem(KP_KEY, JSON.stringify(kpS)); } catch (e) {} }
+    const kpAge = () => kpLoad().age || 5;
+    const kpName = () => (kpLoad().name || '').trim();
+    // 나이에 맞는 포켓몬 번호 목록
+    function kpPool() {
+      const a = kpAge();
+      if (a <= 4) return KP_POOL_S.slice();
+      if (a === 5) return KP_POOL_M.slice();
+      if (a === 6) return [...new Set([...KP_POOL_M, ...Array.from({ length: 151 }, (_, i) => i + 1)])];
+      return Array.from({ length: 1025 }, (_, i) => i + 1);
+    }
+    const kpPick = () => { const p = kpPool(); return p[Math.floor(Math.random() * p.length)]; };
+    const kpPoolLabel = () => { const a = kpAge(); return a <= 4 ? `잘 알려진 친구 ${KP_POOL_S.length}마리` : a === 5 ? `인기 포켓몬 ${KP_POOL_M.length}마리` : a === 6 ? `1세대와 인기 포켓몬 ${kpPool().length}마리` : '전체 1,025마리'; };
+    function kpSetAge(a, quiet) {
+      kpLoad().age = a; kpSave();
+      // 수학·그림 찾기·포켓몬 놀이 나이도 같이
+      try { if (typeof mmS !== 'undefined' && mmS) { mmS.age = a; mmSave(); } } catch (e) {}
+      try { if (typeof fdS !== 'undefined' && fdS) { fdS.age = a; fdSave(); } } catch (e) {}
+      if (!quiet) kpRenderMenu();
+      try { if (guessKidPool) buildGuessDeck(); if (dqKidPool && dqInitialized) buildDescQuizDeck(); } catch (e) {}
+    }
+    function kpSetName(v) { kpLoad().name = String(v || '').slice(0, 8); kpSave(); }
+    function kpRenderMenu() {
+      const box = document.getElementById('kp-menu'); if (!box) return;
+      const s = kpLoad();
+      box.innerHTML = `<div class="kp-title">👧 아이 프로필</div>
+        <label class="kp-row">이름 <input id="kp-name" value="${(s.name || '').replace(/"/g, '')}" maxlength="8" placeholder="예: 지민" oninput="kpSetName(this.value)"></label>
+        <div class="kp-row">나이 ${[3, 4, 5, 6, 7].map(a => `<button class="kp-age ${s.age === a ? 'on' : ''}" onclick="event.stopPropagation(); kpSetAge(${a})">${a}세</button>`).join('')}</div>
+        <small>나이에 맞춰 퀴즈·포획에 나오는 포켓몬과 놀이 난이도가 바뀌어요. 지금: ${kpPoolLabel()}</small>`;
+    }
+    // 수학·그림 찾기에서 나이를 바꿔도 프로필에 반영
+    (function () {
+      if (typeof mmSetAge === 'function') { const f = mmSetAge; mmSetAge = function (a) { const r = f.apply(this, arguments); kpSetAge(a, true); return r; }; }
+      if (typeof fdSetAge === 'function') { const f = fdSetAge; fdSetAge = function (a) { const r = f.apply(this, arguments); kpSetAge(a, true); return r; }; }
+      if (typeof mmLoad === 'function') { const f = mmLoad; mmLoad = function () { const o = f.apply(this, arguments); o.age = kpAge(); return o; }; }
+      if (typeof fdLoad === 'function') { const f = fdLoad; fdLoad = function () { const o = f.apply(this, arguments); o.age = kpAge(); return o; }; }
+    })();
+    const kpCall = () => { const n = kpName(); return n ? `${n}${(n.charCodeAt(n.length - 1) - 0xAC00) % 28 ? '아' : '야'}, ` : ''; };
+
+    // ---------- 예전 놀이에서도 스티커 ----------
+    Object.assign(RW_SRC, { quiz: ['🧩', '빈칸 퀴즈'], guess: ['❓', '누구게?'], desc: ['📖', '설명 퀴즈'], study: ['✏️', '쓰기 놀이터'], catch: ['📡', '포획'], battle: ['⚔️', '바로 대결'] });
+    // 스티커 줄이 안 보이는 화면에서는 작은 알림으로 보여 줘요
+    function kpSticker(pks, src, after) {
+      const cards = rwGive(pks, src);
+      const visibleBar = [...document.querySelectorAll('.rw-bar')].some(b => b.offsetParent !== null && !b.closest('.fd-minibar'));
+      if (!visibleBar) {
+        const el = document.getElementById('kp-pop');
+        if (el) {
+          el.innerHTML = `${rwImg(pks[0])}<b>스티커 +${pks.length}</b><span>${rwS.stickers.length} / 10</span>`;
+          el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+          clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2200);
+        }
+      }
+      if (cards.length) setTimeout(() => rwShowCards(cards, after), 1400); else if (after) after();
+      return cards;
+    }
+
+    // ---------- 빈칸 퀴즈 ----------
+    let kpQuizTry = 0, kpQuizTimer = 0;
+    (function () {
+      const gen = generateNewQuizQuestion;
+      generateNewQuizQuestion = function () {
+        clearTimeout(kpQuizTimer); kpQuizTry = 0;
+        gen.apply(this, arguments);   // '우리 아이 수준'이면 원래 함수 안에서 kpPool()을 써요
+        // 문제 읽어 주기: 빈칸은 "뭐"로
+        if (currentQuizPokemon && !document.getElementById('view-quiz').classList.contains('hidden')) {
+          const nm = currentQuizPokemon.name, bi = [...document.querySelectorAll('#quiz-blank-word-display > div')].findIndex(d => d.id === 'quiz-target-blank');
+          const said = [...nm].map((c, i) => i === bi ? '뭐' : c).join(' ');
+          setTimeout(() => speakText(`${kpCall()}이 포켓몬 이름은 ${said}! 빈칸에 들어갈 글자를 찾아봐요.`), 250);
+        }
+      };
+      const chk = checkQuizAnswer;
+      checkQuizAnswer = function (ch, btn) {
+        if (btn.disabled) return;
+        if (ch !== currentQuizAnswer && kpQuizTry === 0) {
+          kpQuizTry = 1;
+          btn.disabled = true; btn.classList.add('opacity-40'); bxReAnimSafe(btn, 'mm-nope', 400);
+          playTone(220, 0.12, 'sawtooth');
+          speakText(`${ch}${typeof sbJosa === 'function' ? sbJosa(ch, '은') : '는'} 아니에요. 다시 골라 볼까요?`);
+          return;
+        }
+        const ok = ch === currentQuizAnswer;
+        chk.apply(this, arguments);
+        const num = currentQuizPokemon && currentQuizPokemon.num;
+        const go = () => { kpQuizTimer = setTimeout(() => { if (!document.getElementById('view-quiz').classList.contains('hidden') && currentQuizPokemon && currentQuizPokemon.num === num) generateNewQuizQuestion(); }, 2600); };
+        if (ok) kpSticker([num], 'quiz', go); else go();
+      };
+    })();
+
+    // ---------- 누구게? ----------
+    let guessKidPool = true;
+    (function () {
+      const pool = getGuessPool;
+      getGuessPool = function () { const r = pool.apply(this, arguments); if (guessKidPool) { r.pool = kpPool(); r.kid = true; } return r; };
+      const build = buildGuessDeck;
+      buildGuessDeck = function () { const n = build.apply(this, arguments); if (guessKidPool) { const info = document.getElementById('guess-range-info'); if (info) info.textContent = `⭐ 우리 아이 수준 (${kpAge()}세): ${kpPoolLabel()}에서 겹치지 않게 나와요.`; } return n; };
+      const preset = setGuessPreset;
+      setGuessPreset = function () { guessKidPool = false; return preset.apply(this, arguments); };
+      const ch = onGuessRangeChanged;
+      onGuessRangeChanged = function () { guessKidPool = false; return ch.apply(this, arguments); };   // 부모님이 범위를 직접 바꾸면 그 범위로
+      // 아직 글을 못 읽는 아이는 생각할 시간이 더 필요해요
+      const next = nextGuessQuestion;
+      nextGuessQuestion = function () { const a = kpAge(); GUESS_REVEAL_SEC = a <= 3 ? 6 : a === 4 ? 5 : a === 5 ? 4 : 3; return next.apply(this, arguments); };
+      // 5마리마다 스티커 (잠깐 멈추고 카드가 생기면 보여 준 뒤 이어서)
+      const rev = revealGuessAnswer;
+      revealGuessAnswer = function (session) {
+        const r = rev.apply(this, arguments);
+        if (guessSeenCount > 0 && guessSeenCount % 5 === 0 && guessCurrent) {
+          const cards = rwGive([guessCurrent.num], 'guess');
+          const el = document.getElementById('kp-pop');
+          if (el) { el.innerHTML = `${rwImg(guessCurrent.num)}<b>5마리 봤어요! 스티커 +1</b><span>${rwS.stickers.length} / 10</span>`; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2400); }
+          if (cards.length) { setTimeout(() => { stopGuessQuiz(true); rwShowCards(cards, () => { if (!document.getElementById('view-guess').classList.contains('hidden')) toggleGuessQuiz(); }); }, 2600); }
+        }
+        return r;
+      };
+    })();
+
+    // ---------- 설명 퀴즈 ----------
+    let dqKidPool = true;
+    (function () {
+      const pool = getDescQuizPool;
+      getDescQuizPool = function () { const r = pool.apply(this, arguments); if (dqKidPool) r.pool = kpPool(); return r; };
+      const build = buildDescQuizDeck;
+      buildDescQuizDeck = function () { const n = build.apply(this, arguments); if (dqKidPool) { const info = document.getElementById('dq-range-info'); if (info) info.textContent = `⭐ 우리 아이 수준 (${kpAge()}세): ${kpPoolLabel()}에서 나와요.`; } return n; };
+      const preset = setDescQuizPreset;
+      setDescQuizPreset = function () { dqKidPool = false; return preset.apply(this, arguments); };
+      const ch = onDescQuizRangeChanged;
+      onDescQuizRangeChanged = function () { dqKidPool = false; return ch.apply(this, arguments); };
+      // 3~5세는 짧고 쉬운 문제 (타입 + 무슨 포켓몬 + 키)
+      const item = buildDescQuizItem;
+      buildDescQuizItem = function (num) {
+        const it = item.apply(this, arguments);
+        if (kpAge() <= 5) {
+          const row = OFFICIAL_DEX.rows[num - 1], types = row[2].map(i => TYPE_NAMES[i]).join('·'), genus = dqMaskName(row[1], it.name);
+          const h = row[3] / 10, size = h < 0.5 ? '아주 작아요' : h < 1 ? '작아요' : h < 2 ? '어른 키만큼 커요' : '아주 아주 커요';
+          it.question = `${types} 타입이에요. ${genus}${typeof koIeyo === 'function' ? koIeyo(genus) : '이에요'}. 몸집은 ${size}.`;
+        }
+        return it;
+      };
+      const ans = answerDescQuiz;
+      answerDescQuiz = function (picked) {
+        if (!dqCurrent || dqAnswered) return;
+        const ok = picked === dqCurrent.num, num = dqCurrent.num;
+        const r = ans.apply(this, arguments);
+        if (ok) kpSticker([num], 'desc');
+        return r;
+      };
+    })();
+
+    // ---------- 쓰기 놀이터 ----------
+    (function () {
+      // 칭찬도장: 이제 실제로 이름을 썼는지 확인하고, 잘 쓰면 스티커
+      praiseWriting = function () {
+        const cv = document.getElementById('tracing-canvas');
+        const nm = currentStudyPokemon ? currentStudyPokemon.name : '';
+        const chk = validateHangulDrawing(cv, nm);
+        if (!chk.valid) { playTone(200, 0.2, 'sawtooth'); speakText(chk.reason); showToast(chk.reason); return; }
+        playSuccessChime();
+        speakText(`${kpCall()}참 잘 썼어요! ${nm}!`);
+        showToast('참 잘 썼어요! 💮');
+        kpSticker([currentStudyPokemon.num], 'study');
+        setTimeout(() => { try { clearTracingCanvas(); } catch (e) {} }, 1200);
+      };
+      pickRandomStudyPokemon = function () { loadStudyPokemon(kpPick()); kpRenderStudyPicks(); };
+      pickRandomColoringPokemon = function () { loadColoringPokemon(kpPick()); clearColoringCanvas(); };
+    })();
+    // 그림을 눌러 쓸 포켓몬 고르기 (글을 몰라도)
+    function kpRenderStudyPicks() {
+      const box = document.getElementById('kp-study-picks'); if (!box) return;
+      const p = kpPool(), picks = [];
+      while (picks.length < 8 && picks.length < p.length) { const n = p[Math.floor(Math.random() * p.length)]; if (!picks.includes(n)) picks.push(n); }
+      box.innerHTML = picks.map(n => `<button class="kp-pick" onclick="loadStudyPokemon(${n}); playTone(560, 0.05); speakText('${POKEMON_NAMES_1025[n - 1]}')">${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></button>`).join('')
+        + `<button class="kp-pick kp-more" onclick="kpRenderStudyPicks(); playTone(480, 0.04)">🔄<span>다른 친구</span></button>`;
+    }
+
+    // ---------- 포획 ----------
+    const KP_CATCH_KEY = 'pkmn_catch_v1';
+    try { const c = JSON.parse(localStorage.getItem(KP_CATCH_KEY) || 'null'); if (c && c.bag) Object.assign(catchInventory, c.bag); } catch (e) {}
+    let kpCatchCards = null;
+    (function () {
+      const up = updateCatchBagUI;
+      updateCatchBagUI = function () { const r = up.apply(this, arguments); try { localStorage.setItem(KP_CATCH_KEY, JSON.stringify({ bag: catchInventory })); } catch (e) {} return r; };
+      const res = openCatchResultModal;
+      openCatchResultModal = function () {
+        const r = res.apply(this, arguments);
+        const pk = discoveredCatchPokemon;
+        if (pk) {
+          rwLoad(); rwS.caught = rwS.caught || [];
+          if (!rwS.caught.includes(pk.num)) rwS.caught.push(pk.num);
+          kpCatchCards = rwGive([pk.num, pk.num], 'catch');   // 잡으면 스티커 2개
+          const el = document.getElementById('kp-pop');
+          if (el) { el.innerHTML = `${rwImg(pk.num)}<b>잡았다! 스티커 +2</b><span>${rwS.stickers.length} / 10</span>`; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600); }
+        }
+        return r;
+      };
+      const after = fn => function () { const r = fn.apply(this, arguments); if (kpCatchCards && kpCatchCards.length) { const c = kpCatchCards; kpCatchCards = null; setTimeout(() => rwShowCards(c), 300); } return r; };
+      proceedToNextRadarSearch = after(proceedToNextRadarSearch);
+      jumpToDexFromCatch = after(jumpToDexFromCatch);
+    })();
+
+    // ---------- 화면을 열면 바로 시작 ----------
+    (function () {
+      const sw = switchMainView;
+      switchMainView = function (v) {
+        const r = sw.apply(this, arguments);
+        if (v === 'guess') setTimeout(() => { if (!guessRunning && !document.getElementById('view-guess').classList.contains('hidden')) toggleGuessQuiz(); }, 350);
+        if (v === 'descquiz') setTimeout(() => { if (!dqActive && !document.getElementById('view-descquiz').classList.contains('hidden')) startDescQuiz(); }, 350);
+        if (v === 'quiz') setTimeout(() => { if (!document.getElementById('view-quiz').classList.contains('hidden')) generateNewQuizQuestion(); }, 250);
+        if (v === 'study') kpRenderStudyPicks();
+        if (v === 'battle') kpRenderKidBattleBtn();
+        return r;
+      };
+    })();
+    function kpToggleRange(btn) { const box = btn.nextElementSibling; box.classList.toggle('hidden'); btn.textContent = box.classList.contains('hidden') ? '⚙️ 문제 범위 바꾸기 (부모님) ▾' : '⚙️ 문제 범위 접기 ▴'; }
+    function kpUseKidRange(which) {
+      if (which === 'guess') { guessKidPool = true; buildGuessDeck(); } else { dqKidPool = true; buildDescQuizDeck(); }
+      playTone(520, 0.05); showToast('⭐ 우리 아이 수준으로 바꿨어요!');
+    }
+
+    // ---------- 아이용 바로 대결 ----------
+    let kpKb = { picks: [] };
+    function kpRenderKidBattleBtn() {
+      const host = document.getElementById('kp-kidbattle'); if (!host) return;
+      host.innerHTML = `<button class="kp-kb-go" onclick="kpKidBattleOpen()">🐣 바로 대결 <small>친구 3마리를 골라서 바로 싸워요</small></button>`;
+    }
+    function kpKidBattleOpen() {
+      kpKb = { picks: [] };
+      const pool = kpPool().filter(n => BX_DATA.s[n]).slice();
+      const list = pool.length > 24 ? fdShuffle(pool).slice(0, 24) : pool;
+      const ov = document.getElementById('rw-ov');
+      ov.innerHTML = `<div class="rw-box kp-kb"><div class="rw-head">🐣 같이 싸울 친구 3마리를 골라요</div>
+        <div class="kp-kb-grid">${list.map(n => `<button class="kp-kb-pk" data-n="${n}" onclick="kpKidPick(${n}, this)">${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></button>`).join('')}</div>
+        <div class="kp-kb-bar"><span id="kp-kb-n">0 / 3</span><button class="rw-go" id="kp-kb-start" disabled onclick="kpKidBattleStart()">⚔️ 대결 시작!</button></div>
+        <button class="kp-kb-x" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
+      ov.classList.remove('hidden');
+      speakText('같이 싸울 친구 세 마리를 골라요!');
+    }
+    function kpKidPick(n, btn) {
+      const i = kpKb.picks.indexOf(n);
+      if (i >= 0) { kpKb.picks.splice(i, 1); btn.classList.remove('on'); }
+      else { if (kpKb.picks.length >= 3) return; kpKb.picks.push(n); btn.classList.add('on'); speakText(POKEMON_NAMES_1025[n - 1]); }
+      playTone(520 + kpKb.picks.length * 60, 0.05);
+      document.getElementById('kp-kb-n').textContent = `${kpKb.picks.length} / 3`;
+      document.getElementById('kp-kb-start').disabled = kpKb.picks.length !== 3;
+    }
+    function kpKidBattleStart() {
+      document.getElementById('rw-ov').classList.add('hidden');
+      const mine = kpKb.picks.slice();
+      const pool = kpPool().filter(n => BX_DATA.s[n] && !mine.includes(n) && !isLegendaryPokemon(n));
+      const foes = fdShuffle(pool).slice(0, 3);
+      const mk = (n, lv) => bxMakeSet({ num: n, name: POKEMON_NAMES_1025[n - 1] }, lv);
+      const a = kpAge();
+      bxStartBattle({
+        mode: 'cpu', kid: true,
+        lv: { p1: 50, p2: a <= 4 ? 38 : a <= 5 ? 42 : 46 },
+        p1Sets: () => mine.map(n => mk(n, 50)), p2Sets: () => foes.map(n => mk(n, a <= 4 ? 38 : a <= 5 ? 42 : 46)),
+        foeName: '라이벌', aiDiff: 'easy', badgeText: '🐣 바로 대결',
+        onEnd: (win) => {
+          setTimeout(() => {
+            const n = win ? 3 : 1;
+            kpSticker(Array.from({ length: n }, (_, i) => mine[i % 3]), 'battle');
+            speakText(win ? `${kpCall()}이겼어요! 스티커 세 개!` : `${kpCall()}잘 싸웠어요! 스티커 한 개!`);
+          }, 1200);
+        }
+      });
+    }
+    // 대결 중 기술 버튼에 효과 알려 주기 (바로 대결 · 쉬움 난이도)
+    function kpMoveHint(side, mv) {
+      try {
+        if (!bx || bx.mode === 'pvp') return '';
+        if (!(bx.opts && bx.opts.kid) && battleDifficulty !== 'easy') return '';
+        if (mv.category === 'Status') return '';
+        const foe = bx.battle[side === 'p1' ? 'p2' : 'p1'].active[0]; if (!foe) return '';
+        const e = bxEff(mv.type, foe);
+        return e === 0 ? '<span class="kp-eff no">효과 없음 🚫</span>' : e >= 2 ? '<span class="kp-eff good">효과 굉장! 🔥</span>' : e < 1 ? '<span class="kp-eff low">별로예요 💧</span>' : '';
+      } catch (e) { return ''; }
+    }
+    window.addEventListener('load', () => setTimeout(() => { try { kpLoad(); kpRenderMenu(); } catch (e) {} }, 50));
+    (function () { const m = rnMenu; rnMenu = function () { kpRenderMenu(); return m.apply(this, arguments); }; })();
+    /**
+     * ==============================================================
+     * [더하기] 오늘의 미션 · 부모님 리포트 · 쉬는 시간 · 도감 도장
+     *          그림 전시관 · 돌보기 꾸미기 · 목소리 동화 · 앱 설치(PWA)
+     * ==============================================================
+     */
+    const exDay = (d) => { d = d || new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+    const exSay = (t) => { try { speakText(t, 0.95); } catch (e) {} };
+    const exEsc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const exLS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k) || 'null') || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+
+    // ---------- 저장소 (그림·목소리는 IndexedDB) ----------
+    let exDbP = null;
+    function exDb() {
+      if (exDbP) return exDbP;
+      exDbP = new Promise((res, rej) => {
+        if (!('indexedDB' in window)) return rej(new Error('no idb'));
+        const r = indexedDB.open('hangulplay', 1);
+        r.onupgradeneeded = () => { const d = r.result; ['art', 'voice', 'story'].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n); }); };
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      });
+      exDbP.catch(() => { exDbP = null; });
+      return exDbP;
+    }
+    function exIdb(store, mode, fn) {
+      return exDb().then(d => new Promise((res, rej) => {
+        const tx = d.transaction(store, mode), req = fn(tx.objectStore(store));
+        tx.oncomplete = () => res(req ? req.result : undefined); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+      }));
+    }
+    const exGet = (s, k) => exIdb(s, 'readonly', st => st.get(k));
+    const exPut = (s, k, v) => exIdb(s, 'readwrite', st => st.put(v, k));
+    const exDel = (s, k) => exIdb(s, 'readwrite', st => st.delete(k));
+    const exAll = (s) => exIdb(s, 'readonly', st => st.getAll());
+    const exKeys = (s) => exIdb(s, 'readonly', st => st.getAllKeys());
+
+    // ---------- 활동 기록 (부모님 리포트 · 미션에 써요) ----------
+    const EX_LOG = 'pkmn_log_v1';
+    const EX_CAT = {
+      hangul: { e: '🔤', n: '한글', src: ['quiz', 'desc', 'study'], go: () => rnPick('hangul', 1), say: '한글 놀이에서 스티커 3개를 모아요' },
+      math: { e: '🔢', n: '수학', src: ['math'], go: () => rnGo('math'), say: '수학 놀이에서 스티커 3개를 모아요' },
+      play: { e: '🎮', n: '놀이', src: ['hide', 'diff', 'puzzle', 'memory', 'code', 'care', 'guess', 'catch', 'battle', 'coloring'], go: () => rnGo('play'), say: '포켓몬 놀이에서 스티커 3개를 모아요' }
+    };
+    const EX_GOAL = 3;
+    let exLog = null;
+    function exLogLoad() {
+      if (exLog) return exLog;
+      exLog = exLS.get(EX_LOG, { d: {} }); if (!exLog.d) exLog.d = {};
+      const keep = Object.keys(exLog.d).sort().slice(-40), d = {};   // 40일만 남겨요
+      keep.forEach(k => d[k] = exLog.d[k]); exLog.d = d;
+      return exLog;
+    }
+    function exToday() { const L = exLogLoad(), k = exDay(); return L.d[k] || (L.d[k] = { m: 0, s: {}, v: {}, mis: [] }); }
+    const exLogSave = () => exLS.set(EX_LOG, exLogLoad());
+    const exCatOf = (src) => Object.keys(EX_CAT).find(c => EX_CAT[c].src.includes(src));
+    const exCatCount = (day, c) => EX_CAT[c].src.reduce((a, s) => a + ((day.s || {})[s] || 0), 0);
+
+    // 만난 포켓몬 (도감 도장)
+    const EX_MET = 'pkmn_met_v1';
+    let exMet = null;
+    const exMetLoad = () => exMet || (exMet = new Set(exLS.get(EX_MET, [])));
+    function exMeet(nums) { const m = exMetLoad(), n0 = m.size; nums.forEach(n => n > 0 && n <= 1025 && m.add(n)); if (m.size !== n0) exLS.set(EX_MET, [...m]); }
+
+    Object.assign(RW_SRC, { coloring: ['🎨', '색칠 놀이'], mission: ['🎯', '오늘의 미션'] });
+    // 스티커를 줄 때마다 오늘 기록 · 미션 · 도장을 함께 챙겨요
+    (function () {
+      const give = rwGive;
+      rwGive = function (pks, src) {
+        const out = give.apply(this, arguments);
+        try {
+          exMeet(pks);
+          if (src !== 'mission') {
+            const t = exToday(); t.s[src] = (t.s[src] || 0) + pks.length; exLogSave();
+            exCheckMission(src);
+          }
+        } catch (e) {}
+        return out;
+      };
+    })();
+
+    // ---------- 오늘의 미션 ----------
+    function exMisState() { const t = exToday(); if (!t.mis) t.mis = []; return t; }
+    function exCheckMission(src) {
+      const c = exCatOf(src); if (!c) return;
+      const t = exMisState();
+      if (t.mis.includes(c) || exCatCount(t, c) < EX_GOAL) return exRenderMisBtn();
+      t.mis.push(c); exLogSave(); exRenderMisBtn();
+      const all = Object.keys(EX_CAT).every(k => t.mis.includes(k));
+      setTimeout(() => {
+        exPop(`🎯 ${EX_CAT[c].n} 미션 완료!`, all ? '미션 3개 모두 끝!' : `${t.mis.length} / 3`);
+        if (all && !t.bonus) {
+          t.bonus = 1; exLogSave();
+          setTimeout(() => {
+            exSay(`${kpCall()}오늘의 미션을 모두 해냈어요! 선물로 스티커 3개를 줄게요!`);
+            const pk = kpPick(), cards = rwGive([pk, pk, pk], 'mission');
+            exPop('🎁 보너스 스티커 +3', `${rwS.stickers.length} / 10`, pk);
+            if (cards.length) setTimeout(() => rwShowCards(cards), 1600);
+          }, 2400);
+        }
+      }, 1200);
+    }
+    function exPop(title, sub, pk) {
+      const el = document.getElementById('kp-pop'); if (!el) return;
+      el.innerHTML = `${pk ? rwImg(pk) : '<span class="ex-pop-e">🎯</span>'}<b>${exEsc(title)}</b><span>${exEsc(sub || '')}</span>`;
+      el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+      clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+    function exRenderMisBtn() {
+      let b = document.getElementById('ex-mis-btn');
+      const top = document.querySelector('.rn-top');
+      if (!b && top) { b = document.createElement('button'); b.id = 'ex-mis-btn'; b.className = 'ex-mis-btn'; b.onclick = (e) => { e.stopPropagation(); exShowMission(); }; top.prepend(b); }
+      if (!b) return;
+      const t = exMisState(), n = t.mis.length;
+      b.innerHTML = `🎯<b>${n}/3</b>`;
+      b.classList.toggle('done', n >= 3);
+      b.classList.toggle('new', !t.seen);
+      b.title = '오늘의 미션';
+    }
+    function exShowMission() {
+      const t = exMisState(); t.seen = 1; exLogSave(); exRenderMisBtn();
+      const ov = document.getElementById('rw-ov');
+      const rows = Object.entries(EX_CAT).map(([k, c]) => {
+        const n = Math.min(EX_GOAL, exCatCount(t, k)), ok = t.mis.includes(k);
+        return `<div class="ex-mis ${ok ? 'ok' : ''}">
+          <span class="ex-mis-e">${c.e}</span>
+          <div class="ex-mis-b"><b>${c.n} 놀이에서 스티커 ${EX_GOAL}개</b>
+            <div class="ex-dots">${Array.from({ length: EX_GOAL }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div></div>
+          ${ok ? '<span class="ex-mis-ok">✔</span>' : `<button class="ex-mis-go" onclick="exMisGo('${k}')">가기 ▶</button>`}
+        </div>`;
+      }).join('');
+      const all = t.mis.length >= 3;
+      ov.innerHTML = `<div class="rw-box ex-box">
+        <div class="rw-head">🎯 오늘의 미션</div>
+        <p class="rw-tip">${all ? '오늘 미션을 모두 해냈어요! 내일 또 만나요.' : '세 가지를 다 하면 보너스 스티커 3개를 받아요.'}</p>
+        ${rows}
+        <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
+      ov.classList.remove('hidden');
+      const left = Object.keys(EX_CAT).filter(k => !t.mis.includes(k)).map(k => EX_CAT[k].n);
+      exSay(all ? `${kpCall()}오늘의 미션을 모두 해냈어요! 정말 멋져요!` : `${kpCall()}오늘의 미션이에요. ${left.join(', ')} 놀이에서 스티커를 세 개씩 모아요.`);
+    }
+    function exMisGo(k) { document.getElementById('rw-ov').classList.add('hidden'); try { EX_CAT[k].go(); } catch (e) {} }
+
+    // ---------- 놀이 시간 재기 ----------
+    let exLastAct = Date.now();
+    ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, () => { exLastAct = Date.now(); }, { passive: true, capture: true }));
+    const EX_BRK = 'pkmn_break_v1';
+    let exBrk = null;
+    const exBrkLoad = () => exBrk || (exBrk = Object.assign({ min: 0, used: 0, tick: 0, until: 0 }, exLS.get(EX_BRK, {})));
+    const exBrkSave = () => exLS.set(EX_BRK, exBrkLoad());
+    function exTick() {
+      const now = Date.now(), b = exBrkLoad();
+      if (b.until > now) return exShowBreak();
+      if (document.hidden) return;
+      let speaking = false; try { speaking = window.speechSynthesis && window.speechSynthesis.speaking; } catch (e) {}
+      if (now - exLastAct > 180000 && !speaking) return;      // 3분 넘게 손대지 않으면 쉬는 중
+      if (b.tick && now - b.tick > 5 * 60000) b.used = 0;       // 5분 넘게 쉬었으면 다시 처음부터
+      b.tick = now; b.used += 0.25;
+      const t = exToday(); t.m = Math.round((t.m + 0.25) * 100) / 100; exLogSave();
+      if (b.min && b.used >= b.min) { b.until = now + 5 * 60000; b.used = 0; exBrkSave(); exShowBreak(true); }
+      else exBrkSave();
+    }
+    setInterval(exTick, 15000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { const b = exBrkLoad(); if (b.until > Date.now()) exShowBreak(); } });
+
+    // ---------- 쉬는 시간 ----------
+    let exBrkTimer = 0, exBrkQ = null;
+    function exShowBreak(first) {
+      const b = exBrkLoad();
+      let el = document.getElementById('ex-break');
+      if (!el) { el = document.createElement('div'); el.id = 'ex-break'; document.body.appendChild(el); }
+      if (!el.classList.contains('show')) {
+        try { sbStopReading(); } catch (e) {}
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+        el.innerHTML = `<div class="ex-br-box">
+          <div class="ex-br-pk"><img src="${typeof PL_PIKA !== 'undefined' ? PL_PIKA : getPokemonArtworkUrl(25)}" alt="피카츄"><span class="ex-zz">💤</span></div>
+          <h2>피카츄가 쉬고 싶대요</h2>
+          <p>눈을 감고 쉬어요. 물도 한 잔 마시고, 기지개를 쭉 펴요.</p>
+          <div class="ex-br-t" id="ex-br-t"></div>
+          <button class="ex-br-done hidden" id="ex-br-done" onclick="exEndBreak()">다시 놀러 가기 ▶</button>
+          <button class="ex-br-parent" onclick="exParentAsk()">부모님이 풀기</button>
+          <div class="ex-br-q hidden" id="ex-br-q"></div>
+        </div>`;
+        el.classList.add('show');
+        if (first) exSay(`${kpCall()}피카츄가 졸려서 쉬고 싶대요. 우리도 오 분만 쉬어요. 눈을 감고 물도 마셔요.`);
+      }
+      clearInterval(exBrkTimer);
+      const upd = () => {
+        const left = Math.max(0, Math.ceil((exBrkLoad().until - Date.now()) / 1000));
+        const t = document.getElementById('ex-br-t'); if (t) t.textContent = left ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}` : '다 쉬었어요!';
+        if (!left) { clearInterval(exBrkTimer); document.getElementById('ex-br-done')?.classList.remove('hidden'); }
+      };
+      upd(); exBrkTimer = setInterval(upd, 1000);
+    }
+    function exEndBreak() {
+      const b = exBrkLoad(); b.until = 0; b.used = 0; b.tick = Date.now(); exBrkSave();
+      clearInterval(exBrkTimer);
+      const el = document.getElementById('ex-break'); if (el) { el.classList.remove('show'); el.innerHTML = ''; }
+    }
+    function exParentAsk() {
+      const a = 12 + Math.floor(Math.random() * 8), c = 6 + Math.floor(Math.random() * 4);
+      exBrkQ = a * c;
+      const q = document.getElementById('ex-br-q'); q.classList.remove('hidden');
+      q.innerHTML = `<label>${a} × ${c} = <input id="ex-br-in" type="number" inputmode="numeric" autocomplete="off"></label><button onclick="exParentCheck()">확인</button>`;
+      document.getElementById('ex-br-in').focus();
+      document.getElementById('ex-br-in').onkeydown = e => { if (e.key === 'Enter') exParentCheck(); };
+    }
+    function exParentCheck() {
+      const v = parseInt(document.getElementById('ex-br-in')?.value, 10);
+      if (v === exBrkQ) exEndBreak(); else { const i = document.getElementById('ex-br-in'); if (i) { i.value = ''; i.classList.add('bad'); setTimeout(() => i.classList.remove('bad'), 500); } }
+    }
+    function exSetBreak(min) { const b = exBrkLoad(); b.min = min; b.used = 0; exBrkSave(); exRenderMenu(); }
+
+    // ---------- 부모님 메뉴 · 리포트 ----------
+    let exInstallEvt = null;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); exInstallEvt = e; exRenderMenu(); });
+    function exInstall() {
+      if (exInstallEvt) { exInstallEvt.prompt(); exInstallEvt.userChoice.finally(() => { exInstallEvt = null; exRenderMenu(); }); }
+    }
+    function exRenderMenu() {
+      const box = document.getElementById('ex-menu'); if (!box) return;
+      const b = exBrkLoad();
+      const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      box.innerHTML = `<button onclick="exReport()">📊 이번 주 놀이 리포트</button>
+        <div class="kp-row">⏰ 쉬는 시간 ${[0, 15, 20, 30, 45].map(m => `<button class="kp-age ${b.min === m ? 'on' : ''}" onclick="event.stopPropagation(); exSetBreak(${m})">${m ? m + '분' : '끄기'}</button>`).join('')}</div>
+        <small>정한 시간만큼 놀면 피카츄가 5분 쉬자고 해요. 부모님은 곱셈 문제를 풀어 바로 끌 수 있어요.</small>
+        ${standalone ? '' : exInstallEvt ? '<button onclick="exInstall()">📲 홈 화면에 앱으로 추가</button><small>앱처럼 열리고, 한 번 본 그림은 인터넷이 없어도 보여요.</small>'
+          : /^https?:$/.test(location.protocol) ? `<small>📲 ${ios ? '공유 버튼 → "홈 화면에 추가"' : '브라우저 메뉴 → "홈 화면에 추가"'}를 누르면 앱처럼 쓸 수 있어요.</small>` : ''}`;
+    }
+    function exReport() {
+      document.getElementById('rn-menu').classList.add('hidden');
+      const L = exLogLoad(), days = [];
+      for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push([d, L.d[exDay(d)] || { m: 0, s: {} }]); }
+      const maxM = Math.max(10, ...days.map(([, x]) => x.m || 0));
+      const wk = ['일', '월', '화', '수', '목', '금', '토'];
+      const totM = Math.round(days.reduce((a, [, x]) => a + (x.m || 0), 0));
+      const src = {}; days.forEach(([, x]) => Object.entries(x.s || {}).forEach(([k, v]) => src[k] = (src[k] || 0) + v));
+      const cat = Object.keys(EX_CAT).map(k => [k, EX_CAT[k].src.reduce((a, s) => a + (src[s] || 0), 0)]);
+      const top = Object.entries(src).filter(([k]) => RW_SRC[k] && k !== 'mission').sort((a, b) => b[1] - a[1]).slice(0, 3);
+      const misDays = days.filter(([, x]) => (x.mis || []).length >= 3).length;
+      rwLoad();
+      const ov = document.getElementById('rw-ov');
+      ov.innerHTML = `<div class="rw-box ex-box ex-report">
+        <div class="rw-head">📊 이번 주 놀이 리포트 ${kpName() ? `<small>${exEsc(kpName())}</small>` : ''}</div>
+        <div class="ex-rp-sum"><div><b>${totM}분</b><span>7일 동안 논 시간</span></div><div><b>${Object.values(src).reduce((a, v) => a + v, 0)}개</b><span>모은 스티커</span></div><div><b>${misDays}일</b><span>미션 완료</span></div></div>
+        <div class="ex-rp-bars">${days.map(([d, x]) => `<div class="ex-rp-col"><span class="ex-rp-v">${Math.round(x.m || 0)}</span><i style="height:${Math.round((x.m || 0) / maxM * 100)}%"></i><span>${wk[d.getDay()]}</span></div>`).join('')}</div>
+        <div class="ex-rp-cat">${cat.map(([k, n]) => `<div><span>${EX_CAT[k].e} ${EX_CAT[k].n}</span><b>${n}</b></div>`).join('')}</div>
+        ${top.length ? `<p class="rw-tip">많이 한 놀이: ${top.map(([k, n]) => `${RW_SRC[k][0]} ${RW_SRC[k][1]} (${n})`).join(', ')}</p>` : '<p class="rw-tip">아직 이번 주 기록이 없어요.</p>'}
+        <p class="rw-tip">카드 ${rwS.cards.length}장 · 도감 도장 ${exMetLoad().size}개 · 포획 ${(rwS.caught || []).length}마리 <span id="ex-rp-more"></span></p>
+        <small class="ex-rp-note">시간은 화면을 만지거나 소리가 나오는 동안만 세어요. 기록은 이 기기에만 저장돼요.</small>
+        <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
+      ov.classList.remove('hidden');
+      Promise.all([exKeys('art').catch(() => []), exKeys('story').catch(() => [])]).then(([a, s]) => { const m = document.getElementById('ex-rp-more'); if (m) m.textContent = `· 그림 ${a.length}장 · 목소리 동화 ${s.length}편`; });
+    }
+
+    // ---------- 도감 도장 ----------
+    function exStampOf(n) {
+      rwLoad();
+      if (rwS.cards.some(c => c.n === n)) return 'card';
+      if ((rwS.caught || []).includes(n)) return 'caught';
+      if (exMetLoad().has(n)) return 'met';
+      return '';
+    }
+    const EX_STAMP = { card: ['🎴', '카드를 모았어요'], caught: ['📡', '포획에서 잡았어요'], met: ['🐾', '놀이에서 만났어요'] };
+    function exStampCard(el, n) {
+      el.querySelector('.ex-stamp')?.remove();
+      const k = exStampOf(n); if (!k) return;
+      const s = document.createElement('span'); s.className = 'ex-stamp ' + k; s.textContent = EX_STAMP[k][0]; s.title = EX_STAMP[k][1];
+      el.appendChild(s);
+    }
+    function exStampCount() {
+      rwLoad(); const all = new Set([...exMetLoad(), ...(rwS.caught || []), ...rwS.cards.map(c => c.n)]);
+      return all.size;
+    }
+    (function () {
+      if (typeof createPokemonCardElement === 'function') {
+        const cc = createPokemonCardElement;
+        createPokemonCardElement = function (num) { const el = cc.apply(this, arguments); try { el.dataset.num = num; exStampCard(el, num); } catch (e) {} return el; };
+      }
+      if (typeof updateCardsCounter === 'function') {
+        const uc = updateCardsCounter;
+        updateCardsCounter = function () {
+          const r = uc.apply(this, arguments);
+          try { const ci = document.getElementById('cards-count-info'); if (ci) ci.innerHTML = exEsc(ci.textContent) + ` <span class="ex-stamp-sum">· 🐾 도장 ${exStampCount()}개</span>`; } catch (e) {}
+          return r;
+        };
+      }
+    })();
+    function exRefreshStamps() {
+      document.querySelectorAll('#cards-container [data-num]').forEach(el => exStampCard(el, +el.dataset.num));
+      const s = document.querySelector('#cards-count-info .ex-stamp-sum'); if (s) s.textContent = `· 🐾 도장 ${exStampCount()}개`;
+    }
+
+    // ---------- 그림 전시관 (색칠 놀이) ----------
+    const EX_ART_MAX = 120;
+    function exColoredRatio() {
+      const cv = document.getElementById('coloring-draw-canvas'); if (!cv || !cv.width) return 0;
+      const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+      let n = 0, tot = 0;
+      for (let i = 0; i < d.length; i += 4 * 7) { tot++; if (d[i + 3] > 0 && (d[i] < 240 || d[i + 1] < 240 || d[i + 2] < 240)) n++; }
+      return tot ? n / tot : 0;
+    }
+    function exArtBlob() {
+      const dc = document.getElementById('coloring-draw-canvas'), oc = document.getElementById('coloring-outline-canvas');
+      const sc = Math.min(1, 720 / dc.width), w = Math.round(dc.width * sc), h = Math.round(dc.height * sc);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(dc, 0, 0, w, h);
+      x.globalCompositeOperation = 'multiply'; try { if (oc && oc.style.display !== 'none') x.drawImage(oc, 0, 0, w, h); } catch (e) {}
+      return new Promise(res => { try { cv.toBlob(b => res(b), 'image/jpeg', 0.85); } catch (e) { res(null); } });
+    }
+    async function exSaveArt() {
+      if (exColoredRatio() < 0.02) { exSay('조금 더 색칠해 볼까요? 색을 칠하면 전시관에 걸어 줄게요.'); return showToast('조금 더 색칠한 다음 저장해요! 🖍️'); }
+      const blob = await exArtBlob();
+      if (!blob) return showToast('그림을 저장하지 못했어요.');
+      const n = (typeof currentColoringPokemon !== 'undefined' && currentColoringPokemon) ? currentColoringPokemon.num : 25;
+      const id = 'a' + Date.now();
+      try {
+        await exPut('art', id, { id, n, t: Date.now(), blob });
+        const keys = (await exKeys('art')).sort();
+        for (let i = 0; i < keys.length - EX_ART_MAX; i++) await exDel('art', keys[i]);
+      } catch (e) { return showToast('이 브라우저에서는 그림을 저장할 수 없어요.'); }
+      const t = exToday(); t.art = (t.art || 0) + 1; exLogSave();
+      playSuccessChime();
+      if (t.art <= 5) kpSticker([n], 'coloring');
+      exSay(`멋진 그림이에요! ${POKEMON_NAMES_1025[n - 1]} 그림을 전시관에 걸었어요.`);
+      showToast('🖼️ 전시관에 그림을 걸었어요!');
+    }
+    let exArtUrls = [];
+    async function exGallery() {
+      const ov = document.getElementById('rw-ov');
+      exArtUrls.forEach(u => URL.revokeObjectURL(u)); exArtUrls = [];
+      let list = [];
+      try { list = (await exAll('art')).sort((a, b) => b.t - a.t); } catch (e) {}
+      const cells = list.map(a => { const u = URL.createObjectURL(a.blob); exArtUrls.push(u); return `<button class="ex-art" onclick="exArtOpen('${a.id}')"><img src="${u}" alt=""><span>${POKEMON_NAMES_1025[a.n - 1] || ''}</span></button>`; }).join('');
+      ov.innerHTML = `<div class="rw-box ex-box ex-gal">
+        <div class="rw-head">🖼️ 내 그림 전시관 <small>${list.length}장</small></div>
+        ${list.length ? `<div class="ex-gal-grid">${cells}</div>` : '<p class="rw-tip">아직 걸린 그림이 없어요. 색칠하고 [그림 저장]을 눌러 봐요!</p>'}
+        <button class="rw-go" onclick="exGalClose()">닫기</button></div>`;
+      ov.classList.remove('hidden');
+    }
+    function exGalClose() { const ov = document.getElementById('rw-ov'); ov.classList.add('hidden'); ov.innerHTML = ''; exArtUrls.forEach(u => URL.revokeObjectURL(u)); exArtUrls = []; }
+    async function exArtOpen(id) {
+      const a = await exGet('art', id).catch(() => null); if (!a) return;
+      const u = URL.createObjectURL(a.blob); exArtUrls.push(u);
+      const d = new Date(a.t), nm = POKEMON_NAMES_1025[a.n - 1] || '';
+      const ov = document.getElementById('rw-ov');
+      ov.innerHTML = `<div class="rw-box ex-box ex-art-big">
+        <div class="ex-frame"><img src="${u}" alt="${exEsc(nm)}"></div>
+        <div class="rw-msg">${exEsc(nm)} <small>${d.getMonth() + 1}월 ${d.getDate()}일</small></div>
+        <div class="ex-row">
+          <button class="fd-btn" onclick="exGallery()">◀ 전시관</button>
+          <a class="fd-btn" href="${u}" download="${exEsc(nm || 'pokemon')}_${exDay(d)}.jpg">⬇ 내려받기</a>
+          <button class="fd-btn ex-del" onclick="exArtDel('${a.id}', this)">🗑 지우기</button>
+        </div></div>`;
+      exSay(`${nm} 그림이에요.`);
+    }
+    async function exArtDel(id, btn) {
+      if (!btn.dataset.sure) { btn.dataset.sure = '1'; btn.textContent = '정말 지울까요?'; return; }
+      await exDel('art', id).catch(() => {}); exGallery();
+    }
+
+    // ---------- 돌보기 꾸미기 (모은 하트로 열려요) ----------
+    const EX_ACC = [
+      { k: 'ribbon', e: '🎀', n: '리본', need: 1, slot: 'head' },
+      { k: 'flower', e: '🌸', n: '꽃핀', need: 3, slot: 'head' },
+      { k: 'balloon', e: '🎈', n: '풍선', need: 5, slot: 'side' },
+      { k: 'cap', e: '🧢', n: '모자', need: 7, slot: 'head' },
+      { k: 'glasses', e: '🕶️', n: '선글라스', need: 10, slot: 'face' },
+      { k: 'scarf', e: '🧣', n: '목도리', need: 13, slot: 'neck' },
+      { k: 'butterfly', e: '🦋', n: '나비 친구', need: 16, slot: 'side' },
+      { k: 'crown', e: '👑', n: '왕관', need: 20, slot: 'head' },
+      { k: 'medal', e: '🏅', n: '메달', need: 24, slot: 'neck' },
+      { k: 'tophat', e: '🎩', n: '마술 모자', need: 28, slot: 'head' },
+      { k: 'star', e: '⭐', n: '반짝 별', need: 33, slot: 'side' },
+      { k: 'rainbow', e: '🌈', n: '무지개', need: 40, slot: 'side' }
+    ];
+    const exAccHtml = (c) => Object.entries((c && c.wear) || {}).map(([slot, k]) => { const a = EX_ACC.find(x => x.k === k); return a ? `<span class="ex-acc ex-${slot}">${a.e}</span>` : ''; }).join('');
+    function exDress() {
+      const c = fdS && fdS.care; if (!c) return;
+      document.querySelectorAll('#fd-game .cr-me').forEach(me => { me.querySelectorAll('.ex-acc').forEach(x => x.remove()); me.insertAdjacentHTML('beforeend', exAccHtml(c)); });
+    }
+    (function () {
+      if (typeof crHome === 'function') {
+        const h = crHome;
+        crHome = function () {
+          const r = h.apply(this, arguments);
+          try {
+            exDress();
+            const fb = document.getElementById('fd-bottom');
+            if (fb && fdS.care && !fb.querySelector('.ex-decor-btn')) fb.insertAdjacentHTML('beforeend', `<button class="fd-btn ex-decor-btn" onclick="exDecor()">🎀 꾸미기</button>`);
+          } catch (e) {}
+          return r;
+        };
+      }
+      if (typeof crTask === 'function') { const t = crTask; crTask = function () { const r = t.apply(this, arguments); try { exDress(); } catch (e) {} return r; }; }
+    })();
+    function exDecor() {
+      const c = fdS.care; if (!c) return;
+      const h = c.hearts || 0, ov = document.getElementById('rw-ov');
+      const nextLock = EX_ACC.find(a => a.need > h);
+      ov.innerHTML = `<div class="rw-box ex-box ex-decor">
+        <div class="rw-head">🎀 ${exEsc(fdPkName(c.form))} 꾸미기 <small>❤ ${h}</small></div>
+        <div class="ex-dc-me"><div class="cr-me ex-dc-pk">${rwImg(c.form)}${exAccHtml(c)}</div></div>
+        <div class="ex-dc-grid">${EX_ACC.map(a => {
+          const open = h >= a.need, on = c.wear && c.wear[a.slot] === a.k;
+          return `<button class="ex-dc ${open ? '' : 'lock'} ${on ? 'on' : ''}" onclick="exWear('${a.k}')"><span>${open ? a.e : '🔒'}</span><small>${open ? a.n : '❤ ' + a.need}</small></button>`;
+        }).join('')}</div>
+        <p class="rw-tip">${nextLock ? `하트 ${nextLock.need - h}개를 더 모으면 ${nextLock.n}${sbJosa(nextLock.n, '이')} 열려요.` : '꾸미기 물건을 모두 열었어요!'}</p>
+        <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden'); crHome(true)">다 꾸몄어요</button></div>`;
+      ov.classList.remove('hidden');
+    }
+    function exWear(k) {
+      const c = fdS.care, a = EX_ACC.find(x => x.k === k); if (!c || !a) return;
+      if ((c.hearts || 0) < a.need) { exSay(`하트 ${a.need}개를 모으면 ${a.n}${sbJosa(a.n, '이')} 열려요. 매일 돌봐 주면 하트가 생겨요.`); return; }
+      c.wear = c.wear || {};
+      if (c.wear[a.slot] === k) delete c.wear[a.slot]; else { c.wear[a.slot] = k; exSay(`${a.n}!`); playTone(700, 0.06); }
+      fdSave(); exDecor(); exDress();
+    }
+
+    // ---------- 목소리 동화 (엄마 아빠가 읽어 주는 동화) ----------
+    let exVoiceSet = new Set(), exAudio = null, exRec = null, exRecT = 0, exRecOn = false;
+    const exVoiceKey = (make) => {
+      if (!sbStory) return null;
+      if (!sbStory._rid && make) sbStory._rid = 's' + Date.now().toString(36);
+      return sbStory._rid ? `${sbStory._rid}:${sbPageIdx}` : null;
+    };
+    function exStopAudio() { if (exAudio) { try { exAudio.pause(); } catch (e) {} exAudio = null; } }
+    (function () {
+      if (typeof sbReadCurrent !== 'function') return;
+      const rc = sbReadCurrent;
+      sbReadCurrent = function () {
+        const key = exVoiceKey();
+        if (!key || !exVoiceSet.has(key) || exRec) return rc.apply(this, arguments);
+        sbSession++; const session = sbSession; sbClearTimers(); exStopAudio();
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+        exGet('voice', key).then(blob => {
+          if (session !== sbSession) return;
+          if (!blob) return rc();
+          const url = URL.createObjectURL(blob), a = new Audio(url); exAudio = a; sbReading = true;
+          let done = false;
+          const fin = () => {
+            if (done) return; done = true; URL.revokeObjectURL(url);
+            if (session !== sbSession) return;
+            sbReading = false; exAudio = null;
+            if (document.getElementById('sb-auto-turn').checked && sbStory && sbPageIdx < sbStory.pages.length) sbTimers.push(setTimeout(() => { if (session === sbSession) sbNextPage(); }, 1300));
+          };
+          a.onended = fin; a.onerror = fin;
+          const p = a.play(); if (p && p.catch) p.catch(fin);
+        }).catch(() => rc());
+      };
+      const st = sbStopReading;
+      sbStopReading = function () { exStopAudio(); return st.apply(this, arguments); };
+      const rp = sbRenderPage;
+      sbRenderPage = function () { if (exRec && exRec.state === 'recording') exRec.stop(); const r = rp.apply(this, arguments); try { exRenderRecBar(); } catch (e) {} return r; };
+      if (typeof sbMakeStory === 'function') { const mk = sbMakeStory; sbMakeStory = function () { exRecOn = false; return mk.apply(this, arguments); }; }
+    })();
+    function exRecSupported() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined'); }
+    function exRenderRecBar() {
+      const book = document.getElementById('sb-book'); if (!book) return;
+      let btn = document.getElementById('ex-rec-toggle');
+      if (!btn) {
+        const full = document.getElementById('sb-full-btn');
+        if (full) { full.insertAdjacentHTML('beforebegin', `<button id="ex-rec-toggle" onclick="exRecToggleBar()" class="px-2.5 py-1 rounded-xl bg-white border border-amber-200 text-slate-600 hover:bg-amber-100 active:scale-95 transition">🎙️ 녹음</button>`); btn = document.getElementById('ex-rec-toggle'); }
+      }
+      let bar = document.getElementById('ex-recbar');
+      if (!bar) { bar = document.createElement('div'); bar.id = 'ex-recbar'; document.getElementById('sb-page-wrap')?.after(bar); }
+      if (btn) btn.classList.toggle('on', exRecOn);
+      if (!exRecOn) { bar.className = 'hidden'; bar.innerHTML = ''; return; }
+      const key = exVoiceKey(), has = key && exVoiceSet.has(key), rec = exRec && exRec.state === 'recording';
+      bar.className = 'ex-recbar' + (rec ? ' rec' : '');
+      bar.innerHTML = !exRecSupported() || !/^https?:$/.test(location.protocol) && location.hostname !== 'localhost'
+        ? `<span>녹음은 홈페이지 주소(https)로 연 앱에서 할 수 있어요.</span>`
+        : `<button class="ex-rec-btn" onclick="exRecord()">${rec ? '■ 그만' : '● 녹음'}</button>
+           <span>${rec ? '녹음하고 있어요… 이 쪽을 읽어 주세요' : has ? '이 쪽은 녹음했어요. 읽어 주기를 누르면 이 목소리가 나와요.' : '이 쪽을 소리 내어 읽고 녹음해요.'}</span>
+           ${has && !rec ? `<button onclick="sbReadCurrent()">▶ 듣기</button><button onclick="exVoiceDel(this)">🗑</button>` : ''}`;
+    }
+    function exRecToggleBar() { exRecOn = !exRecOn; if (!exRecOn && exRec) exRec.stop(); exRenderRecBar(); }
+    async function exRecord() {
+      if (exRec) { if (exRec.state === 'recording') exRec.stop(); return; }
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) { return showToast('마이크를 쓸 수 있게 허락해 주세요.'); }
+      sbStopReading();
+      const key = exVoiceKey(true), chunks = [];
+      let r; try { r = new MediaRecorder(stream); } catch (e) { stream.getTracks().forEach(t => t.stop()); return showToast('이 기기에서는 녹음을 할 수 없어요.'); }
+      exRec = r;
+      r.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      r.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop()); clearTimeout(exRecT); exRec = null;
+        const blob = new Blob(chunks, { type: r.mimeType || 'audio/webm' });
+        if (blob.size > 500) { await exSaveVoice(key, blob); showToast('🎙️ 목소리를 저장했어요!'); }
+        exRenderRecBar();
+      };
+      r.start(); exRecT = setTimeout(() => { if (r.state === 'recording') r.stop(); }, 90000);
+      exRenderRecBar();
+    }
+    async function exSaveVoice(key, blob) {
+      try {
+        await exPut('voice', key, blob); exVoiceSet.add(key);
+        const rid = key.split(':')[0];
+        if (sbStory && sbStory._rid === rid) await exPut('story', rid, { rid, t: Date.now(), title: sbStory.title, hero: sbStory.hero, story: JSON.parse(JSON.stringify(sbStory)) });
+        exRenderShelf();
+      } catch (e) { showToast('녹음을 저장하지 못했어요.'); }
+    }
+    async function exVoiceDel(btn) {
+      if (!btn.dataset.sure) { btn.dataset.sure = '1'; btn.textContent = '지울까요?'; return; }
+      const key = exVoiceKey(); if (!key) return;
+      await exDel('voice', key).catch(() => {}); exVoiceSet.delete(key);
+      const rid = key.split(':')[0];
+      if (![...exVoiceSet].some(k => k.startsWith(rid + ':'))) await exDel('story', rid).catch(() => {});
+      exRenderRecBar(); exRenderShelf();
+    }
+    async function exRenderShelf() {
+      const setup = document.getElementById('sb-setup'); if (!setup) return;
+      let sh = document.getElementById('ex-shelf');
+      if (!sh) { sh = document.createElement('div'); sh.id = 'ex-shelf'; setup.prepend(sh); }
+      let list = [];
+      try { list = (await exAll('story')).sort((a, b) => b.t - a.t); } catch (e) {}
+      if (!list.length) { sh.className = 'hidden'; sh.innerHTML = ''; return; }
+      sh.className = 'ex-shelf';
+      sh.innerHTML = `<div class="ex-shelf-h">📼 우리 가족 목소리 동화</div><div class="ex-shelf-row">${list.map(s => {
+        const n = [...exVoiceSet].filter(k => k.startsWith(s.rid + ':')).length;
+        return `<div class="ex-sbk"><button class="ex-sbk-open" onclick="exOpenStory('${s.rid}')">${rwImg(s.hero)}<b>${exEsc(s.title)}</b><small>🎙️ ${n}쪽</small></button><button class="ex-sbk-x" onclick="exStoryDel('${s.rid}', this)" aria-label="지우기">✕</button></div>`;
+      }).join('')}</div>`;
+    }
+    async function exOpenStory(rid) {
+      const rec = await exGet('story', rid).catch(() => null); if (!rec) return;
+      if (!sbInitialized) initStoryView();
+      sbStopReading();
+      sbStory = rec.story; sbStory._rid = rid; sbPageIdx = 0; exRecOn = false;
+      document.getElementById('sb-setup').classList.add('hidden');
+      document.getElementById('sb-book').classList.remove('hidden');
+      playSuccessChime(); sbRenderPage(true);
+      try { rwScrollTo(document.getElementById('sb-book')); } catch (e) {}
+    }
+    async function exStoryDel(rid, btn) {
+      if (!btn.dataset.sure) { btn.dataset.sure = '1'; btn.textContent = '지울까요?'; btn.classList.add('sure'); return; }
+      const ks = [...exVoiceSet].filter(k => k.startsWith(rid + ':'));
+      for (const k of ks) { await exDel('voice', k).catch(() => {}); exVoiceSet.delete(k); }
+      await exDel('story', rid).catch(() => {}); exRenderShelf();
+    }
+
+    // ---------- 화면 전환에 맞춰 ----------
+    (function () {
+      const sw = switchMainView;
+      switchMainView = function (v) {
+        const r = sw.apply(this, arguments);
+        try {
+          const t = exToday(); t.v[v] = (t.v[v] || 0) + 1; exLogSave();
+          if (v === 'dex') exRefreshStamps();
+          if (v === 'story') { exRenderShelf(); exRenderRecBar(); }
+        } catch (e) {}
+        return r;
+      };
+      if (typeof saveColoringArtwork === 'function') saveColoringArtwork = exSaveArt;
+      if (typeof kpRenderMenu === 'function') { const km = kpRenderMenu; kpRenderMenu = function () { const r = km.apply(this, arguments); exRenderMenu(); return r; }; }
+    })();
+    window.addEventListener('load', () => setTimeout(() => {
+      try { exRenderMisBtn(); exRenderMenu(); exRefreshStamps(); } catch (e) {}
+      exKeys('voice').then(ks => { exVoiceSet = new Set(ks); exRenderShelf(); }).catch(() => {});
+      const b = exBrkLoad(); if (b.until > Date.now()) exShowBreak();
+    }, 80));
+    // 앱 설치 · 오프라인 (홈페이지 주소로 열었을 때만)
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
