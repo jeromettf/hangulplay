@@ -500,6 +500,9 @@
         <button id="nav-math" onclick="switchMainView('math')" class="tab-btn px-2.5 py-1.5 rounded-xl font-jua text-xs sm:text-sm flex items-center gap-1 transition-all hover:bg-white/20">
           <i class="fa-solid fa-calculator text-amber-200"></i><span>수학 놀이 🔢</span>
         </button>
+        <button id="nav-find" onclick="switchMainView('find')" class="tab-btn px-2.5 py-1.5 rounded-xl font-jua text-xs sm:text-sm flex items-center gap-1 transition-all hover:bg-white/20">
+          <i class="fa-solid fa-magnifying-glass text-cyan-200"></i><span>그림 찾기 🔎</span>
+        </button>
         <button id="nav-favs" onclick="switchMainView('favs')" class="tab-btn px-2 py-1.5 rounded-xl font-jua text-xs sm:text-sm flex items-center gap-1 transition-all hover:bg-white/20">
           <i class="fa-solid fa-star text-yellow-300"></i><span>(<span id="fav-count">0</span>)</span>
         </button>
@@ -2150,9 +2153,9 @@
             <h2 class="font-jua text-base text-slate-800">🔢 포켓몬 수학 놀이</h2>
             <p class="text-[11px] text-slate-500 font-bold">세기부터 시계·돈 계산까지, 포켓몬이랑 놀면서 익혀요.</p>
           </div>
-          <button onclick="mmShowAlbum()" class="shrink-0 font-jua text-xs px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 active:scale-95 transition">📒 카드 <span id="mm-cardcount">0</span></button>
+          <button onclick="rwShowAlbum()" class="shrink-0 font-jua text-xs px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 active:scale-95 transition">📒 카드 <span class="rw-count">0</span></button>
         </div>
-        <div class="mm-stickbar"><span class="font-jua text-[11px] text-amber-600 shrink-0">스티커</span><div id="mm-stickers" class="mm-stickers"></div><span class="shrink-0 text-lg">🎁</span></div>
+        <div class="rw-barwrap"><span class="font-jua text-[11px] text-amber-600 shrink-0">스티커</span><div id="mm-stickers" class="rw-bar"></div><span class="shrink-0 text-lg">🎁</span></div>
       </div>
       <div id="mm-setup" class="space-y-2.5"></div>
       <div id="mm-play" class="hidden mm-wide-layout space-y-2">
@@ -2169,8 +2172,154 @@
           <div id="mm-feedback"></div>
         </div>
       </div>
-      <div id="mm-cardov" class="hidden"></div>
     </section>
+
+    <!-- 그림 찾기 -->
+    <section id="view-find" class="hidden space-y-2.5 max-w-2xl mx-auto">
+      <style>
+    /* ===== 보상: 스티커 · 카드 · 앨범 ===== */
+    .rw-barwrap { display: flex; align-items: center; gap: .3rem; }
+    .rw-bar { display: grid; grid-template-columns: repeat(10, minmax(0, 2.6rem)); justify-content: space-between; gap: 3px; flex: 1; }
+    .rw-stk { aspect-ratio: 1; border-radius: 999px; border: 2px dashed #fcd34d; background: #fffbeb; color: #fcd34d; font-size: .6rem; display: flex; align-items: center; justify-content: center; font-family: Jua, sans-serif; }
+    .rw-stk.on { border: 0; background: radial-gradient(circle at 35% 30%, #fff, #fde68a 70%, #fbbf24); box-shadow: 0 0 0 2.5px #fff, 0 2px 4px rgba(0,0,0,.28); }
+    .rw-stk img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.12); filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff); }
+    .rw-stk img.rw-ball { transform: scale(.8); filter: none; }
+    .rw-stk.new { animation: rw-stick .6s cubic-bezier(.2,1.6,.4,1); }
+    @keyframes rw-stick { 0% { transform: scale(2.2) rotate(-25deg); opacity: 0; } 60% { transform: scale(.9) rotate(6deg); opacity: 1; } 100% { transform: none; } }
+
+    #rw-ov { position: fixed; inset: 0; z-index: 90; background: rgba(15,23,42,.6); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    #rw-ov.hidden { display: none; }
+    .rw-box { background: #fff; border-radius: 1.5rem; padding: 1rem; width: min(360px, 100%); max-height: 92vh; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: .7rem; animation: rw-in .35s; }
+    @keyframes rw-in { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
+    .rw-head { font-family: Jua, sans-serif; text-align: center; color: #b45309; font-size: 1.05rem; }
+    .rw-head small { color: #94a3b8; font-size: .85rem; }
+    .rw-tip { font-size: 11px; color: #64748b; font-weight: 700; text-align: center; }
+    .rw-flip { position: relative; width: min(260px, 72vw); aspect-ratio: 5 / 7; perspective: 900px; background: none; border: 0; padding: 0; }
+    .rw-face { position: absolute; inset: 0; border-radius: 1.1rem; backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: transform .6s cubic-bezier(.3,1.3,.5,1); overflow: hidden; }
+    .rw-back { background: repeating-linear-gradient(45deg, #ef4444 0 14px, #dc2626 14px 28px); border: 6px solid #fff; box-shadow: 0 6px 16px rgba(0,0,0,.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; font-family: Jua, sans-serif; color: #fff; font-size: 1.3rem; animation: rw-wob 1.4s infinite; }
+    .rw-back-ball { width: 46%; aspect-ratio: 1; border-radius: 999px; background: linear-gradient(#fff 0 46%, #334155 46% 54%, #fff 54%); border: 5px solid #334155; position: relative; }
+    .rw-back-ball::after { content: ''; position: absolute; left: 50%; top: 50%; width: 30%; height: 30%; transform: translate(-50%, -50%); border-radius: 999px; background: #fff; border: 5px solid #334155; }
+    @keyframes rw-wob { 0%, 100% { rotate: 0deg; } 10% { rotate: -3deg; } 20% { rotate: 3deg; } 30% { rotate: 0deg; } }
+    .rw-front { transform: rotateY(180deg); background: linear-gradient(160deg, #fef3c7, #fde68a 60%, #fbbf24); border: 6px solid #facc15; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: .6rem; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+    .rw-flip.open .rw-back { transform: rotateY(-180deg); animation: none; }
+    .rw-flip.open .rw-front { transform: rotateY(0deg); }
+    .rw-front.gold { background: linear-gradient(160deg, #fff7d6, #fcd34d 45%, #f59e0b 70%, #fde68a); border-color: #f59e0b; box-shadow: 0 0 0 3px #fff7d6, 0 0 24px #fbbf24; }
+    .rw-holo { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.75) 35%, rgba(186,230,253,.5) 42%, rgba(251,207,232,.5) 50%, transparent 62%); background-size: 250% 250%; animation: rw-holo 2.2s linear infinite; mix-blend-mode: soft-light; pointer-events: none; }
+    @keyframes rw-holo { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+    .rw-gold-tag { position: absolute; top: .4rem; right: .5rem; font-family: Jua, sans-serif; font-size: .8rem; color: #92400e; background: #fff; border-radius: 999px; padding: 0 .45rem; }
+    .rw-src { position: absolute; top: .4rem; left: .5rem; font-family: Jua, sans-serif; font-size: .7rem; color: #78350f; background: rgba(255,255,255,.75); border-radius: 999px; padding: 0 .45rem; }
+    .rw-card-img { width: 78%; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 6px 4px rgba(0,0,0,.22)); }
+    .rw-card-name { font-family: Jua, sans-serif; font-size: 1.7rem; color: #1e293b; }
+    .rw-card-sub { font-size: .75rem; color: #78350f; font-weight: 700; text-align: center; }
+    .rw-after { opacity: 0; transform: translateY(8px); transition: .3s; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: .5rem; width: 100%; }
+    .rw-after.show { opacity: 1; transform: none; pointer-events: auto; }
+    .rw-msg { font-family: Jua, sans-serif; font-size: 1.15rem; color: #334155; }
+    .rw-go { width: 100%; font-family: Jua, sans-serif; font-size: 1.05rem; padding: .65rem; border-radius: 1rem; background: linear-gradient(135deg, #fbbf24, #f97316); color: #fff; box-shadow: 0 4px 0 #c2410c; }
+    .rw-go:active { transform: translateY(2px); box-shadow: 0 2px 0 #c2410c; }
+    .rw-album { width: min(560px, 100%); }
+    .rw-album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: .4rem; width: 100%; }
+    .rw-mini { position: relative; background: #fffbeb; border: 2px solid #fde68a; border-radius: .8rem; text-align: center; font-family: Jua, sans-serif; font-size: .72rem; padding: .2rem; color: #334155; }
+    .rw-mini img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+    .rw-mini.gold { border-color: #f59e0b; background: linear-gradient(160deg, #fff7d6, #fde68a); box-shadow: 0 0 8px #fbbf24; }
+    .rw-shadow { background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8; }
+    .rw-shadow img { filter: brightness(0); opacity: .16; }
+    .rw-k { position: absolute; right: .25rem; top: .15rem; font-weight: normal; font-size: .65rem; color: #b45309; }
+    /* ===== 그림 찾기 ===== */
+    #view-find .hidden { display: none !important; }
+    .fd-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+    .fd-tab { font-family: Jua, sans-serif; font-size: .9rem; padding: .45rem .2rem; border-radius: 1rem; background: #f1f5f9; color: #475569; border: 2px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; line-height: 1.2; transition: transform .1s; }
+    .fd-tab span { font-size: 1.4rem; }
+    .fd-tab.on { background: #ecfeff; border-color: #06b6d4; color: #0e7490; }
+    .fd-tab:active { transform: scale(.96); }
+    .fd-wait { text-align: center; padding: 3rem 0; font-family: Jua, sans-serif; color: #94a3b8; }
+    .fd-box { position: relative; width: 100%; aspect-ratio: 4 / 3; margin: 0 auto; border-radius: 1.2rem; overflow: hidden; background: #f0f9ff; max-height: calc(100vh - var(--rw-hdr, 120px) - 120px); max-width: calc((100vh - var(--rw-hdr, 120px) - 120px) * 4 / 3); }
+    .fd-box > img.mm-bg { pointer-events: none; }
+    .fd-btn { font-family: Jua, sans-serif; font-size: .9rem; padding: .45rem .8rem; border-radius: 1rem; background: #fff; border: 2px solid #a5f3fc; color: #0e7490; transition: transform .1s; }
+    .fd-btn:active { transform: scale(.95); }
+    .fd-btn.fd-primary { background: linear-gradient(135deg, #22d3ee, #0ea5e9); color: #fff; border-color: #0ea5e9; font-size: 1.05rem; padding: .6rem 1.4rem; box-shadow: 0 4px 0 #0369a1; }
+    #fd-bottom { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; }
+    .fd-ring { position: absolute; transform: translate(-50%, -50%); aspect-ratio: 1; border-radius: 999px; pointer-events: none; z-index: 5; }
+    .fd-ok { border: 4px solid #f43f5e; box-shadow: 0 0 0 2px #fff; animation: mm-pop .35s; }
+    .fd-miss { border: 3px solid #94a3b8; animation: fd-fade .6s forwards; }
+    @keyframes fd-fade { to { opacity: 0; transform: translate(-50%, -50%) scale(1.8); } }
+    .fd-hint { border: 4px dashed #facc15; background: rgba(254,240,138,.25); animation: fd-hint 1s infinite; }
+    @keyframes fd-hint { 50% { transform: translate(-50%, -50%) scale(1.12); } }
+
+    .hd-it, .hd-cl { position: absolute; transform: translate(-50%, -50%); aspect-ratio: 1; padding: 0; background: none; border: 0; }
+    .hd-cl { pointer-events: none; }
+    .hd-it img, .hd-cl img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .hd-pk img { filter: saturate(.9); }
+    .fd-bush { position: absolute; left: -12%; right: -12%; bottom: -8%; width: 124%; height: 58%; pointer-events: none; }
+    .hd-it.got { opacity: 1 !important; animation: fd-jump .5s; }
+    @keyframes fd-jump { 40% { translate: 0 -12%; scale: 1.15; } }
+    .hd-list { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; }
+    .hd-chip { display: flex; align-items: center; gap: .25rem; background: #fff; border: 2px solid #e2e8f0; border-radius: 999px; padding: .15rem .6rem .15rem .2rem; font-family: Jua, sans-serif; font-size: .9rem; color: #334155; }
+    .hd-chip img { width: 2rem; height: 2rem; object-fit: contain; }
+    .hd-chip b { font-weight: normal; }
+    .hd-chip.got { background: #dcfce7; border-color: #22c55e; text-decoration: line-through; text-decoration-color: #16a34a; opacity: .75; }
+
+    .df-pair { display: grid; grid-template-columns: 1fr; gap: .4rem; }
+    .df-pair .fd-box { max-height: none; max-width: min(100%, calc((100vh - var(--rw-hdr, 120px) - 70px) / 2 * 4 / 3)); }
+    .df-it { position: absolute; transform: translate(-50%, -50%); aspect-ratio: 1; padding: 0; background: none; border: 0; }
+    .df-in { display: block; width: 100%; height: 100%; }
+    .df-in img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.15)); }
+    .df-tag { position: absolute; left: .4rem; top: .3rem; font-family: Jua, sans-serif; font-size: 1.1rem; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.5); pointer-events: none; }
+    .df-count { display: flex; justify-content: center; align-items: center; gap: .3rem; font-family: Jua, sans-serif; color: #475569; }
+    .df-count span { width: 1.6rem; height: 1.6rem; border-radius: 999px; border: 2px dashed #fda4af; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: .8rem; }
+    .df-count span.on { background: #f43f5e; border: 0; }
+    @media (orientation: landscape) and (min-width: 700px) {
+      #view-find { max-width: 64rem; }
+      .df-pair { grid-template-columns: 1fr 1fr; }
+      .df-pair .fd-box { max-width: 100%; }
+    }
+
+    .pz-area { position: relative; margin: 0 auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .pz-board { position: absolute; left: 0; top: 0; border-radius: .8rem; overflow: hidden; background: #e0f2fe; box-shadow: inset 0 0 0 3px #bae6fd; }
+    .pz-board svg { width: 100%; height: 100%; display: block; }
+    .pz-ghost { transition: opacity .8s; }
+    .pz-tray { position: absolute; border-radius: .8rem; background: repeating-linear-gradient(45deg, #fef9c3 0 12px, #fef3c7 12px 24px); box-shadow: inset 0 0 0 3px #fde68a; }
+    .pz-pc { position: absolute; transform-origin: 0 0; pointer-events: none; transition: transform .15s; }
+    .pz-pc svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 3px 3px rgba(0,0,0,.3)); }
+    .pz-pc .pz-hit { pointer-events: fill; cursor: grab; }
+    .pz-pc.drag { transition: none; z-index: 10; }
+    .pz-pc.drag svg { filter: drop-shadow(0 10px 8px rgba(0,0,0,.35)); }
+    .pz-pc.done svg { filter: none; }
+    .pz-pc.done .pz-hit { pointer-events: none; }
+    .pz-area.solved .pz-pc { opacity: 0; transition: opacity .8s; }
+    .pz-info { display: flex; align-items: center; justify-content: center; gap: .5rem; font-family: Jua, sans-serif; color: #475569; font-size: .9rem; }
+    .pz-thumb { width: 72px; height: 54px; border-radius: .5rem; border: 2px solid #bae6fd; }
+    .pz-info b { font-weight: normal; color: #0e7490; }
+
+    .sl-board { position: relative; width: min(100%, 520px, calc((100vh - var(--rw-hdr, 120px) - 90px) * 4 / 3)); aspect-ratio: 4 / 3; margin: 0 auto; background: #cbd5e1; border-radius: .9rem; overflow: hidden; border: 4px solid #94a3b8; }
+    .sl-tile { position: absolute; width: 33.333%; height: 33.333%; padding: 0; border: 2px solid #fff; background: #e2e8f0; transition: left .15s, top .15s; }
+    .sl-tile svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+    .sl-tile b { position: absolute; left: 4px; top: 2px; min-width: 1.4rem; height: 1.4rem; border-radius: 999px; background: rgba(15,23,42,.65); color: #fff; font-family: Jua, sans-serif; font-weight: normal; font-size: .85rem; line-height: 1.4rem; text-align: center; }
+    .sl-tile.ok b { background: #16a34a; }
+    .sl-last { position: absolute; left: 66.667%; top: 66.667%; width: 33.333%; height: 33.333%; opacity: 0; transition: opacity .6s; pointer-events: none; }
+    .sl-last svg { width: 100%; height: 100%; display: block; }
+    .sl-board.solved .sl-last { opacity: 1; }
+    .sl-board.solved .sl-tile { border-color: transparent; }
+    .sl-board.solved .sl-tile b { opacity: 0; }
+      </style>
+      <div class="bg-white p-3 rounded-2xl shadow-sm border border-cyan-200 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="font-jua text-base text-slate-800">🔎 포켓몬 그림 찾기</h2>
+            <p class="text-[11px] text-slate-500 font-bold">숨은 친구 찾기, 다른 곳 찾기, 퍼즐 맞추기. 스티커는 수학 놀이와 같이 모여요.</p>
+          </div>
+          <div class="shrink-0 flex items-center gap-1.5">
+            <label class="flex items-center gap-0.5 cursor-pointer select-none text-slate-600 font-jua text-xs" title="읽어 주기"><input id="fd-voice" type="checkbox" checked onchange="if (!this.checked) fdStopSpeech()" class="accent-cyan-500">🔊</label>
+            <button onclick="rwShowAlbum()" class="font-jua text-xs px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 active:scale-95 transition">📒 카드 <span class="rw-count">0</span></button>
+          </div>
+        </div>
+        <div class="rw-barwrap"><span class="font-jua text-[11px] text-amber-600 shrink-0">스티커</span><div class="rw-bar"></div><span class="shrink-0 text-lg">🎁</span></div>
+      </div>
+      <div id="fd-top" class="bg-white p-2.5 rounded-2xl border border-slate-200 space-y-2"></div>
+      <div id="fd-game"></div>
+      <div id="fd-list"></div>
+      <div id="fd-bottom"></div>
+    </section>
+    <div id="rw-ov" class="hidden"></div>
 
   </main>
 
@@ -4983,8 +5132,9 @@
       if (viewKey !== 'story' && typeof sbStopReading === 'function' && (sbReading || sbTimers.length)) sbStopReading();
       if (viewKey !== 'story' && typeof ibStopSpeech === 'function') ibStopSpeech();
       if (viewKey !== 'math' && typeof mmStopSpeech === 'function') mmStopSpeech();
+      if (viewKey !== 'find' && typeof fdStopSpeech === 'function') fdStopSpeech();
       if (viewKey !== 'battle' && typeof bxStopSpeech === 'function') bxStopSpeech();
-      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'favs'].forEach(v => {
+      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'find', 'favs'].forEach(v => {
         const sec = document.getElementById(`view-${v}`);
         const tab = document.getElementById(`nav-${v}`);
         if (sec) sec.classList.toggle('hidden', v !== viewKey);
@@ -5019,6 +5169,8 @@
         initStoryView();
       } else if (viewKey === 'math') {
         mmInit();
+      } else if (viewKey === 'find') {
+        fdInit();
       }
     }
 
@@ -10637,7 +10789,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     const mmMari = n => `${MM_CNT[n] || n} 마리`;
     const mmGae = n => `${MM_CNT[n] || n} 개`;
     const mmIco = (e, cls) => { const u = (typeof SBI !== 'undefined') ? SBI.url(e) : ''; return u ? `<img class="mm-ico ${cls || ''}" src="${u}" alt="${e}" draggable="false">` : `<span class="mm-ico mm-emo ${cls || ''}">${e}</span>`; };
-    const mmPkImg = (n, cls, style) => `<img class="${cls || ''}" style="${style || ''}" src="${getPokemonArtworkUrl(n)}" onerror="this.onerror=null;this.src='${getPokemonPixelUrl(n)}'" alt="${mmName(n)}" draggable="false">`;
+    const mmPkImg = (n, cls, style) => rwImg(n, cls, style);   // 그림이 안 열리면 몬스터볼로 바뀌어요
     const mmDots = n => `<span class="mm-dots">${'●'.repeat(Math.min(n, 10))}${n > 10 ? '<br>' + '●'.repeat(n - 10) : ''}</span>`;
 
     // 숫자로 끝나는 말도 조사가 맞게 붙어요 (3이에요, 2예요, 6을, 5를)
@@ -10712,7 +10864,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       document.getElementById('mm-play').classList.remove('hidden');
       playSuccessChime();
       mmNext();
-      try { document.getElementById('mm-play').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+      rwScrollTo(document.getElementById('mm-play'));
     }
     function mmBack() { mmStopSpeech(); mmQ = null; mmRenderSetup(); }
 
@@ -10724,7 +10876,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       return base;
     }
     function mmNext() {
-      mmStopSpeech(); mmBusy = false;
+      mmStopSpeech(); mmBusy = false; mmInk = null;
       const st = mmCurStage();
       const d = mmS.d[st] || 1;
       mmQ = MM_GEN[st](d);
@@ -10792,50 +10944,18 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           }
         }
         mmSave();
-        if (mmCardPending) mmShowCard(mmCardPending); else mmNext();
+        if (mmCardPending) { const c = mmCardPending; mmCardPending = null; rwShowCards(c, mmNext); } else mmNext();
       };
     }
     function mmToast(t) { try { showToast(t); } catch (e) {} }
 
-    // ---------- 스티커 · 카드 ----------
-    let mmCardPending = 0;
+    // ---------- 스티커 · 카드 (그림 찾기와 함께 써요) ----------
+    let mmCardPending = null;
     function mmAddSticker(pk) {
-      mmS.stickers.push(pk);
-      if (mmS.stickers.length >= 10) {
-        mmS.stickers = [];
-        const pool = MM_PK.filter(n => !mmS.cards.includes(n));
-        const card = pool.length ? mmPick(pool) : mmRand(1, 151);
-        mmS.cards.push(card);
-        mmCardPending = card;   // 칭찬 말이 끝나면 카드를 보여 줘요
-        mmSave(); mmRenderStickers();
-        return;
-      }
-      mmSave(); mmRenderStickers();
+      const cards = rwGive([pk], 'math');
+      if (cards.length) mmCardPending = cards;   // 칭찬 말이 끝나면 카드를 보여 줘요
     }
-    function mmRenderStickers() {
-      const el = document.getElementById('mm-stickers'); if (!el || !mmS) return;
-      el.innerHTML = Array.from({ length: 10 }, (_, i) => mmS.stickers[i] ? `<span class="mm-stk on">${mmPkImg(mmS.stickers[i])}</span>` : `<span class="mm-stk">${i + 1}</span>`).join('');
-      const c = document.getElementById('mm-cardcount'); if (c) c.textContent = mmS.cards.length;
-    }
-    function mmShowCard(n) {
-      const ov = document.getElementById('mm-cardov');
-      const types = OFFICIAL_DEX.rows[n - 1][2].map(i => TYPE_NAMES[i]).join('·');
-      ov.innerHTML = `<div class="mm-cardbox"><div class="mm-cardhead">🎁 스티커 10개 달성! 새 카드를 받았어요</div>
-        <div class="mm-pcard">${mmPkImg(n)}<div class="mm-pcard-name">${mmName(n)}</div><div class="mm-pcard-sub">${types} · 키 ${mmHt(n)}m · 몸무게 ${mmWt(n)}kg</div></div>
-        <button class="mm-go" onclick="mmCloseCard()">계속하기 ▶</button></div>`;
-      ov.classList.remove('hidden');
-      playSuccessChime();
-      mmSay(`축하해요! ${mmName(n)} 카드를 받았어요!`);
-    }
-    function mmCloseCard() { document.getElementById('mm-cardov').classList.add('hidden'); mmCardPending = 0; mmNext(); }
-    function mmShowAlbum() {
-      if (!mmS) mmS = mmLoad();
-      const ov = document.getElementById('mm-cardov');
-      ov.innerHTML = `<div class="mm-cardbox mm-album"><div class="mm-cardhead">📒 내가 모은 카드 ${mmS.cards.length}장</div>
-        <div class="mm-album-grid">${mmS.cards.length ? mmS.cards.map(n => `<div class="mm-mini">${mmPkImg(n)}<span>${mmName(n)}</span></div>`).join('') : '<p class="mm-help">문제를 맞히고 스티커 10개를 모으면 카드가 생겨요!</p>'}</div>
-        <button class="mm-go" onclick="document.getElementById('mm-cardov').classList.add('hidden')">닫기</button></div>`;
-      ov.classList.remove('hidden');
-    }
+    function mmRenderStickers() { rwRenderBars(); }
 
     // ---------- 배치 도우미 ----------
     // 겹치지 않게 그림 자리를 정해요 (상자 안 % 좌표)
@@ -11034,7 +11154,15 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       };
     }
     let mmInk = null;
+    // 글꼴(Jua)이 준비된 다음에 밑그림을 그려야 채점 기준과 모양이 같아요
     function mmInkSetup(n) {
+      let go = false;
+      const run = () => { if (go) return; go = true; mmInkSetupNow(n); };
+      try { document.fonts.load('40px Jua').then(run, run); } catch (e) { run(); }
+      setTimeout(run, 1200);
+    }
+    function mmInkSetupNow(n) {
+      if (!mmQ || !mmQ.write || mmQ.answer !== n) return;
       const g = document.getElementById('mm-ghost'), c = document.getElementById('mm-ink'); if (!g || !c) return;
       const r = c.getBoundingClientRect();
       [g, c].forEach(cv => { cv.width = Math.max(10, r.width); cv.height = Math.max(10, r.height); });
@@ -11055,9 +11183,10 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       ctx.fillText(String(n), w / 2, h * 0.54);
     }
     function mmInkClear() { if (mmInk) mmInk.c.getContext('2d').clearRect(0, 0, mmInk.c.width, mmInk.c.height); }
-    // 32×32 칸으로 줄여서: 쓴 선이 숫자 모양 안에 있는지(75%↑), 숫자 모양을 충분히 덮었는지(55%↑) 봐요
+    // 64×64 칸으로 줄여서: 쓴 선이 숫자 모양 근처에 있는지(72%↑), 숫자 모양을 충분히 덮었는지(80%↑) 봐요
+    // (흔들리게 따라 쓴 글씨는 400개 중 399개 통과, 다른 숫자를 쓴 경우는 절반쯤 걸러져요)
     function mmDigitScore(inkCanvas, n) {
-      const G = 32, w = inkCanvas.width, h = inkCanvas.height;
+      const G = 64, w = inkCanvas.width, h = inkCanvas.height;
       const m = document.createElement('canvas'); m.width = w; m.height = h;
       const mx = m.getContext('2d'); mx.fillStyle = '#000'; mmDrawDigit(mx, n, w, h);
       const grid = (cv) => { const d = cv.getContext('2d').getImageData(0, 0, w, h).data; const out = new Uint8Array(G * G);
@@ -11065,18 +11194,18 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const gl = grid(m), ink = grid(inkCanvas);
       const near = (arr, i, r) => { const x = i % G, y = (i / G) | 0; for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < G && yy < G && arr[yy * G + xx]) return true; } return false; };
       let inkN = 0, inkIn = 0, glN = 0, glCov = 0;
-      for (let i = 0; i < G * G; i++) { if (ink[i]) { inkN++; if (near(gl, i, 2)) inkIn++; } if (gl[i]) { glN++; if (near(ink, i, 2)) glCov++; } }
+      for (let i = 0; i < G * G; i++) { if (ink[i]) { inkN++; if (near(gl, i, 4)) inkIn++; } if (gl[i]) { glN++; if (ink[i]) glCov++; } }
       return { inkN, inside: inkN ? inkIn / inkN : 0, cover: glN ? glCov / glN : 0 };
     }
     function mmInkCheck(btn) {
       if (!mmInk || mmBusy) return;
       const s = mmDigitScore(mmInk.c, mmInk.n);
-      if (s.inkN >= 8 && s.inside >= 0.75 && s.cover >= 0.55) return mmRight(btn);
+      if (s.inkN >= 30 && s.inside >= 0.72 && s.cover >= 0.8) return mmRight(btn);
       const q = mmQ; q.tries++;
       playTone(220, 0.12, 'sawtooth');
       mmMissOnce(q);
       if (q.tries === 1) {
-        mmSay(s.inkN < 8 ? '아직 조금밖에 안 썼어요. 연한 숫자를 따라 끝까지 그려 봐요!' : s.inside < 0.75 ? '선이 숫자 밖으로 많이 나갔어요. 지우고 연한 숫자 위에 다시 그려 볼까요?' : '숫자의 빈 곳이 있어요. 연한 부분을 더 따라 그려 봐요!');
+        mmSay(s.inkN < 30 ? '아직 조금밖에 안 썼어요. 연한 숫자를 따라 끝까지 그려 봐요!' : s.inside < 0.72 ? '선이 숫자 밖으로 많이 나갔어요. 지우고 연한 숫자 위에 다시 그려 볼까요?' : '숫자의 빈 곳이 있어요. 연한 부분을 더 따라 그려 봐요!');
       } else { mmBusy = true; const t = q.reveal(); document.getElementById('mm-feedback').innerHTML = `<div class="mm-fb mm-fb-soft">💡 ${t}</div>`; mmSay(t, () => mmLater(mmAdjust(false), 900)); }
     }
 
@@ -11256,6 +11385,539 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     }
 
     const MM_GEN = { 1: mmGenCount, 2: mmGenCompare, 3: mmGenShapePattern, 4: mmGenNumber, 5: mmGenAddSub, 6: mmGenTen, 7: mmGenLife };
+    /**
+     * ==============================================================
+     * [보상] 수학 놀이 · 그림 찾기가 함께 쓰는 스티커 · 카드 · 앨범
+     *  - 스티커 10개 → 카드 1장 (뒤집어서 받아요, 가끔 반짝 카드)
+     *  - 앨범: 모은 카드는 그림으로, 아직 못 모은 친구는 그림자로
+     * ==============================================================
+     */
+    const RW_KEY = 'pkmn_reward_v1';
+    const RW_POOL = [25, 1, 4, 7, 133, 39, 52, 143, 54, 35, 172, 175, 183, 393, 906, 909, 912, 132, 79, 151,
+      94, 6, 9, 3, 149, 131, 129, 95, 74, 16, 10, 197, 448, 778, 196, 134, 135, 136, 470, 471,
+      700, 258, 255, 252, 501, 495, 498, 722, 725, 728, 810, 813, 816, 37, 58, 77, 113, 152, 155, 158];
+    const RW_SRC = { math: ['🔢', '수학 놀이'], hide: ['🔎', '숨은그림찾기'], diff: ['👀', '틀린그림찾기'], puzzle: ['🧩', '퍼즐'] };
+    const RW_BALL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff" stroke="#334155" stroke-width="4"/><path d="M4,32 A28,28 0 0 1 60,32Z" fill="#ef4444" stroke="#334155" stroke-width="4"/><path d="M4,32H60" stroke="#334155" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="#fff" stroke="#334155" stroke-width="4"/></svg>');
+    let rwS = null, rwBarLen = -1;
+    // 위에 붙어 있는 메뉴 줄 높이 (화면을 올릴 때 메뉴에 가리지 않게)
+    function rwHdr() { const h = Math.round(document.querySelector('header')?.getBoundingClientRect().height || 0); document.documentElement.style.setProperty('--rw-hdr', h + 'px'); return h; }
+    function rwScrollTo(el) { if (!el) return; const top = el.getBoundingClientRect().top + window.scrollY - rwHdr() - 8; try { window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); } catch (e) { window.scrollTo(0, Math.max(0, top)); } }
+
+    function rwLoad() {
+      if (rwS) return rwS;
+      let st = null; try { st = JSON.parse(localStorage.getItem(RW_KEY) || 'null'); } catch (e) {}
+      if (!st) {
+        // 수학 놀이에서 모은 스티커·카드를 그대로 옮겨 와요
+        st = { stickers: [], cards: [] };
+        try { const m = JSON.parse(localStorage.getItem('pkmn_math_v1') || 'null'); if (m) { st.stickers = (m.stickers || []).slice(0, 9); st.cards = (m.cards || []).map(n => ({ n, g: 0, s: 'math' })); } } catch (e) {}
+      }
+      rwS = Object.assign({ stickers: [], cards: [] }, st);
+      return rwS;
+    }
+    function rwSave() { try { localStorage.setItem(RW_KEY, JSON.stringify(rwS)); } catch (e) {} }
+    // 포켓몬 그림이 안 열리면 작은 그림 → 몬스터볼 순서로 바꿔요
+    function rwImgErr(el, n) {
+      if (!el.dataset.f) { el.dataset.f = '1'; el.src = getPokemonPixelUrl(n); }
+      else if (el.dataset.f === '1') { el.dataset.f = '2'; el.src = RW_BALL; el.classList.add('rw-ball'); }
+    }
+    const rwImg = (n, cls, style) => `<img class="${cls || ''}" style="${style || ''}" src="${getPokemonArtworkUrl(n)}" onerror="rwImgErr(this, ${n})" alt="${POKEMON_NAMES_1025[n - 1]}" draggable="false">`;
+
+    // 스티커를 붙이고, 10개가 차면 카드를 만들어 돌려줘요
+    function rwGive(pks, src) {
+      rwLoad();
+      const out = [];
+      pks.forEach(pk => {
+        rwS.stickers.push(pk);
+        if (rwS.stickers.length >= 10) {
+          rwS.stickers = rwS.stickers.slice(10);
+          const have = new Set(rwS.cards.map(c => c.n));
+          const pool = RW_POOL.filter(n => !have.has(n));
+          const n = pool.length ? pool[Math.floor(Math.random() * pool.length)] : RW_POOL[Math.floor(Math.random() * RW_POOL.length)];
+          const card = { n, g: Math.random() < 0.15 ? 1 : 0, s: src, dup: have.has(n) };
+          rwS.cards.push({ n: card.n, g: card.g, s: card.s });
+          out.push(card);
+        }
+      });
+      rwSave(); rwRenderBars();
+      return out;
+    }
+    function rwRenderBars() {
+      rwLoad();
+      const len = rwS.stickers.length, grew = rwBarLen >= 0 && len > rwBarLen;
+      document.querySelectorAll('.rw-bar').forEach(el => {
+        el.innerHTML = Array.from({ length: 10 }, (_, i) => rwS.stickers[i]
+          ? `<span class="rw-stk on ${grew && i >= rwBarLen ? 'new' : ''}">${rwImg(rwS.stickers[i])}</span>`
+          : `<span class="rw-stk">${i + 1}</span>`).join('');
+      });
+      document.querySelectorAll('.rw-count').forEach(el => el.textContent = rwS.cards.length);
+      rwBarLen = len;
+    }
+
+    // 카드 받기: 뒷면으로 나오고, 누르면 뒤집혀요
+    function rwShowCards(cards, done) {
+      const ov = document.getElementById('rw-ov');
+      if (!cards || !cards.length) { if (done) done(); return; }
+      const c = cards[0], rest = cards.slice(1);
+      const row = OFFICIAL_DEX.rows[c.n - 1], nm = POKEMON_NAMES_1025[c.n - 1];
+      const types = row[2].map(i => TYPE_NAMES[i]).join('·');
+      const src = RW_SRC[c.s] || ['🎁', ''];
+      ov.innerHTML = `<div class="rw-box">
+        <div class="rw-head">🎁 스티커 10개 달성! 카드를 눌러 뒤집어 봐요</div>
+        <button class="rw-flip" id="rw-flip" onclick="rwFlip()">
+          <div class="rw-face rw-back"><div class="rw-back-ball"></div><span>톡!</span></div>
+          <div class="rw-face rw-front ${c.g ? 'gold' : ''}">
+            ${c.g ? '<div class="rw-holo"></div><span class="rw-gold-tag">✨ 반짝 카드</span>' : ''}
+            <span class="rw-src">${src[0]} ${src[1]}</span>
+            ${rwImg(c.n, 'rw-card-img')}
+            <div class="rw-card-name">${nm}</div>
+            <div class="rw-card-sub">${types} · 키 ${row[3] / 10}m · 몸무게 ${row[4] / 10}kg</div>
+          </div>
+        </button>
+        <div class="rw-after" id="rw-after">
+          <div class="rw-msg">${c.dup ? `${nm}${sbJosa(nm, '을')} 또 만났어요!` : `새 친구 ${nm}!`}</div>
+          <button class="rw-go" onclick="rwCardNext()">${rest.length ? '다음 카드 ▶' : '계속하기 ▶'}</button>
+        </div>
+      </div>`;
+      ov.classList.remove('hidden');
+      ov._rest = rest; ov._done = done; ov._name = nm; ov._gold = c.g;
+      playTone(660, 0.08);
+    }
+    function rwFlip() {
+      const f = document.getElementById('rw-flip'); if (!f || f.classList.contains('open')) return;
+      const ov = document.getElementById('rw-ov');
+      f.classList.add('open');
+      setTimeout(() => { document.getElementById('rw-after')?.classList.add('show'); }, 450);
+      playSuccessChime();
+      try {
+        if ('speechSynthesis' in window && (document.getElementById('mm-voice')?.checked !== false) && (document.getElementById('fd-voice')?.checked !== false)) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(`${ov._gold ? '우와, 반짝 카드! ' : ''}${ov._name} 카드를 받았어요!`);
+          u.lang = 'ko-KR'; u.rate = 0.9; const v = getKoreanVoice(); if (v) u.voice = v;
+          window.speechSynthesis.speak(u);
+        }
+      } catch (e) {}
+    }
+    function rwCardNext() {
+      const ov = document.getElementById('rw-ov');
+      const rest = ov._rest, done = ov._done;
+      ov.classList.add('hidden'); ov.innerHTML = '';
+      if (rest && rest.length) rwShowCards(rest, done); else if (done) done();
+    }
+    function rwShowAlbum() {
+      rwLoad();
+      const ov = document.getElementById('rw-ov');
+      const got = {}; rwS.cards.forEach(c => { const g = got[c.n] || (got[c.n] = { k: 0, g: 0 }); g.k++; if (c.g) g.g = 1; });
+      const extra = Object.keys(got).map(Number).filter(n => !RW_POOL.includes(n));
+      const have = RW_POOL.filter(n => got[n]).length;
+      const cell = n => {
+        const g = got[n], nm = POKEMON_NAMES_1025[n - 1];
+        return g ? `<div class="rw-mini ${g.g ? 'gold' : ''}">${rwImg(n)}<span>${nm}</span>${g.k > 1 ? `<b class="rw-k">×${g.k}</b>` : ''}</div>`
+          : `<div class="rw-mini rw-shadow">${rwImg(n)}<span>?</span></div>`;
+      };
+      ov.innerHTML = `<div class="rw-box rw-album">
+        <div class="rw-head">📒 포켓몬 카드 앨범 <small>${have} / ${RW_POOL.length}</small></div>
+        <p class="rw-tip">수학 놀이와 그림 찾기에서 스티커를 10개 모으면 카드가 한 장 생겨요. 그림자 친구들은 누구일까요?</p>
+        <div class="rw-album-grid">${RW_POOL.map(cell).join('')}${extra.map(cell).join('')}</div>
+        <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
+      ov.classList.remove('hidden');
+    }
+    /**
+     * ==============================================================
+     * [그림 찾기] 숨은그림찾기 · 틀린그림찾기 · 퍼즐 (3~7세)
+     *  - 동화 배경 그림과 아이콘으로 매번 새 문제를 만들어요
+     *  - 나이에 따라 개수 · 크기 · 숨김 정도 · 퍼즐 조각 수가 달라져요
+     *  - 끝내면 스티커 (수학 놀이와 같은 앨범에 모여요)
+     * ==============================================================
+     */
+    const FD_KEY = 'pkmn_find_v1';
+    const FD_OBJ = { '🍎': '사과', '⭐': '별', '🍄': '버섯', '🎈': '풍선', '💎': '보석', '🐚': '조개', '🦀': '게', '🐟': '물고기', '🦆': '오리', '🐛': '애벌레', '🐝': '꿀벌', '🐣': '병아리', '🥚': '알', '🍓': '딸기', '🍇': '포도', '🍞': '빵', '🎂': '케이크', '🍦': '아이스크림', '☂': '우산', '✉': '편지', '🎁': '선물', '🏆': '트로피', '👑': '왕관', '🪙': '동전', '⚽': '공', '⚪': '몬스터볼', '🦋': '나비', '🌻': '해바라기', '🔥': '불꽃', '⚡': '번개', '🌙': '달', '❤': '하트', '🧺': '바구니', '🥛': '우유', '🍯': '꿀단지', '🎨': '물감', '🪶': '깃털', '🚩': '깃발', '🍫': '초콜릿', '🐔': '닭', '🦁': '사자', '🐴': '말' };
+    const FD_DECO = ['🌿', '🍃', '🌱', '🌼', '🌸', '🪨', '🍂', '🌷', '☁', '🫧', '🌳', '🌲'];
+    const FD_PK = [25, 133, 39, 52, 54, 35, 172, 175, 183, 393, 906, 909, 912, 132, 79, 151, 94, 7, 4, 1, 778, 197, 129, 143, 255, 258, 252, 501, 722, 810];
+    const FD_SCENES = ['forest', 'meadow', 'hill', 'field', 'town', 'garden', 'lake', 'river', 'sea', 'snow', 'mountain', 'rainbow', 'party', 'kitchen', 'bedroom'];
+    const FD_GAMES = { hide: ['🔎', '숨은그림찾기'], diff: ['👀', '틀린그림찾기'], puzzle: ['🧩', '퍼즐'] };
+    let fdS = null, fdG = null, fdSession = 0, fdTimers = [], fdSpeaking = false, fdPkOK = null, fdUid = 0;
+    const fdRand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+    const fdPick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const fdShuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const fdIcon = (e, cls, style) => `<img class="${cls || ''}" style="${style || ''}" src="${SBI.url(e)}" alt="${FD_OBJ[e] || ''}" draggable="false">`;
+    const fdPkName = n => POKEMON_NAMES_1025[n - 1];
+
+    function fdLoad() {
+      let st = null; try { st = JSON.parse(localStorage.getItem(FD_KEY) || 'null'); } catch (e) {}
+      if (!st) { st = {}; try { const m = JSON.parse(localStorage.getItem('pkmn_math_v1') || 'null'); if (m && m.age) st.age = m.age; } catch (e) {} }
+      return Object.assign({ age: 5, game: 'hide', pzMode: 'jig', done: {} }, st);
+    }
+    function fdSave() { try { localStorage.setItem(FD_KEY, JSON.stringify(fdS)); } catch (e) {} }
+
+    // ---------- 말하기 ----------
+    function fdClearTimers() { fdTimers.forEach(t => clearTimeout(t)); fdTimers = []; }
+    function fdStopSpeech() {
+      if (!fdSpeaking && !fdTimers.length) return;
+      fdSession++; fdClearTimers(); fdSpeaking = false;
+      try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {}
+    }
+    function fdSay(text, cb) {
+      fdSession++; fdClearTimers();
+      const session = fdSession;
+      const clean = String(text || '').replace(/[“”"‘’]/g, '').replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu, '').trim();
+      let done = false;
+      const finish = () => { if (done || session !== fdSession) return; done = true; fdSpeaking = false; if (cb) cb(); };
+      const muted = !document.getElementById('fd-voice')?.checked;
+      if (!clean || muted || !('speechSynthesis' in window)) { fdTimers.push(setTimeout(finish, muted ? 300 + clean.length * 20 : 150)); return; }
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(clean);
+        u.lang = 'ko-KR'; u.rate = 0.9;
+        const v = getKoreanVoice(); if (v) u.voice = v;
+        u.onend = finish; u.onerror = finish;
+        fdSpeaking = true;
+        window.speechSynthesis.speak(u);
+        fdTimers.push(setTimeout(finish, 2200 + clean.length * 190));
+      } catch (e) { finish(); }
+    }
+    function fdLater(fn, ms) { const s = fdSession; fdTimers.push(setTimeout(() => { if (s === fdSession) fn(); }, ms)); }
+
+    // 포켓몬 그림을 쓸 수 있는지 한 번 확인해요 (인터넷이 없으면 아이콘으로만 만들어요)
+    function fdCheckPk(cb) {
+      if (fdPkOK !== null) return cb(fdPkOK);
+      let fin = false; const end = ok => { if (fin) return; fin = true; fdPkOK = ok; cb(ok); };
+      const im = new Image(); im.onload = () => end(true); im.onerror = () => end(false); im.src = getPokemonArtworkUrl(25);
+      setTimeout(() => end(false), 3000);
+    }
+
+    // ---------- 화면 ----------
+    function fdInit() {
+      if (!fdS) fdS = fdLoad();
+      rwHdr(); rwRenderBars();
+      fdRenderTop();
+      if (!fdG) fdStart();
+      else if (fdG.kind === 'puzzle') pzRelayout();
+    }
+    function fdRenderTop() {
+      const ages = [3, 4, 5, 6, 7].map(a => `<button class="mm-pill ${fdS.age === a ? 'on' : ''}" onclick="fdSetAge(${a})">${a}세</button>`).join('');
+      const games = Object.keys(FD_GAMES).map(k => `<button class="fd-tab ${fdS.game === k ? 'on' : ''}" onclick="fdSetGame('${k}')"><span>${FD_GAMES[k][0]}</span>${FD_GAMES[k][1]}</button>`).join('');
+      const pz = fdS.game === 'puzzle' && fdS.age >= 6 ? `<div class="flex items-center gap-1.5 justify-center"><button class="mm-pill ${fdS.pzMode === 'jig' ? 'on' : ''}" onclick="fdSetPz('jig')">🧩 조각 맞추기</button><button class="mm-pill ${fdS.pzMode === 'slide' ? 'on' : ''}" onclick="fdSetPz('slide')">🔢 밀기 퍼즐</button></div>` : '';
+      document.getElementById('fd-top').innerHTML = `<div class="fd-tabs">${games}</div>
+        <div class="flex flex-wrap items-center gap-1.5"><span class="mm-label">나이</span>${ages}</div>${pz}`;
+    }
+    function fdSetAge(a) { fdS.age = a; fdSave(); playTone(520, 0.04); fdRenderTop(); fdStart(); }
+    function fdSetGame(g) { fdS.game = g; fdSave(); playTone(520, 0.04); fdRenderTop(); fdStart(); }
+    function fdSetPz(m) { fdS.pzMode = m; fdSave(); playTone(520, 0.04); fdRenderTop(); fdStart(); }
+    function fdStart() {
+      fdStopSpeech();
+      const g = fdS.game, tok = ++fdUid;
+      document.getElementById('fd-game').innerHTML = '<div class="fd-wait">그림을 준비하고 있어요…</div>';
+      document.getElementById('fd-list').innerHTML = ''; document.getElementById('fd-bottom').innerHTML = '';
+      fdCheckPk(ok => {
+        if (tok !== fdUid) return;
+        if (g === 'hide') hdNew(ok); else if (g === 'diff') dfNew(ok); else if (fdS.age >= 6 && fdS.pzMode === 'slide') slNew(ok); else pzNew(ok);
+        setTimeout(fdScroll, 60);
+      });
+    }
+    function fdBottom(btns) {
+      document.getElementById('fd-bottom').innerHTML = `<button class="fd-btn" onclick="fdReplay()">🔊 다시 듣기</button>${btns || ''}<button class="fd-btn" onclick="fdStart()">🔄 새 그림</button>`;
+    }
+    // 놀이 화면이 한눈에 안 들어오면 놀이 화면이 위로 오게 올려요
+    function fdScroll() {
+      const el = document.getElementById('fd-game'); if (!el) return;
+      const r = el.getBoundingClientRect(), list = document.getElementById('fd-list').getBoundingClientRect();
+      if (list.bottom > window.innerHeight || r.top < rwHdr()) rwScrollTo(el);
+    }
+    function fdReplay() { if (fdG && fdG.say) fdSay(fdG.say); }
+    // 다 하면 스티커를 주고, 카드가 생기면 보여 줘요
+    function fdDone(n, msg) {
+      const g = fdG; if (!g || g.done) return; g.done = true;
+      fdS.done[g.kind] = (fdS.done[g.kind] || 0) + 1; fdSave();
+      const pks = Array.from({ length: n }, (_, i) => (g.pks && g.pks[i]) || fdPick(FD_PK));
+      const cards = rwGive(pks, g.kind);
+      playSuccessChime();
+      document.getElementById('fd-list').innerHTML = `<div class="mm-fb">🎉 ${msg}<br><small>스티커 ${n}개를 받았어요!</small></div>`;
+      document.getElementById('fd-bottom').innerHTML = `<button class="fd-btn fd-primary" onclick="fdStart()">다음 그림 ▶</button>`;
+      fdSay(`${msg} 스티커 ${n}개를 받았어요!`, () => { if (cards.length) rwShowCards(cards); });
+    }
+    function fdRing(box, x, y, r, cls) {
+      box.insertAdjacentHTML('beforeend', `<span class="fd-ring ${cls || ''}" style="left:${x}%;top:${y}%;width:${r * 2}%"></span>`);
+      return box.lastElementChild;
+    }
+    function fdMissAt(box, ev) {
+      const r = box.getBoundingClientRect();
+      const x = (ev.clientX - r.left) / r.width * 100, y = (ev.clientY - r.top) / r.height * 100;
+      const el = fdRing(box, x, y, 4, 'fd-miss');
+      playTone(260, 0.08);
+      setTimeout(() => el.remove(), 600);
+    }
+    // 겹치지 않게 자리를 나눠요 (상자 안 % 좌표)
+    function fdCells(cols, rows, area) {
+      const [x0, y0, x1, y1] = area, cw = (x1 - x0) / cols, ch = (y1 - y0) / rows, out = [];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) out.push({ x: x0 + (c + 0.5) * cw, y: y0 + (r + 0.5) * ch, cw, ch });
+      return fdShuffle(out);
+    }
+    const fdBush = '<svg class="fd-bush" viewBox="0 0 100 60" preserveAspectRatio="none"><path d="M0,60 C0,30 12,22 22,30 C24,10 44,6 50,24 C58,6 78,10 78,30 C88,22 100,30 100,60Z" fill="#5f9e55"/><path d="M8,60 C10,40 20,36 28,42 C32,26 46,24 50,38 C56,26 70,28 72,42 C80,36 92,42 92,60Z" fill="#78b866"/><circle cx="30" cy="40" r="3" fill="#f2a7c3"/><circle cx="66" cy="36" r="3" fill="#fde68a"/></svg>';
+
+    // ============ 숨은그림찾기 ============
+    function hdNew(pkOK) {
+      const i = fdS.age - 3;
+      const n = [3, 4, 5, 6, 7][i], sz = [15, 12.5, 10.5, 9, 8][i], nCl = [0, 5, 9, 13, 17][i], op = [1, 1, 0.9, 0.8, 0.7][i], rot = [0, 0, 15, 22, 28][i];
+      const npk = pkOK ? [1, 1, 2, 2, 2][i] : 0;
+      const scene = fdPick(FD_SCENES);
+      const cells = fdS.age <= 4 ? fdCells(4, 3, [6, 20, 94, 92]) : fdCells(6, 4, [5, 18, 95, 93]);
+      const objs = fdShuffle(Object.keys(FD_OBJ)).slice(0, n - npk);
+      const pks = fdShuffle(FD_PK).slice(0, npk);
+      const targets = [...objs.map(e => ({ e, name: FD_OBJ[e] })), ...pks.map(p => ({ pk: p, name: fdPkName(p) }))];
+      const jit = c => [c.x + (Math.random() - 0.5) * Math.max(0, c.cw - sz) * 0.8, c.y + (Math.random() - 0.5) * Math.max(0, c.ch - sz * 4 / 3) * 0.8];
+      targets.forEach((t, k) => { [t.x, t.y] = jit(cells[k]); t.r = rot ? fdRand(-rot, rot) : 0; t.w = t.pk ? sz * 1.35 : sz; });
+      const clPool = FD_DECO.concat(fdS.age >= 6 ? Object.keys(FD_OBJ).filter(e => !objs.includes(e)) : []);
+      const clutter = cells.slice(n, n + nCl).map(c => { const [x, y] = jit(c); return { e: fdPick(clPool), x, y, r: rot ? fdRand(-rot, rot) : 0, w: sz * (0.8 + Math.random() * 0.5) }; });
+      fdG = { kind: 'hide', targets, found: 0, pks: pks.length ? pks : null, hints: 0 };
+      const names = targets.map(t => t.name);
+      fdG.say = `숨어 있는 친구들을 찾아봐요! ${names.join(', ')}.`;
+      const item = (t, k) => t.pk
+        ? `<button class="hd-it hd-pk" data-k="${k}" style="left:${t.x}%;top:${t.y}%;width:${t.w}%;rotate:${t.r / 2}deg;opacity:${Math.max(op, 0.85)}" onclick="hdTap(${k}, this, event)">${rwImg(t.pk)}${fdBush}</button>`
+        : `<button class="hd-it" data-k="${k}" style="left:${t.x}%;top:${t.y}%;width:${t.w}%;rotate:${t.r}deg;opacity:${op}" onclick="hdTap(${k}, this, event)">${fdIcon(t.e)}</button>`;
+      document.getElementById('fd-game').innerHTML = `<div class="fd-box hd-box" onclick="hdMiss(event)"><img class="mm-bg" src="${SBA.url(scene)}" alt="">
+        ${clutter.map(c => `<span class="hd-cl" style="left:${c.x}%;top:${c.y}%;width:${c.w}%;rotate:${c.r}deg;opacity:${op}">${fdIcon(c.e)}</span>`).join('')}
+        ${targets.map(item).join('')}</div>`;
+      document.getElementById('fd-list').innerHTML = `<div class="hd-list">${targets.map((t, k) => `<span class="hd-chip" id="hd-c-${k}">${t.pk ? rwImg(t.pk) : fdIcon(t.e)}<b>${t.name}</b></span>`).join('')}</div>`;
+      fdBottom(`<button class="fd-btn" onclick="hdHint()">💡 힌트</button>`);
+      fdSay(fdG.say);
+    }
+    function hdTap(k, btn, ev) {
+      ev.stopPropagation();
+      const g = fdG; if (!g || g.kind !== 'hide' || g.done) return;
+      const t = g.targets[k]; if (t.got) return;
+      t.got = true; g.found++;
+      btn.classList.add('got');
+      fdRing(btn.parentElement, t.x, t.y, t.w * 0.75, 'fd-ok');
+      document.getElementById('hd-c-' + k)?.classList.add('got');
+      playTone(620 + g.found * 70, 0.1);
+      const left = g.targets.length - g.found;
+      if (!left) return fdDone(2, '모두 찾았어요!');
+      fdSay(`${t.name} 찾았다! ${left}개 남았어요.`);
+    }
+    function hdMiss(ev) { if (!fdG || fdG.done || ev.target.closest('.hd-it')) return; fdMissAt(ev.currentTarget, ev); }
+    function hdHint() {
+      const g = fdG; if (!g || g.kind !== 'hide' || g.done) return;
+      const t = g.targets.find(x => !x.got); if (!t) return;
+      const box = document.querySelector('#fd-game .hd-box');
+      const el = fdRing(box, t.x + fdRand(-5, 5), t.y + fdRand(-5, 5), 15, 'fd-hint');
+      setTimeout(() => el.remove(), 2600);
+      fdSay(`${t.name}${sbJosa(t.name, '은')} 반짝이는 동그라미 근처에 있어요!`);
+    }
+
+    // ============ 틀린그림찾기 ============
+    function dfNew(pkOK) {
+      const i = fdS.age - 3;
+      const nd = [2, 3, 4, 5, 6][i], ne = [5, 7, 8, 10, 12][i];
+      const kinds = [['remove', 'swap'], ['remove', 'swap', 'color'], ['remove', 'swap', 'color', 'flip'], ['remove', 'swap', 'color', 'flip', 'size'], ['remove', 'swap', 'color', 'flip', 'size']][i];
+      const scene = fdPick(FD_SCENES);
+      const cells = fdCells(5, 3, [8, 20, 92, 92]).slice(0, ne);
+      const icons = fdShuffle(Object.keys(FD_OBJ));
+      const pkl = fdShuffle(FD_PK);
+      const els = cells.map((c, k) => {
+        const pk = pkOK && Math.random() < 0.45 ? pkl.pop() : 0;
+        const w = pk ? (fdS.age >= 7 ? 15 : 17) : (fdS.age >= 7 ? 10 : 12);
+        return { pk, e: pk ? null : icons.pop(), x: c.x + (Math.random() - 0.5) * (c.cw - w) * 0.6, y: c.y + (Math.random() - 0.5) * (c.ch - w * 4 / 3) * 0.6, w, r: fdRand(-12, 12) };
+      });
+      fdShuffle(els.map((_, k) => k)).slice(0, nd).forEach(k => {
+        const el = els[k]; let kind = fdPick(kinds);
+        if (kind === 'flip' && !el.pk) kind = 'color';   // 아이콘은 대부분 좌우가 같아서 뒤집기 대신 색을 바꿔요
+        el.diff = { kind, side: Math.random() < 0.5 ? 'A' : 'B', alt: el.pk ? pkl.pop() : icons.pop() };
+      });
+      fdG = { kind: 'diff', els, nd, found: 0, pks: els.filter(e => e.pk).map(e => e.pk) };
+      fdG.say = `두 그림에서 다른 곳 ${nd}군데를 찾아봐요! 다른 곳을 콕 눌러요.`;
+      const one = side => `<div class="fd-box df-box" data-side="${side}" onclick="dfMiss(event)"><img class="mm-bg" src="${SBA.url(scene)}" alt=""><span class="df-tag">${side === 'A' ? '①' : '②'}</span>
+        ${els.map((el, k) => {
+          const d = el.diff && el.diff.side === side ? el.diff.kind : '';
+          const pos = `left:${el.x}%;top:${el.y}%;width:${el.w}%;`;
+          if (d === 'remove') return `<button class="df-it df-empty" style="${pos}" onclick="dfTap(${k}, event)"></button>`;
+          const tf = d === 'flip' ? 'scaleX(-1)' : d === 'size' ? `scale(${fdS.age >= 7 ? 1.3 : 1.45})` : '';
+          const flt = d === 'color' ? 'filter:hue-rotate(150deg) saturate(1.5);' : '';
+          const inner = d === 'swap' ? (el.pk ? rwImg(el.diff.alt) : fdIcon(el.diff.alt)) : (el.pk ? rwImg(el.pk) : fdIcon(el.e));
+          return `<button class="df-it" style="${pos}rotate:${el.r}deg" onclick="dfTap(${k}, event)"><span class="df-in" style="transform:${tf};${flt}">${inner}</span></button>`;
+        }).join('')}</div>`;
+      document.getElementById('fd-game').innerHTML = `<div class="df-pair">${one('A')}${one('B')}</div>`;
+      dfList();
+      fdBottom(`<button class="fd-btn" onclick="dfHint()">💡 힌트</button>`);
+      fdSay(fdG.say);
+    }
+    function dfList() { const g = fdG; document.getElementById('fd-list').innerHTML = `<div class="df-count">다른 곳 ${Array.from({ length: g.nd }, (_, k) => `<span class="${k < g.found ? 'on' : ''}">${k < g.found ? '✔' : ''}</span>`).join('')}</div>`; }
+    function dfTap(k, ev) {
+      ev.stopPropagation();
+      const g = fdG; if (!g || g.kind !== 'diff' || g.done) return;
+      const el = g.els[k];
+      if (!el.diff) return fdMissAt(ev.currentTarget.closest('.df-box'), ev);
+      if (el.got) return;
+      el.got = true; g.found++;
+      document.querySelectorAll('#fd-game .df-box').forEach(b => fdRing(b, el.x, el.y, el.w * 0.8, 'fd-ok'));
+      playTone(620 + g.found * 70, 0.1); dfList();
+      const left = g.nd - g.found;
+      if (!left) return fdDone(2, '다른 곳을 모두 찾았어요!');
+      fdSay(`찾았다! ${left}군데 남았어요.`);
+    }
+    function dfMiss(ev) { if (!fdG || fdG.done || ev.target.closest('.df-it')) return; fdMissAt(ev.currentTarget, ev); }
+    function dfHint() {
+      const g = fdG; if (!g || g.kind !== 'diff' || g.done) return;
+      const el = g.els.find(e => e.diff && !e.got); if (!el) return;
+      const dx = fdRand(-5, 5), dy = fdRand(-5, 5);
+      document.querySelectorAll('#fd-game .df-box').forEach(b => { const r = fdRing(b, el.x + dx, el.y + dy, 14, 'fd-hint'); setTimeout(() => r.remove(), 2600); });
+      fdSay('반짝이는 동그라미 근처를 두 그림에서 비교해 봐요!');
+    }
+
+    // ============ 퍼즐: 조각 맞추기 ============
+    // 그림: 배경 + 포켓몬 (400×300 좌표)
+    function pzArt(pkOK) {
+      const scene = fdPick(FD_SCENES);
+      const pk = pkOK ? fdPick(FD_PK) : 0;
+      const sceneImg = `<image href="${SBA.url(scene)}" x="0" y="0" width="400" height="300" preserveAspectRatio="xMidYMid slice"/>`;
+      const body = pk ? `<image href="${getPokemonArtworkUrl(pk)}" x="90" y="35" width="220" height="220"/>`
+        : fdShuffle(Object.keys(FD_OBJ)).slice(0, 3).map((e, k) => `<image href="${SBI.url(e)}" x="${40 + k * 115}" y="${110 + (k % 2) * 40}" width="100" height="100"/>`).join('');
+      return { pk, svg: sceneImg + body };
+    }
+    function pzEdge(ax, ay, bx, by, t, k) {
+      if (!t) return `L${bx},${by}`;
+      const L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L, nx = uy, ny = -ux;
+      const p = (a, b) => `${(ax + ux * a * L + nx * b * k * t).toFixed(1)},${(ay + uy * a * L + ny * b * k * t).toFixed(1)}`;
+      return `L${p(0.36, 0)} C${p(0.42, 0)} ${p(0.28, 1.05)} ${p(0.5, 1.05)} C${p(0.72, 1.05)} ${p(0.58, 0)} ${p(0.64, 0)} L${bx},${by}`;
+    }
+    function pzNew(pkOK) {
+      const i = fdS.age - 3;
+      const [C, R] = [[2, 2], [3, 2], [3, 3], [4, 3], [4, 4]][i];
+      const ghost = [0.4, 0.32, 0.25, 0.12, 0][i], square = fdS.age === 3;
+      const W = 400 / C, H = 300 / R, K = square ? 0 : Math.min(W, H) * 0.2;
+      const hz = Array.from({ length: R - 1 }, () => Array.from({ length: C }, () => Math.random() < 0.5 ? 1 : -1));
+      const vt = Array.from({ length: R }, () => Array.from({ length: C - 1 }, () => Math.random() < 0.5 ? 1 : -1));
+      const art = pzArt(pkOK), uid = ++fdUid;
+      const pieces = [];
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+        const x = c * W, y = r * H;
+        const top = r ? -hz[r - 1][c] : 0, bottom = r < R - 1 ? hz[r][c] : 0, left = c ? -vt[r][c - 1] : 0, right = c < C - 1 ? vt[r][c] : 0;
+        const d = `M${x},${y} ${pzEdge(x, y, x + W, y, top, K)} ${pzEdge(x + W, y, x + W, y + H, right, K)} ${pzEdge(x + W, y + H, x, y + H, bottom, K)} ${pzEdge(x, y + H, x, y, left, K)} Z`;
+        pieces.push({ r, c, x, y, d, done: false });
+      }
+      fdG = { kind: 'puzzle', C, R, W, H, K, pieces, uid, placed: 0, pks: art.pk ? [art.pk] : null };
+      fdG.say = `조각을 끌어서 맞는 자리에 놓아 봐요! 조각 ${pieces.length}개예요.`;
+      const pc = (p, k) => `<div class="pz-pc" data-k="${k}"><svg viewBox="${p.x - K} ${p.y - K} ${W + 2 * K} ${H + 2 * K}"><defs><clipPath id="pzc-${uid}-${k}"><path d="${p.d}"/></clipPath></defs><g clip-path="url(#pzc-${uid}-${k})"><use href="#pz-art-${uid}"/></g><path d="${p.d}" fill="none" stroke="#fff" stroke-width="2.2" stroke-opacity=".95"/><path class="pz-hit" d="${p.d}" fill="transparent"/></svg></div>`;
+      document.getElementById('fd-game').innerHTML = `<svg width="0" height="0" style="position:absolute"><defs><g id="pz-art-${uid}">${art.svg}</g></defs></svg>
+        <div id="pz-area" class="pz-area"><div class="pz-board"><svg viewBox="0 0 400 300"><g class="pz-ghost" style="opacity:${ghost}"><use href="#pz-art-${uid}"/></g>${pieces.map(p => `<path d="${p.d}" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4" opacity=".8"/>`).join('')}</svg></div>
+        <div class="pz-tray"></div>${pieces.map(pc).join('')}</div>`;
+      document.getElementById('fd-list').innerHTML = `<div class="pz-info"><span>완성 그림</span><svg viewBox="0 0 400 300" class="pz-thumb"><use href="#pz-art-${uid}"/></svg><b id="pz-count">0 / ${pieces.length}</b></div>`;
+      fdBottom('');
+      pzRelayout(true);
+      pzBind();
+      fdSay(fdG.say);
+    }
+    function pzRelayout(scatter) {
+      const g = fdG; if (!g || g.kind !== 'puzzle') return;
+      const area = document.getElementById('pz-area'); if (!area) return;
+      const avail = document.getElementById('fd-game').clientWidth || 360;
+      const land = window.innerWidth > window.innerHeight && window.innerWidth >= 700, vh = window.innerHeight - rwHdr();
+      const trayR = land ? 0 : 0.62;
+      let Wb = Math.min(avail, 640, (vh - 70) / (0.75 + trayR));
+      if (land) Wb = Math.min(avail * 0.64, (vh - 80) / 0.75);
+      Wb = Math.max(240, Wb);
+      const s = Wb / 400, Hb = 300 * s;
+      const trayW = land ? Math.max(160, avail - Wb - 12) : Wb, trayH = land ? Hb : Hb * trayR;
+      const trayX = land ? Wb + 12 : 0, trayY = land ? 0 : Hb + 10;
+      area.style.width = (land ? Wb + 12 + trayW : Wb) + 'px'; area.style.height = (land ? Hb : Hb + 10 + trayH) + 'px';
+      const board = area.querySelector('.pz-board'); board.style.width = Wb + 'px'; board.style.height = Hb + 'px';
+      const tray = area.querySelector('.pz-tray'); Object.assign(tray.style, { left: trayX + 'px', top: trayY + 'px', width: trayW + 'px', height: trayH + 'px' });
+      const pw = (g.W + 2 * g.K) * s, ph = (g.H + 2 * g.K) * s;
+      const free = g.pieces.filter(p => !p.done);
+      const n = Math.max(1, free.length), rowsT = n <= 2 ? 1 : n <= 6 ? 2 : 3, colsT = Math.ceil(n / rowsT);
+      const ts = Math.min(1, (trayW / colsT) / pw, (trayH / rowsT) / ph) * 0.96;
+      Object.assign(g, { s, ts, pw, ph, Wb, Hb, trayX, trayY, trayW, trayH });
+      const slots = fdShuffle(free.map((_, k) => k));
+      g.pieces.forEach((p, k) => {
+        const el = area.querySelector(`.pz-pc[data-k="${k}"]`);
+        el.style.width = pw + 'px'; el.style.height = ph + 'px';
+        if (p.done) { el.style.left = (p.x - g.K) * s + 'px'; el.style.top = (p.y - g.K) * s + 'px'; el.style.transform = 'none'; return; }
+        if (!scatter && p.free) return pzPlaceFree(el, p);
+        const j = slots[free.indexOf(p)], cx = j % colsT, cy = Math.floor(j / colsT);
+        const cellW = trayW / colsT, cellH = trayH / rowsT;
+        p.lx = trayX + cx * cellW + (cellW - pw * ts) / 2 + (Math.random() - 0.5) * cellW * 0.12;
+        p.ly = trayY + cy * cellH + (cellH - ph * ts) / 2 + (Math.random() - 0.5) * cellH * 0.12;
+        p.sc = ts; p.free = false;
+        pzPlaceFree(el, p);
+      });
+    }
+    function pzPlaceFree(el, p) { el.style.left = p.lx + 'px'; el.style.top = p.ly + 'px'; el.style.transform = `scale(${p.sc})`; }
+    function pzBind() {
+      const area = document.getElementById('pz-area'); let drag = null;
+      area.onpointerdown = e => {
+        const el = e.target.closest('.pz-pc'); const g = fdG; if (!el || !g || g.done) return;
+        const p = g.pieces[+el.dataset.k]; if (p.done) return;
+        e.preventDefault();
+        const ar = area.getBoundingClientRect();
+        const px = e.clientX - ar.left, py = e.clientY - ar.top;
+        // 잡은 곳을 손가락 밑에 둔 채로 원래 크기로 키워요
+        const fx = (px - p.lx) / p.sc, fy = (py - p.ly) / p.sc;
+        p.sc = 1; p.lx = px - fx; p.ly = py - fy; pzPlaceFree(el, p);
+        el.classList.add('drag'); area.appendChild(el);
+        try { area.setPointerCapture(e.pointerId); } catch (x) {}
+        drag = { el, p, fx, fy };
+        playTone(500, 0.04);
+      };
+      area.onpointermove = e => {
+        if (!drag) return; e.preventDefault();
+        const ar = area.getBoundingClientRect();
+        drag.p.lx = e.clientX - ar.left - drag.fx; drag.p.ly = e.clientY - ar.top - drag.fy; pzPlaceFree(drag.el, drag.p);
+      };
+      area.onpointerup = area.onpointercancel = () => {
+        if (!drag) return; const { el, p } = drag; drag = null; el.classList.remove('drag');
+        const g = fdG, tx = (p.x - g.K) * g.s, ty = (p.y - g.K) * g.s;
+        const tol = Math.min(g.W, g.H) * g.s * 0.32;
+        if (Math.hypot(p.lx - tx, p.ly - ty) < tol) {
+          p.done = true; p.lx = tx; p.ly = ty; el.classList.add('done'); pzPlaceFree(el, p);
+          const board = area.querySelector('.pz-board'); area.insertBefore(el, board.nextSibling);
+          g.placed++; document.getElementById('pz-count').textContent = `${g.placed} / ${g.pieces.length}`;
+          playTone(700 + g.placed * 40, 0.08);
+          if (g.placed === g.pieces.length) { area.querySelector('.pz-ghost').style.opacity = 1; area.classList.add('solved'); return fdDone(2, '퍼즐 완성!'); }
+        } else {
+          p.free = true;
+          // 판 밖(조각 상자)에 놓으면 다시 작게
+          if (p.ly > g.Hb * 0.8 && g.trayY > 0 || g.trayX > 0 && p.lx > g.Wb * 0.85) p.sc = g.ts;
+          // 판 밖으로 멀리 나가 잃어버리지 않게 영역 안으로 당겨요
+          const aw = area.clientWidth, ah = area.clientHeight;
+          p.lx = Math.min(Math.max(p.lx, 0), aw - g.pw * p.sc); p.ly = Math.min(Math.max(p.ly, 0), ah - g.ph * p.sc);
+          pzPlaceFree(el, p);
+        }
+      };
+    }
+
+    // ============ 퍼즐: 밀기 (6~7세) ============
+    function slNew(pkOK) {
+      const art = pzArt(pkOK), uid = ++fdUid, N = 3;
+      let st = [0, 1, 2, 3, 4, 5, 6, 7, 8], prev = -1;
+      for (let m = 0; m < 90; m++) {   // 맞춘 상태에서 빈칸을 무작위로 움직여 섞어요 (항상 풀 수 있어요)
+        const e = st.indexOf(8), er = Math.floor(e / N), ec = e % N;
+        const nb = [[er - 1, ec], [er + 1, ec], [er, ec - 1], [er, ec + 1]].filter(([r, c]) => r >= 0 && c >= 0 && r < N && c < N).map(([r, c]) => r * N + c).filter(x => x !== prev);
+        const t = fdPick(nb); [st[e], st[t]] = [st[t], st[e]]; prev = e;
+      }
+      if (st.every((v, k) => v === k)) { [st[0], st[1]] = [st[1], st[0]]; [st[3], st[4]] = [st[4], st[3]]; }
+      fdG = { kind: 'puzzle', slide: true, st, N, uid, moves: 0, pks: art.pk ? [art.pk] : null };
+      fdG.say = '빈칸 옆의 조각을 눌러서 밀어요. 숫자 1부터 8까지 차례대로 맞춰 봐요!';
+      const tile = t => `<button class="sl-tile" data-t="${t}" onclick="slTap(${t})"><svg viewBox="${(t % N) * 400 / N} ${Math.floor(t / N) * 100} ${400 / N} 100" preserveAspectRatio="none"><use href="#pz-art-${uid}"/></svg><b>${t + 1}</b></button>`;
+      document.getElementById('fd-game').innerHTML = `<svg width="0" height="0" style="position:absolute"><defs><g id="pz-art-${uid}">${art.svg}</g></defs></svg>
+        <div class="sl-board" id="sl-board">${[0, 1, 2, 3, 4, 5, 6, 7].map(tile).join('')}<div class="sl-last"><svg viewBox="${2 * 400 / 3} 200 ${400 / 3} 100" preserveAspectRatio="none"><use href="#pz-art-${uid}"/></svg></div></div>`;
+      document.getElementById('fd-list').innerHTML = `<div class="pz-info"><span>완성 그림</span><svg viewBox="0 0 400 300" class="pz-thumb"><use href="#pz-art-${uid}"/></svg><b id="sl-moves">0번 움직임</b></div>`;
+      fdBottom('');
+      slDraw();
+      fdSay(fdG.say);
+    }
+    function slDraw() {
+      const g = fdG; const N = g.N;
+      g.st.forEach((t, pos) => { if (t === 8) return; const el = document.querySelector(`#sl-board .sl-tile[data-t="${t}"]`); el.style.left = (pos % N) * 100 / N + '%'; el.style.top = Math.floor(pos / N) * 100 / N + '%'; el.classList.toggle('ok', t === pos); });
+    }
+    function slTap(t) {
+      const g = fdG; if (!g || !g.slide || g.done) return;
+      const N = g.N, p = g.st.indexOf(t), e = g.st.indexOf(8);
+      if (Math.abs(p - e) === N || (Math.abs(p - e) === 1 && Math.floor(p / N) === Math.floor(e / N))) {
+        [g.st[p], g.st[e]] = [g.st[e], g.st[p]]; g.moves++; slDraw(); playTone(480 + (t * 30), 0.05);
+        document.getElementById('sl-moves').textContent = `${g.moves}번 움직임`;
+        if (g.st.every((v, k) => v === k)) { document.getElementById('sl-board').classList.add('solved'); fdDone(3, '밀기 퍼즐 완성!'); }
+      } else { const el = document.querySelector(`#sl-board .sl-tile[data-t="${t}"]`); bxReAnimSafe(el, 'mm-nope', 400); }
+    }
+    window.addEventListener('resize', () => { if (fdG && fdG.kind === 'puzzle' && !fdG.slide && !document.getElementById('view-find')?.classList.contains('hidden')) pzRelayout(false); });
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
