@@ -14428,7 +14428,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         document.getElementById('tw-view').addEventListener('scroll', () => { if (Date.now() - twProgScroll < 1200 && !twDrag) return; const h = document.querySelector('.tw-hint'); if (h) { h.style.opacity = 0; setTimeout(() => h.remove(), 500); try { localStorage.setItem('pkmn_tw_hint', '1'); } catch (e) {} } }, { passive: true });
         addEventListener('resize', () => { if (twActive) twFit(); });
       }
-      const h = new Date().getHours(); if (!twNightSet) { twNight = h >= 20 || h < 6; twNightK = twNight ? 1 : 0; }
+      if (!twNightSet) { twNight = twIsNight(); twNightK = twNight ? 1 : 0; }
       twBuild(); twActive = true; twRenderTop();
       requestAnimationFrame(() => {
         twFit(); twSpawn();
@@ -14444,6 +14444,15 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     }
     function twClose() { twActive = false; twToken++; document.getElementById('tw-over') && (document.getElementById('tw-over').innerHTML = ''); }
     let twNightSet = false;
+    // 마을이 자는 시간 (부모님이 ⚙️ 메뉴에서 정해요. 기본: 밤 9시 ~ 아침 7시)
+    const twSleepH = () => { const v = twLoad().sleepH; return v == null ? 21 : v; };
+    function twIsNight() { const sh = twSleepH(); if (sh < 0) return false; const h = new Date().getHours(); return h >= sh || h < 7; }
+    function twSetSleep(h) { twLoad().sleepH = h; twSave(); twRenderMenu(); twNightSet = false; twAutoNight(true); }
+    function twAutoNight(force) {   // 정한 시간이 되면 저절로 밤이 되고, 아침이 되면 깨요
+      if (!twActive || (twNightSet && !force)) return;
+      const want = twIsNight(); if (want !== twNight) { twToggleNight(); twNightSet = false; }
+    }
+    setInterval(() => twAutoNight(false), 60000);
     function twToggleNight() {
       twNightSet = true; twNight = !twNight; const from = twNightK, t0 = performance.now();
       const st = t => { const k = Math.min(1, (t - t0) / 1200); twNightK = from + ((twNight ? 1 : 0) - from) * k; k < 1 && requestAnimationFrame(st); }; requestAnimationFrame(st);
@@ -14560,7 +14569,10 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const m = document.getElementById('rn-menu'); if (!m) return;
       let box = document.getElementById('tw-menu');
       if (!box) { box = document.createElement('div'); box.id = 'tw-menu'; const ex = document.getElementById('ex-menu'); ex ? ex.after(box) : m.prepend(box); }
-      box.innerHTML = `<button onclick="twBackup()">💾 백업 파일 저장</button><button onclick="document.getElementById('tw-restore').click()">📂 백업 불러오기</button><input id="tw-restore" type="file" accept="application/json,.json" hidden onchange="twRestore(this)"><small>마을, 스티커, 카드, 기록을 파일 하나로 저장해요. 기기를 바꿀 때 불러오면 그대로 이어져요.</small>`;
+      const sh = twSleepH();
+      box.innerHTML = `<div class="kp-row">🌙 마을 잠자는 시간 ${[20, 21, 22, 23, -1].map(h => `<button class="kp-age ${sh === h ? 'on' : ''}" onclick="event.stopPropagation(); twSetSleep(${h})">${h < 0 ? '안 자요' : h + '시'}</button>`).join('')}</div>
+        <small>정한 시간부터 아침 7시까지 마을 포켓몬들이 자요. 🌙 버튼으로 언제든 바꿀 수도 있어요.</small>
+        <button onclick="twBackup()">💾 백업 파일 저장</button><button onclick="document.getElementById('tw-restore').click()">📂 백업 불러오기</button><input id="tw-restore" type="file" accept="application/json,.json" hidden onchange="twRestore(this)"><small>마을, 스티커, 카드, 기록을 파일 하나로 저장해요. 기기를 바꿀 때 불러오면 그대로 이어져요.</small>`;
     }
 
     /* ---------- 다른 기능과 잇기 ---------- */
