@@ -7,7 +7,7 @@
 - 수학 놀이 (3~7세, 세기부터 시계·돈 계산까지 7단계)
 - 그림 찾기: 찌리리공을 찾아라, 틀린그림찾기, 조각·밀기 퍼즐 (3~7세)
 - 포켓몬 놀이: 짝 맞추기, 피카츄 길 코딩, 내 포켓몬 돌보기 (3~7세)
-- 스티커 10개마다 포켓몬 카드, 카드 앨범 (모든 놀이가 함께 써요)
+- 포켓몬 마을: 하트골드 느낌의 도트 마을. 스티커 10개마다 선물 상자(새 친구 · 놀이기구 · 먹이)를 열고, 카드로 모은 친구가 마을에서 놀아요
 - 아이 프로필(이름·나이)에 맞춘 포켓몬과 난이도, 오늘의 미션
 - 그림 전시관, 돌보기 꾸미기, 가족 목소리로 녹음하는 동화, 도감 도장
 - 부모님 메뉴: 이번 주 놀이 리포트, 쉬는 시간 알림
@@ -16,3 +16,5 @@
 
 배틀 엔진: [Pokémon Showdown](https://github.com/smogon/pokemon-showdown) 시뮬레이터 (MIT License).
 포켓몬 이름·그림 등은 각 권리자의 것이며, 이 앱은 가족끼리 쓰는 비상업용이에요.
+
+마을 걷기 그림(`ow/`): 1~4세대는 [teobz/pkmn-hgss-animated-overworld-sprites](https://github.com/teobz/pkmn-hgss-animated-overworld-sprites)(HeartGold·SoulSilver), 5세대는 [baptiste-ro/pokemon-followers-sprites](https://github.com/baptiste-ro/pokemon-followers-sprites)에서 가져왔어요. 마을 배경·건물 도트는 이 앱에서 직접 그렸어요.

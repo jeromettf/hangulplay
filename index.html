@@ -538,6 +538,8 @@
     @keyframes kp-pulse { 50% { scale: 1.1; } }
     .kp-eff.low { background: #e0f2fe; color: #0369a1; }
     .kp-eff.no { background: #f1f5f9; color: #64748b; }
+    .kp-kb-pk { position: relative; }
+    .kp-res { position: absolute; top: .1rem; left: .2rem; font-style: normal; font-size: .8rem; }
 </style>
 <style>
     /* ===== 미션 · 리포트 · 쉬는 시간 · 도장 · 전시관 · 꾸미기 · 목소리 동화 ===== */
@@ -646,6 +648,34 @@
     #ex-inst button { background: #f43f5e; color: #fff; border-radius: 999px; padding: .3rem .9rem; }
     #ex-inst button.x { background: transparent; color: #94a3b8; padding: .3rem .5rem; }
 </style>
+<style>
+    /* ===== 포켓몬 마을 ===== */
+    #view-town { margin-left: -.5rem; margin-right: -.5rem; }
+    #tw-top { display: flex; align-items: center; gap: .4rem; padding: .3rem .5rem .4rem; }
+    #tw-top .tw-bar { flex: 1; min-width: 0; }
+    .tw-btn { flex: 0 0 auto; height: 2.3rem; min-width: 2.3rem; padding: 0 .55rem; border-radius: 999px; background: #fff; border: 2px solid #e2e8f0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: .15rem; box-shadow: 0 2px 0 rgba(0,0,0,.08); }
+    .tw-btn:active { transform: scale(.94); }
+    .tw-gift { background: linear-gradient(135deg, #fb7185, #f59e0b); color: #fff; border: 0; animation: kp-pulse 1.4s infinite; }
+    .tw-gift b { font-family: Jua, sans-serif; font-weight: normal; font-size: .95rem; }
+    #tw-view { position: relative; overflow: auto; background: #284820; border-radius: 1rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    #tw-view::-webkit-scrollbar { display: none; }
+    #tw-wrap { position: relative; }
+    #tw-cv { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: pointer; }
+    #tw-over { position: absolute; inset: 0; pointer-events: none; }
+    .tw-name { position: absolute; translate: -50% -100%; background: #fff; color: #334155; border: 3px solid #3a3a52; border-radius: 10px; padding: 1px 9px; font-family: Jua, sans-serif; font-size: 16px; white-space: nowrap; box-shadow: 0 3px 0 rgba(0,0,0,.2); animation: kp-pop-in .2s; display: flex; align-items: center; gap: .35rem; }
+    .tw-name small { font-size: 12px; color: #e11d48; }
+    @keyframes kp-pop-in { from { scale: .3; opacity: 0; } }
+    .tw-box { width: min(460px, 100%); }
+    .tw-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; width: 100%; }
+    .tw-opt { display: flex; flex-direction: column; align-items: center; gap: .15rem; background: #f8fafc; border: 3px solid #e2e8f0; border-radius: 1rem; padding: .5rem .2rem .45rem; font-family: Jua, sans-serif; color: #334155; }
+    .tw-opt img { width: 4.5rem; height: 4.5rem; image-rendering: pixelated; }
+    .tw-opt b { font-weight: normal; font-size: .95rem; }
+    .tw-opt small { font-size: .7rem; color: #94a3b8; }
+    .tw-opt:active { transform: scale(.95); border-color: #f43f5e; }
+    .tw-reveal { width: 8rem; height: 8rem; image-rendering: pixelated; animation: kp-pop-in .4s; }
+    .tw-row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+    #tw-menu { padding: .3rem 0 .4rem; border-bottom: 1px solid #f1f5f9; margin-bottom: .3rem; }
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
 
@@ -723,7 +753,7 @@
       <button onclick="downloadAppFile(); rnMenu()">📥 앱 파일로 저장</button>
       <small>인터넷이 없어도 열 수 있게 이 앱을 파일 하나로 저장해요.</small>
     </div>
-    <nav id="rn-groups" aria-label="메뉴"><button class="rn-g on" data-k="dex" onclick="rnGo('dex')"><span class="rn-ge">📖</span><span>도감</span></button><button class="rn-g" data-k="hangul" onclick="rnGo('hangul')"><span class="rn-ge">🔤</span><span>한글</span></button><button class="rn-g" data-k="story" onclick="rnGo('story')"><span class="rn-ge">📚</span><span>동화</span></button><button class="rn-g" data-k="math" onclick="rnGo('math')"><span class="rn-ge">🔢</span><span>수학</span></button><button class="rn-g" data-k="play" onclick="rnGo('play')"><span class="rn-ge">🎮</span><span>놀이</span></button><button class="rn-g" data-k="adv" onclick="rnGo('adv')"><span class="rn-ge">⚔️</span><span>모험</span></button></nav>
+    <nav id="rn-groups" aria-label="메뉴"><button class="rn-g" data-k="town" onclick="rnGo('town')"><span class="rn-ge">🏡</span><span>마을</span></button><button class="rn-g on" data-k="dex" onclick="rnGo('dex')"><span class="rn-ge">📖</span><span>도감</span></button><button class="rn-g" data-k="hangul" onclick="rnGo('hangul')"><span class="rn-ge">🔤</span><span>한글</span></button><button class="rn-g" data-k="story" onclick="rnGo('story')"><span class="rn-ge">📚</span><span>동화</span></button><button class="rn-g" data-k="math" onclick="rnGo('math')"><span class="rn-ge">🔢</span><span>수학</span></button><button class="rn-g" data-k="play" onclick="rnGo('play')"><span class="rn-ge">🎮</span><span>놀이</span></button><button class="rn-g" data-k="adv" onclick="rnGo('adv')"><span class="rn-ge">⚔️</span><span>모험</span></button></nav>
     <div id="rn-subs" class="empty"></div>
   </header>
 
@@ -2396,6 +2426,12 @@
     </section>
 
     <!-- 그림 찾기 -->
+    <!-- 포켓몬 마을 -->
+    <section id="view-town" class="hidden max-w-5xl mx-auto">
+      <div id="tw-top"></div>
+      <div id="tw-view"><div id="tw-wrap"><canvas id="tw-cv"></canvas><div id="tw-over"></div></div></div>
+    </section>
+
     <section id="view-find" class="hidden space-y-2.5 max-w-2xl mx-auto">
       <style>
     /* ===== 보상: 스티커 · 카드 · 앨범 ===== */
@@ -5512,7 +5548,7 @@
       if (viewKey !== 'math' && typeof mmStopSpeech === 'function') mmStopSpeech();
       if (viewKey !== 'find' && viewKey !== 'play' && typeof fdStopSpeech === 'function') fdStopSpeech();
       if (viewKey !== 'battle' && typeof bxStopSpeech === 'function') bxStopSpeech();
-      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'find', 'play', 'favs'].forEach(v => {
+      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'find', 'play', 'favs', 'town'].forEach(v => {
         const sec = document.getElementById(`view-${v}`);
         const tab = document.getElementById(`nav-${v}`);
         if (sec) sec.classList.toggle('hidden', v !== viewKey);
@@ -11791,6 +11827,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         try { const m = JSON.parse(localStorage.getItem('pkmn_math_v1') || 'null'); if (m) { st.stickers = (m.stickers || []).slice(0, 9); st.cards = (m.cards || []).map(n => ({ n, g: 0, s: 'math' })); } } catch (e) {}
       }
       rwS = Object.assign({ stickers: [], cards: [] }, st);
+      if (rwS.got == null) rwS.got = rwS.cards.length;   // 지금까지 연 상자 수 (예전 카드 포함)
+      if (rwS.boxes == null) rwS.boxes = 0;              // 아직 열지 않은 선물 상자
       return rwS;
     }
     function rwSave() { try { localStorage.setItem(RW_KEY, JSON.stringify(rwS)); } catch (e) {} }
@@ -11801,24 +11839,33 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     }
     const rwImg = (n, cls, style) => `<img class="${cls || ''}" style="${style || ''}" src="${getPokemonArtworkUrl(n)}" onerror="rwImgErr(this, ${n})" alt="${POKEMON_NAMES_1025[n - 1]}" draggable="false">`;
 
-    // 스티커를 붙이고, 10개가 차면 카드를 만들어 돌려줘요
+    // 스티커를 붙이고, 10개가 차면 선물 상자를 돌려줘요 (마을 모듈이 없으면 예전처럼 카드)
     function rwGive(pks, src) {
       rwLoad();
       const out = [];
       pks.forEach(pk => {
         rwS.stickers.push(pk);
         if (rwS.stickers.length >= 10) {
-          rwS.stickers = rwS.stickers.slice(10);
-          const have = new Set(rwS.cards.map(c => c.n));
-          const pool = RW_POOL.filter(n => !have.has(n));
-          const n = pool.length ? pool[Math.floor(Math.random() * pool.length)] : RW_POOL[Math.floor(Math.random() * RW_POOL.length)];
-          const card = { n, g: Math.random() < 0.15 ? 1 : 0, s: src, dup: have.has(n) };
-          rwS.cards.push({ n: card.n, g: card.g, s: card.s });
-          out.push(card);
+          rwS.stickers = rwS.stickers.slice(10); rwS.got++;
+          if (typeof twOpenBox === 'function') { rwS.boxes++; out.push({ box: 1, s: src }); }
+          else out.push(rwNewCard(src));
         }
       });
       rwSave(); rwRenderBars();
       return out;
+    }
+    // 새 친구 카드: 앨범에 없는 친구 먼저, 다 모으면 아이 수준 포켓몬 중에서
+    function rwNewCard(src) {
+      rwLoad();
+      const have = new Set(rwS.cards.map(c => c.n));
+      let pool = RW_POOL.filter(n => !have.has(n));
+      if (!pool.length && typeof kpPool === 'function') pool = kpPool().filter(n => !have.has(n) && n <= 649);
+      if (!pool.length && typeof kpPool === 'function') pool = kpPool().filter(n => !have.has(n));
+      if (!pool.length) pool = RW_POOL;
+      const n = pool[Math.floor(Math.random() * pool.length)];
+      const card = { n, g: Math.random() < 0.15 ? 1 : 0, s: src, dup: have.has(n) };
+      rwS.cards.push({ n: card.n, g: card.g, s: card.s });
+      return card;
     }
     function rwRenderBars() {
       rwLoad();
@@ -11832,8 +11879,17 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       rwBarLen = len;
     }
 
-    // 카드 받기: 뒷면으로 나오고, 누르면 뒤집혀요
+    // 카드 · 선물 상자를 차례로 보여 줘요. 다른 창이 열려 있으면 닫힐 때까지 기다려요
     function rwShowCards(cards, done) {
+      if (!cards || !cards.length) { if (done) done(); return; }
+      const ov = document.getElementById('rw-ov');
+      if (!ov.classList.contains('hidden')) { setTimeout(() => rwShowCards(cards, done), 500); return; }
+      const c = cards[0], rest = cards.slice(1), next = () => rwShowCards(rest, done);
+      if (c.box && typeof twOpenBox === 'function') return twOpenBox(c, next);
+      return rwShowCardsRaw([c], next);
+    }
+    // 카드 받기: 뒷면으로 나오고, 누르면 뒤집혀요
+    function rwShowCardsRaw(cards, done) {
       const ov = document.getElementById('rw-ov');
       if (!cards || !cards.length) { if (done) done(); return; }
       const c = cards[0], rest = cards.slice(1);
@@ -11853,8 +11909,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           </div>
         </button>
         <div class="rw-after" id="rw-after">
-          <div class="rw-msg">${c.dup ? `${nm}${sbJosa(nm, '을')} 또 만났어요!` : `새 친구 ${nm}!`}</div>
-          <button class="rw-go" onclick="rwCardNext()">${rest.length ? '다음 카드 ▶' : '계속하기 ▶'}</button>
+          <div class="rw-msg">${c.dup ? `${nm}${sbJosa(nm, '을')} 또 만났어요!${typeof twOpen === 'function' ? ' 마을의 ' + nm + sbJosa(nm, '이') + ' 더 친해졌어요 ❤' : ''}` : `새 친구 ${nm}!${typeof twOpen === 'function' ? ' 마을로 이사 와요 🏡' : ''}`}</div>
+          <div class="tw-row">${typeof twFocus === 'function' ? `<button class="fd-btn" onclick="rwCardNext(); twFocus(${c.n})">🏡 마을에서 보기</button>` : ''}<button class="rw-go" onclick="rwCardNext()">${rest.length ? '다음 카드 ▶' : '계속하기 ▶'}</button></div>
         </div>
       </div>`;
       ov.classList.remove('hidden');
@@ -11880,7 +11936,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const ov = document.getElementById('rw-ov');
       const rest = ov._rest, done = ov._done;
       ov.classList.add('hidden'); ov.innerHTML = '';
-      if (rest && rest.length) rwShowCards(rest, done); else if (done) done();
+      if (rest && rest.length) rwShowCardsRaw(rest, done); else if (done) done();
     }
     function rwShowAlbum() {
       rwLoad();
@@ -11890,15 +11946,16 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const have = RW_POOL.filter(n => got[n]).length;
       const cell = n => {
         const g = got[n], nm = POKEMON_NAMES_1025[n - 1];
-        return g ? `<div class="rw-mini ${g.g ? 'gold' : ''}">${rwImg(n)}<span>${nm}</span>${g.k > 1 ? `<b class="rw-k">×${g.k}</b>` : ''}</div>`
+        return g ? `<div class="rw-mini ${g.g ? 'gold' : ''}" ${typeof twFocus === 'function' ? `onclick="twFocus(${n})" style="cursor:pointer"` : ''}>${rwImg(n)}<span>${nm}</span>${g.k > 1 ? `<b class="rw-k">×${g.k}</b>` : ''}</div>`
           : `<div class="rw-mini rw-shadow">${rwImg(n)}<span>?</span></div>`;
       };
       ov.innerHTML = `<div class="rw-box rw-album">
-        <div class="rw-head">📒 포켓몬 카드 앨범 <small>${have} / ${RW_POOL.length}</small></div>
-        <p class="rw-tip">어느 놀이에서든 스티커를 10개 모으면 카드가 한 장 생겨요. 그림자 친구들은 누구일까요?</p>
+        <div class="rw-head">📒 마을 주민 명부 <small>${have} / ${RW_POOL.length}</small></div>
+        <p class="rw-tip">스티커를 10개 모으면 선물 상자가 열려요. 새 친구를 고르면 마을로 이사 와요. 친구를 누르면 마을에서 만나요.</p>
+        ${(rwS.boxes || 0) > 0 && typeof twOpenPending === 'function' ? `<button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden'); twOpenPending()">🎁 열지 않은 선물 상자 ${rwS.boxes}개</button>` : ''}
         <div class="rw-album-grid">${RW_POOL.map(cell).join('')}${extra.map(cell).join('')}</div>
         ${(rwS.caught || []).length ? `<div class="rw-head">📡 포획 모드에서 잡은 포켓몬 <small>${rwS.caught.length}마리</small></div>
-        <div class="rw-album-grid">${rwS.caught.map(n => `<div class="rw-mini rw-caught">${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></div>`).join('')}</div>` : ''}
+        <div class="rw-album-grid">${rwS.caught.map(n => `<div class="rw-mini rw-caught" ${typeof twFocus === 'function' ? `onclick="twFocus(${n})" style="cursor:pointer"` : ''}>${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></div>`).join('')}</div>` : ''}
         <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
       ov.classList.remove('hidden');
     }
@@ -12887,6 +12944,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
      */
     const RN_KEY = 'pkmn_nav_v1';
     const RN_GROUPS = [
+      { k: 'town', e: '🏡', n: '마을', items: [{ e: '🏡', n: '포켓몬 마을', v: 'town' }] },
       { k: 'dex', e: '📖', n: '도감', items: [{ e: '📖', n: '도감', v: 'dex' }, { e: '⭐', n: '즐겨찾기', v: 'favs', fav: true }] },
       { k: 'hangul', e: '🔤', n: '한글', items: [{ e: '✏️', n: '쓰기 놀이터', v: 'study' }, { e: '🧩', n: '빈칸 퀴즈', v: 'quiz' }, { e: '📖', n: '설명 퀴즈', v: 'descquiz' }] },
       { k: 'story', e: '📚', n: '동화', items: [{ e: '🐾', n: '포켓몬 동화', v: 'story', sb: 'pk' }, { e: '🎮', n: '참여 동화', v: 'story', sb: 'ib' }, { e: '👧', n: '우리 아이 동화', v: 'story', sb: 'kid' }] },
@@ -13217,10 +13275,12 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     function kpKidBattleOpen() {
       kpKb = { picks: [] };
       const pool = kpPool().filter(n => BX_DATA.s[n]).slice();
-      const list = pool.length > 24 ? fdShuffle(pool).slice(0, 24) : pool;
+      const res = typeof twResidents === 'function' ? twResidents().filter(n => BX_DATA.s[n]) : [];   // 마을 주민이 먼저 나와요
+      const rest = pool.filter(n => !res.includes(n));
+      const list = [...res.slice(0, 16), ...(rest.length > 24 - Math.min(16, res.length) ? fdShuffle(rest) : rest)].slice(0, Math.max(24, Math.min(16, res.length)));
       const ov = document.getElementById('rw-ov');
       ov.innerHTML = `<div class="rw-box kp-kb"><div class="rw-head">🐣 같이 싸울 친구 3마리를 골라요</div>
-        <div class="kp-kb-grid">${list.map(n => `<button class="kp-kb-pk" data-n="${n}" onclick="kpKidPick(${n}, this)">${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></button>`).join('')}</div>
+        <div class="kp-kb-grid">${list.map(n => `<button class="kp-kb-pk" data-n="${n}" onclick="kpKidPick(${n}, this)">${res.includes(n) ? '<i class="kp-res">🏡</i>' : ''}${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></button>`).join('')}</div>
         <div class="kp-kb-bar"><span id="kp-kb-n">0 / 3</span><button class="rw-go" id="kp-kb-start" disabled onclick="kpKidBattleStart()">⚔️ 대결 시작!</button></div>
         <button class="kp-kb-x" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
       ov.classList.remove('hidden');
@@ -13840,6 +13900,664 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     // 앱 설치 · 오프라인 (홈페이지 주소로 열었을 때만)
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 
+    /**
+     * ==============================================================
+     * [포켓몬 마을] 하트골드 느낌의 도트 마을
+     *  - 카드를 모은 포켓몬(주민)이 마을에서 걸어 다니며 놀아요
+     *  - 스티커 10개 → 선물 상자 → 새 친구 · 놀이기구 · 먹이 중 하나
+     *  - 마을 상태는 이 기기에 저장돼요 (⚙️ 메뉴에서 백업 파일로도 저장)
+     * ==============================================================
+     */
+    const TW_KEY = 'pkmn_town_v1', TW_TS = 16, TW_MW = 40, TW_MH = 26, TW_PW = 640, TW_PH = 416;
+    const TW_RAW = 'https://raw.githubusercontent.com/jeromettf/hangulplay/main/';
+    const TW_NO_OW = new Set([494, 521, 550, 585, 586, 593]);   // 1~5세대 중 걷기 그림이 없는 친구
+    const TW_ITEMS = {
+      slide: { n: '미끄럼틀', cat: 'ride' }, seesaw: { n: '시소', cat: 'ride' }, tramp: { n: '트램펄린', cat: 'ride' },
+      berry: { n: '열매 나무', cat: 'food' }, field: { n: '열매 밭', cat: 'food' }, bowl: { n: '포켓몬 밥그릇', cat: 'food' },
+      arena: { n: '배틀 경기장', cat: 'build' }, flower: { n: '꽃밭', cat: 'deco', max: 4 }
+    };
+    const TW_FLOWER_SPOTS = [[3, 9], [26, 5], [15, 20], [36, 12]];
+    let twS = null;
+    function twLoad() {
+      if (twS) return twS;
+      let s = null; try { s = JSON.parse(localStorage.getItem(TW_KEY) || 'null'); } catch (e) {}
+      twS = Object.assign({ own: {}, flower: 0, field: null, bowl: 0, love: {}, seen: [] }, s || {});
+      return twS;
+    }
+    const twSave = () => { try { localStorage.setItem(TW_KEY, JSON.stringify(twLoad())); } catch (e) {} };
+    const twDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+    const twHas = k => k === 'flower' ? twLoad().flower > 0 : !!twLoad().own[k];
+    const twAvail = k => k === 'flower' ? twLoad().flower < TW_ITEMS.flower.max : !twLoad().own[k];
+
+    // 주민: 대표 친구 피카츄 + 돌보기 친구 + 카드 + 포획
+    function twResidents() {
+      rwLoad();
+      const out = [25];
+      try { if (typeof fdS !== 'undefined' && fdS && fdS.care && fdS.care.form) out.push(fdS.care.form); } catch (e) {}
+      [...rwS.cards].reverse().forEach(c => out.push(c.n));
+      (rwS.caught || []).slice().reverse().forEach(n => out.push(n));
+      return [...new Set(out)];
+    }
+    const twShiny = n => rwLoad().cards.some(c => c.n === n && c.g);
+    const twLove = n => twLoad().love[n] || 0;
+    function twAddLove(n, k = 1) { const s = twLoad(); s.love[n] = (s.love[n] || 0) + k; twSave(); }
+
+    /* ---------- 도트 그림 ---------- */
+    let twArt = null;
+    function twMk(w, h, fn) { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); fn(x, w, h); return c; }
+    const twP = (x, px, py, c, w = 1, h = 1) => { x.fillStyle = c; x.fillRect(px, py, w, h); };
+    function twDisc(x, cx, cy, rx, ry, c) { for (let y = -ry; y <= ry; y++) { const hw = Math.round(rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry + .01)))); twP(x, cx - hw, cy + y, c, hw * 2 + 1, 1); } }
+    function twLine(x, x0, y0, x1, y1, c, t = 1) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1; for (let i = 0; i <= n; i++) twP(x, Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), c, t, t); }
+    const TC = {
+      g: '#88d070', g2: '#70b858', g3: '#a8e090', gd: '#58a040', s: '#f0e0a8', s2: '#d8c088', s3: '#e4d096',
+      w: '#58a0f0', w2: '#4888e0', w3: '#a8d8ff', wd: '#3068b8',
+      to: '#284820', t1: '#3c7830', t2: '#58a040', t3: '#78c058', t4: '#a0dc70', tr: '#8a5a30', trd: '#5a3818',
+      st: '#b8b8c8', st2: '#e4e4ee', std: '#78788e', ol: '#3a3a52', wo: '#c88848', wo2: '#e8b070', wod: '#805028',
+      soil: '#a87048', soil2: '#8a5634', soil3: '#c08860'
+    };
+    function twTree(berry) {
+      return twMk(32, 32, x => {
+        twDisc(x, 16, 29, 11, 2, 'rgba(40,72,32,.35)');
+        twP(x, 13, 22, TC.trd, 6, 8); twP(x, 14, 22, TC.tr, 4, 7); twP(x, 14, 23, '#a87040', 1, 5);
+        twDisc(x, 16, 13, 14, 11, TC.to); twDisc(x, 16, 13, 13, 10, TC.t1); twDisc(x, 15, 12, 12, 9, TC.t2);
+        twDisc(x, 12, 9, 6, 4, TC.t3); twDisc(x, 20, 8, 4, 3, TC.t3); twDisc(x, 10, 15, 4, 3, TC.t3); twDisc(x, 11, 8, 2, 1, TC.t4);
+        for (let k = 0; k < 8; k++) twP(x, 6 + (k * 7) % 20, 16 + (k * 3) % 6, TC.t1, 2, 1);
+        if (berry) [[9, 10], [20, 11], [14, 16], [23, 15], [16, 6], [7, 15]].forEach(([a, b], i) => { const c = i % 3 ? '#e83050' : '#3a6ae0'; twP(x, a, b, TC.ol, 4, 4); twP(x, a, b, c, 3, 3); twP(x, a, b, '#fff', 1, 1); });
+      });
+    }
+    function twInitArt() {
+      if (twArt) return twArt;
+      const A = twArt = {};
+      A.tree = twTree(false); A.berry = twTree(true);
+      A.fountain = twMk(48, 48, x => {
+        twDisc(x, 24, 33, 22, 12, TC.ol); twDisc(x, 24, 32, 21, 11, TC.st); twDisc(x, 24, 31, 21, 10, TC.st2);
+        twDisc(x, 24, 31, 17, 7, TC.std); twDisc(x, 24, 32, 16, 6, TC.w2); twDisc(x, 24, 32, 15, 5, TC.w);
+        twP(x, 21, 14, TC.ol, 7, 18); twP(x, 22, 14, TC.st, 5, 18); twP(x, 22, 14, TC.st2, 2, 18);
+        twDisc(x, 24, 13, 8, 3, TC.ol); twDisc(x, 24, 12, 7, 2, TC.st2); twDisc(x, 24, 12, 5, 1, TC.w);
+      });
+      A.swing = twMk(64, 48, x => {
+        const leg = (a, b) => { twLine(x, a, 4, b, 44, TC.ol, 2); twLine(x, a + 1, 4, b + 1, 44, '#e04848', 1); };
+        leg(6, 2); leg(8, 13); leg(56, 61); leg(54, 50);
+        twP(x, 5, 3, TC.ol, 54, 5); twP(x, 6, 4, '#f07030', 52, 3); twP(x, 6, 4, '#ffb070', 52, 1);
+        twDisc(x, 32, 45, 28, 2, 'rgba(40,72,32,.25)');
+      });
+      A.slide = twMk(32, 64, x => {
+        twDisc(x, 16, 60, 13, 3, 'rgba(40,72,32,.3)');
+        twP(x, 6, 2, TC.ol, 3, 20); twP(x, 23, 2, TC.ol, 3, 20); twP(x, 7, 2, '#9060d0', 1, 19); twP(x, 24, 2, '#9060d0', 1, 19);
+        for (let y = 5; y < 20; y += 4) twP(x, 8, y, '#b090f0', 15, 2);
+        twP(x, 5, 18, TC.ol, 22, 6); twP(x, 6, 19, '#7a48c0', 20, 4); twP(x, 6, 19, '#a07ae0', 20, 1);
+        twP(x, 6, 23, TC.ol, 20, 35); twP(x, 7, 23, '#f8d038', 18, 34); twP(x, 10, 23, '#fff09a', 3, 34);
+        twP(x, 4, 52, TC.ol, 24, 9); twP(x, 5, 53, '#f8d038', 22, 6); twP(x, 5, 57, '#c8a020', 22, 2); twP(x, 9, 53, '#fff09a', 3, 4);
+      });
+      A.seesawBase = twMk(64, 16, x => { twDisc(x, 32, 13, 26, 2, 'rgba(40,72,32,.3)'); twP(x, 28, 7, TC.ol, 9, 7); twP(x, 29, 8, '#4878e0', 7, 5); twP(x, 30, 8, '#80a8f8', 2, 4); });
+      A.lamp = twMk(16, 32, x => { twDisc(x, 8, 30, 4, 1, 'rgba(40,72,32,.35)'); twP(x, 7, 8, TC.ol, 3, 22); twP(x, 8, 8, '#5a5a72', 1, 22); twP(x, 4, 2, TC.ol, 9, 8); twP(x, 5, 3, '#fff3b0', 7, 6); twP(x, 5, 3, '#fff', 2, 2); twP(x, 5, 28, TC.ol, 7, 2); });
+      A.bench = twMk(32, 16, x => { twDisc(x, 16, 14, 14, 1, 'rgba(40,72,32,.3)'); twP(x, 2, 2, TC.ol, 28, 6); twP(x, 3, 3, TC.wo, 26, 4); twP(x, 3, 3, TC.wo2, 26, 1); twP(x, 2, 8, TC.ol, 28, 4); twP(x, 3, 9, TC.wo, 26, 2); twP(x, 4, 12, TC.ol, 3, 3); twP(x, 25, 12, TC.ol, 3, 3); });
+      A.fenceH = twMk(16, 16, x => { twP(x, 0, 6, TC.ol, 16, 4); twP(x, 0, 7, TC.wo, 16, 2); twP(x, 0, 7, TC.wo2, 16, 1); twP(x, 6, 2, TC.ol, 4, 12); twP(x, 7, 3, TC.wo, 2, 10); twP(x, 7, 3, TC.wo2, 1, 10); });
+      A.fenceV = twMk(16, 16, x => { twP(x, 6, 0, TC.ol, 4, 16); twP(x, 7, 0, TC.wo, 2, 16); twP(x, 7, 0, TC.wo2, 1, 16); });
+      A.sign = twMk(16, 24, x => { twP(x, 7, 12, TC.ol, 3, 11); twP(x, 8, 12, TC.wod, 1, 10); twP(x, 1, 2, TC.ol, 15, 11); twP(x, 2, 3, TC.wo, 13, 9); twP(x, 2, 3, TC.wo2, 13, 1); twP(x, 4, 6, TC.wod, 9, 1); twP(x, 4, 8, TC.wod, 7, 1); });
+      A.lot = twMk(16, 24, x => {   // 빈자리 팻말 (?)
+        twP(x, 7, 12, TC.ol, 3, 11); twP(x, 8, 12, TC.wod, 1, 10); twP(x, 1, 1, TC.ol, 15, 12); twP(x, 2, 2, '#fff7d6', 13, 10);
+        ['.XXX.', 'X...X', '...X.', '..X..', '.....', '..X..'].forEach((r, j) => [...r].forEach((c, i) => c === 'X' && twP(x, 6 + i, 4 + j, '#e83050')));
+      });
+      A.tramp = twMk(32, 32, x => { twDisc(x, 16, 28, 14, 3, 'rgba(40,72,32,.3)'); [4, 12, 20, 27].forEach(a => twP(x, a, 16, TC.ol, 2, 11)); twDisc(x, 16, 14, 15, 8, TC.ol); twDisc(x, 16, 14, 14, 7, '#38c060'); twDisc(x, 16, 14, 11, 5, '#1e2838'); twDisc(x, 13, 12, 4, 1, '#334155'); });
+      A.bowl = twMk(16, 16, x => { twDisc(x, 8, 13, 7, 2, 'rgba(40,72,32,.3)'); twDisc(x, 8, 10, 7, 4, TC.ol); twDisc(x, 8, 9, 6, 3, '#f06090'); twDisc(x, 8, 8, 5, 1, '#ffd0e0'); });
+      A.bowlFull = twMk(16, 16, x => { x.drawImage(A.bowl, 0, 0); [[4, 6], [7, 5], [10, 6], [6, 7], [9, 7]].forEach(([a, b], i) => { twP(x, a, b, TC.ol, 3, 3); twP(x, a, b, i % 2 ? '#c88848' : '#e8b070', 2, 2); }); });
+      const field = st => twMk(64, 48, x => {
+        twP(x, 1, 3, TC.ol, 62, 44); twP(x, 2, 4, TC.soil, 60, 42);
+        for (let r = 0; r < 3; r++) { twP(x, 4, 8 + r * 13, TC.soil2, 56, 3); twP(x, 4, 7 + r * 13, TC.soil3, 56, 1); }
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) {
+          const px = 8 + c * 11, py = 9 + r * 13;
+          if (st === 1) { twP(x, px, py - 3, TC.gd, 1, 3); twP(x, px - 2, py - 4, TC.t3, 2, 1); twP(x, px + 1, py - 4, TC.t3, 2, 1); }
+          if (st === 2) { twDisc(x, px, py - 4, 4, 3, TC.t1); twDisc(x, px, py - 5, 3, 2, TC.t2); twP(x, px - 2, py - 6, TC.ol, 3, 3); twP(x, px - 2, py - 6, (r + c) % 2 ? '#e83050' : '#3a6ae0', 2, 2); twP(x, px + 1, py - 3, TC.ol, 3, 3); twP(x, px + 1, py - 3, '#e83050', 2, 2); }
+        }
+        twP(x, 0, 0, TC.ol, 4, 6); twP(x, 60, 0, TC.ol, 4, 6);
+      });
+      A.field = [field(0), field(1), field(2)];
+      A.house = twMk(64, 64, x => {
+        twDisc(x, 32, 61, 30, 3, 'rgba(40,72,32,.3)');
+        twP(x, 6, 28, TC.ol, 52, 33); twP(x, 7, 29, '#f8f0d8', 50, 31); twP(x, 7, 29, '#fffaf0', 50, 2); twP(x, 7, 54, '#e0d4b0', 50, 6);
+        for (let i = 0; i < 16; i++) { twP(x, 2 + i, 28 - i, TC.ol, 60 - i * 2, 1); }
+        for (let i = 0; i < 14; i++) twP(x, 4 + i, 27 - i, i % 3 === 0 ? '#c0482a' : '#e8603a', 56 - i * 2, 1);
+        twP(x, 2, 28, TC.ol, 60, 3); twP(x, 3, 28, '#a8381e', 58, 2);
+        twP(x, 26, 40, TC.ol, 12, 20); twP(x, 27, 41, '#a8682e', 10, 19); twP(x, 35, 50, '#f0c040', 2, 2);
+        [[11, 36], [43, 36]].forEach(([a, b]) => { twP(x, a, b, TC.ol, 11, 11); twP(x, a + 1, b + 1, '#a8d8ff', 9, 9); twP(x, a + 5, b + 1, TC.ol, 1, 9); twP(x, a + 1, b + 5, TC.ol, 9, 1); twP(x, a + 2, b + 2, '#fff', 2, 2); });
+        twP(x, 22, 31, TC.ol, 20, 7); twP(x, 23, 32, '#fff7d6', 18, 5); twDisc(x, 32, 34, 2, 1, '#e83050');
+        twP(x, 46, 6, TC.ol, 8, 14); twP(x, 47, 7, '#b0a090', 6, 12);
+      });
+      A.arena = twMk(96, 64, x => {
+        twP(x, 0, 4, TC.ol, 96, 58); twP(x, 1, 5, '#e8e8f0', 94, 56);
+        twP(x, 5, 9, TC.ol, 86, 48); twP(x, 6, 10, '#6ab84a', 84, 46);
+        for (let i = 0; i < 6; i++) twP(x, 6 + i * 14, 10, '#78c458', 7, 46);
+        twP(x, 47, 10, '#fff', 2, 46); twDisc(x, 48, 33, 9, 7, '#fff'); twDisc(x, 48, 33, 7, 5, '#6ab84a');
+        twP(x, 10, 14, '#fff', 76, 1); twP(x, 10, 51, '#fff', 76, 1); twP(x, 10, 14, '#fff', 1, 38); twP(x, 85, 14, '#fff', 1, 38);
+        twDisc(x, 48, 33, 3, 3, '#e83050'); twP(x, 45, 33, '#fff', 7, 3); twDisc(x, 48, 33, 1, 1, TC.ol);
+        [[0, '#e83050'], [88, '#3a6ae0']].forEach(([a, c]) => { twP(x, a + 1, 0, TC.ol, 6, 14); twP(x, a + 2, 1, c, 4, 12); });
+      });
+      A.flower = twMk(32, 32, x => {
+        twDisc(x, 16, 18, 15, 12, '#6cbc58'); twDisc(x, 16, 17, 14, 11, TC.g3);
+        [[8, 12, '#f87171'], [16, 9, '#fde047'], [24, 13, '#f9a8d4'], [11, 20, '#fff'], [20, 19, '#f87171'], [15, 25, '#c4b5fd'], [26, 22, '#fde047'], [6, 22, '#f9a8d4']].forEach(([a, b, c]) => { twP(x, a, b + 2, TC.gd, 1, 3); twP(x, a - 1, b, c, 3, 1); twP(x, a, b - 1, c, 1, 3); twP(x, a, b, '#f59e0b'); });
+      });
+      // 말풍선
+      const PAT = { heart: ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'], note: ['...XXX', '...X.X', '...X..', '.XXX..', 'XXXX..', '.XX...'], zz: ['XXXX..', '...X..', '..X...', '.X.XXX', 'XXXX.X', '....X.', '...XXX'], ex: ['.XX.', '.XX.', '.XX.', '.XX.', '....', '.XX.'], star: ['...X...', '..XXX..', 'XXXXXXX', '.XXXXX.', '.XX.XX.', 'X.....X'], food: ['..X..', '.XXX.', 'XXXXX', 'XXXXX', '.XXX.'] };
+      const COL = { heart: '#e83050', note: '#3a6ae0', zz: '#5a5a72', ex: '#e83050', star: '#f0b020', food: '#e8603a' };
+      A.emo = {};
+      for (const k in PAT) A.emo[k] = twMk(14, 15, x => { twP(x, 1, 0, TC.ol, 12, 12); twP(x, 0, 1, TC.ol, 14, 10); twP(x, 2, 1, '#fff', 10, 10); twP(x, 1, 2, '#fff', 12, 8); twP(x, 5, 12, TC.ol, 4, 1); twP(x, 6, 13, TC.ol, 2, 1); twP(x, 6, 12, '#fff', 2, 1);
+        const p = PAT[k], ox = Math.floor((14 - p[0].length) / 2), oy = Math.floor((12 - p.length) / 2); p.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === 'X') twP(x, ox + i, oy + j, COL[k]); })); });
+      A.ball = twMk(16, 16, x => { twDisc(x, 8, 8, 7, 7, TC.ol); twDisc(x, 8, 8, 6, 6, '#fff'); for (let y = 2; y < 8; y++) { const hw = Math.round(6 * Math.sqrt(1 - ((y - 8) / 6.01) ** 2)); twP(x, 8 - hw, y, '#e83050', hw * 2 + 1, 1); } twP(x, 2, 8, TC.ol, 13, 1); twDisc(x, 8, 8, 2, 2, TC.ol); twP(x, 8, 8, '#fff'); });
+      A.gift = twMk(32, 32, x => { twP(x, 4, 12, TC.ol, 24, 18); twP(x, 5, 13, '#f43f5e', 22, 16); twP(x, 2, 8, TC.ol, 28, 6); twP(x, 3, 9, '#fb7185', 26, 4); twP(x, 14, 8, TC.ol, 4, 22); twP(x, 15, 9, '#fde047', 2, 20); twDisc(x, 12, 5, 4, 3, TC.ol); twDisc(x, 20, 5, 4, 3, TC.ol); twDisc(x, 12, 5, 3, 2, '#fde047'); twDisc(x, 20, 5, 3, 2, '#fde047'); });
+      return A;
+    }
+    // 선물 상자에 보여 줄 그림
+    function twIcon(k) {
+      const A = twInitArt();
+      const src = { slide: A.slide, seesaw: null, tramp: A.tramp, berry: A.berry, field: A.field[2], bowl: A.bowlFull, arena: A.arena, flower: A.flower, friend: null }[k];
+      const c = twMk(64, 64, x => {
+        x.imageSmoothingEnabled = false;
+        if (k === 'friend') { x.drawImage(A.ball, 8, 8, 48, 48); twP(x, 26, 20, '#fff', 0, 0); return; }
+        if (k === 'seesaw') { x.drawImage(A.seesawBase, 0, 24, 64, 16); twLine(x, 4, 34, 60, 26, TC.ol, 3); twLine(x, 5, 34, 59, 26, '#f43f5e', 2); return; }
+        const s = Math.min(64 / src.width, 64 / src.height); const w = Math.floor(src.width * s), h = Math.floor(src.height * s);
+        x.drawImage(src, (64 - w) >> 1, (64 - h) >> 1, w, h);
+      });
+      return c.toDataURL();
+    }
+
+    /* ---------- 지도 만들기 ---------- */
+    let twTile, twBlock, twObjs, twGround, twTall, twFount, twSwing, twSlide, twSaw, twBerry, twField, twBowl, twArena, twTramp, twHouse;
+    const TW_SPOT = { slide: [29, 4], seesaw: [11, 16], tramp: [4.5, 15.6], berry: [34, 7], field: [22, 19], bowl: [17, 19], arena: [3, 20] };
+    function twBuild() {
+      const A = twInitArt(), s = twLoad();
+      const T = twTile = Array.from({ length: TW_MH }, () => Array(TW_MW).fill(0));
+      const B = twBlock = Array.from({ length: TW_MH }, () => Array(TW_MW).fill(0));
+      const inE = (cx, cy, rx, ry, x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+      for (let y = 0; y < TW_MH; y++) for (let x = 0; x < TW_MW; x++) {
+        if (x >= 14 && x <= 25 && y >= 9 && y <= 16) T[y][x] = 1;
+        if ((y === 12 || y === 13) && x >= 3 && x <= 36) T[y][x] = 1;
+        if ((x === 19 || x === 20) && y >= 12) T[y][x] = 1;
+        if ((x === 7 || x === 8) && y >= 9 && y <= 12) T[y][x] = 1;
+        if ((x === 11 || x === 12) && y >= 8 && y <= 12) T[y][x] = 1;
+        if (x === 30 && y >= 9 && y <= 12) T[y][x] = 1;
+        if (inE(32, 19.5, 4.3, 2.4, x, y)) T[y][x] = 2;
+      }
+      for (let y = 20; y <= 23; y++) for (let x = 11; x <= 15; x++) if (!(x === 11 && y === 20)) T[y][x] = 4;
+      [[37, 9], [36, 8], [25, 23], [26, 23], [9, 24], [10, 24]].forEach(([x, y]) => T[y][x] = 3);
+      for (let x = 0; x < TW_MW; x++) B[0][x] = B[1][x] = B[2][x] = B[3][x] = 1;
+      for (let y = 0; y < TW_MH; y++) B[y][0] = B[y][TW_MW - 1] = 1;
+      for (let y = 0; y < TW_MH; y++) for (let x = 0; x < TW_MW; x++) if (T[y][x] === 2) B[y][x] = 2;
+      twObjs = [];
+      const place = (img, tx, ty, opt = {}) => { const o = Object.assign({ img, x: tx * TW_TS + (opt.ox || 0), y: ty * TW_TS + (opt.oy || 0) }, opt); o.foot = o.foot || (o.y + img.height); twObjs.push(o); (opt.blocks || []).forEach(([a, b]) => { const yy = Math.floor(ty) + b, xx = Math.floor(tx) + a; if (B[yy]) B[yy][xx] = 1; }); return o; };
+      twObjs.place = place;
+      const trees = [];
+      for (let x = -1; x < TW_MW; x += 2) { trees.push([x, 0]); trees.push([x + 1, 2]); }
+      for (let y = 4; y < TW_MH; y += 2) { trees.push([-1, y]); trees.push([38, y + 1]); }
+      for (let y = 24; y < TW_MH; y += 2) for (const x of [1, 35]) trees.push([x, y]);
+      trees.push([2, 4], [36, 4], [16, 3], [23, 3], [33, 3]);
+      trees.forEach(([tx, ty]) => place(A.tree, tx, ty, { blocks: [[0, 0], [1, 0], [0, 1], [1, 1]] }));
+      twFount = place(A.fountain, 18.5, 9.5, {}); for (let y = 10; y <= 12; y++) for (let x = 18; x <= 21; x++) B[y][x] = 1;
+      twHouse = place(A.house, 10, 3.5, { house: 1 }); for (let y = 4; y <= 7; y++) for (let x = 10; x <= 13; x++) B[y][x] = 1;
+      twSwing = place(A.swing, 5, 5, { blocks: [[0, 1], [3, 1], [0, 2], [3, 2]] }); B[7][6] = B[7][7] = 1;
+      twSwing.seats = [{ x: 5 * 16 + 24, y: 5 * 16 + 38, busy: null, ph: 0 }, { x: 5 * 16 + 40, y: 5 * 16 + 38, busy: null, ph: 1.6 }];
+      [[14, 8], [25, 8], [14, 16], [25, 16]].forEach(([a, b]) => place(A.lamp, a, b - 1, { blocks: [[0, 1]], lamp: true }));
+      place(A.bench, 16, 17, { blocks: [[0, 0], [1, 0]] }); place(A.bench, 22, 17, { blocks: [[0, 0], [1, 0]] });
+      place(A.sign, 21, 22.5, { blocks: [[0, 1]], townSign: 1 });
+      const lot = (k, tx, ty) => place(A.lot, tx, ty, { blocks: [[0, 1]], lot: k });
+      twSlide = twSaw = twBerry = twField = twBowl = twArena = twTramp = null;
+      if (twHas('slide')) { twSlide = place(A.slide, 29, 4, { blocks: [[0, 1], [1, 1], [0, 2], [1, 2], [0, 3], [1, 3]] }); twSlide.busy = null; } else lot('slide', 29.5, 5);
+      if (twHas('seesaw')) { twSaw = place(A.seesawBase, 11, 16, { blocks: [[1, 0], [2, 0]] }); twSaw.busy = []; twSaw.tilt = 0; } else lot('seesaw', 12.5, 15);
+      if (twHas('berry')) twBerry = place(A.berry, 34, 7, { blocks: [[0, 0], [1, 0], [0, 1], [1, 1]] }); else lot('berry', 34.5, 7);
+      if (twHas('field')) { twField = place(A.field[0], 22, 19, { field: 1 }); for (let y = 19; y <= 21; y++) for (let x = 22; x <= 25; x++) B[y][x] = 1; } else lot('field', 23.5, 19);
+      if (twHas('bowl')) { twBowl = place(A.bowl, 17, 19, { bowl: 1 }); B[19][17] = 1; } else lot('bowl', 17, 18.5);
+      if (twHas('arena')) { twArena = place(A.arena, 3, 20, { arena: 1 }); twArena.busy = []; for (let y = 21; y <= 23; y++) for (let x = 3; x <= 8; x++) B[y][x] = 1; } else lot('arena', 5.5, 20.5);
+      // 트램펄린 울타리
+      const LX = 3, LY = 15, LW = 5, LH = 4;
+      for (let x = LX - 1; x <= LX + LW; x++) { if (x !== LX + 2) place(A.fenceH, x, LY - 1, { blocks: [[0, 0]] }); place(A.fenceH, x, LY + LH, { blocks: [[0, 0]] }); }
+      for (let y = LY; y < LY + LH; y++) { place(A.fenceV, LX - 1, y, { blocks: [[0, 0]] }); place(A.fenceV, LX + LW, y, { blocks: [[0, 0]] }); }
+      if (twHas('tramp')) { twTramp = place(A.tramp, 4.5, 15.6, {}); twTramp.busy = null; twTramp.foot = 17.6 * 16; } else lot('tramp', 5, 15.6);
+      for (let i = 0; i < s.flower; i++) { const [fx, fy] = TW_FLOWER_SPOTS[i]; place(A.flower, fx, fy, { foot: fy * 16 + 2 }); }
+      twGround = [0, 1].map(ph => twDrawGround(ph));
+      twTall = [0, 1].map(ph => twMk(16, 8, x => { for (let k = 0; k < 2; k++) { const a = k * 8, o = ph && k % 2 ? 1 : 0; twP(x, a + 1, 2, TC.t2, 6, 6); twP(x, a + o, 1, TC.t3, 2, 3); twP(x, a + 3 + o, 0, TC.t3, 2, 4); twP(x, a + 6 + o, 1, TC.t3, 1, 3); twP(x, a + 1, 7, TC.t1, 6, 1); } }));
+    }
+    function twDrawGround(phase) {
+      let seed = 11; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const T = twTile, isT = (x, y, t) => x >= 0 && y >= 0 && x < TW_MW && y < TW_MH && T[y][x] === t;
+      return twMk(TW_PW, TW_PH, x => {
+        for (let ty = 0; ty < TW_MH; ty++) for (let tx = 0; tx < TW_MW; tx++) {
+          const X = tx * 16, Y = ty * 16, t = T[ty][tx];
+          twP(x, X, Y, TC.g, 16, 16);
+          for (let k = 0; k < 3; k++) { const a = Math.floor(r() * 14), b = Math.floor(r() * 13); twP(x, X + a, Y + b, TC.g2); twP(x, X + a + 1, Y + b - 1, TC.g2); twP(x, X + a + 2, Y + b, TC.g2); }
+          if (r() < .3) twP(x, X + Math.floor(r() * 14), Y + Math.floor(r() * 14), TC.g3, 2, 1);
+          const edges = (tt, fill, edge, inner, R, cw) => {
+            const n = !isT(tx, ty - 1, tt), s = !isT(tx, ty + 1, tt), w = !isT(tx - 1, ty, tt), e = !isT(tx + 1, ty, tt);
+            if (n) { twP(x, X, Y, fill, 16, cw); twP(x, X, Y + cw, edge, 16, 1); }
+            if (s) { twP(x, X, Y + 16 - cw, fill, 16, cw); twP(x, X, Y + 15 - cw, inner, 16, 1); }
+            if (w) { twP(x, X, Y, fill, cw, 16); twP(x, X + cw, Y, edge, 1, 16); }
+            if (e) { twP(x, X + 16 - cw, Y, fill, cw, 16); twP(x, X + 15 - cw, Y, edge, 1, 16); }
+            const corner = (cx, cy, sx, sy) => { for (let j = 0; j < R; j++) for (let i = 0; i < R; i++) { const d = Math.hypot(R - i - .5, R - j - .5); const px = cx + sx * i, py = cy + sy * j; if (d > R) twP(x, px, py, fill); else if (d > R - 1.2) twP(x, px, py, sy > 0 ? edge : inner); } };
+            if (n && w) corner(X + cw, Y + cw, 1, 1); if (n && e) corner(X + 15 - cw, Y + cw, -1, 1);
+            if (s && w) corner(X + cw, Y + 15 - cw, 1, -1); if (s && e) corner(X + 15 - cw, Y + 15 - cw, -1, -1);
+          };
+          if (t === 1) { twP(x, X, Y, TC.s, 16, 16); for (let k = 0; k < 4; k++) twP(x, X + Math.floor(r() * 15), Y + Math.floor(r() * 15), TC.s3); edges(1, TC.g, TC.s2, TC.s2, 6, 2); }
+          else if (t === 2) { twP(x, X, Y, TC.w, 16, 16); for (let k = 0; k < 2; k++) { const a = (Math.floor(r() * 10) + phase * 3) % 12, b = Math.floor(r() * 13); twP(x, X + a, Y + b, TC.w3, 4, 1); twP(x, X + a + 1, Y + b + 1, TC.w2, 3, 1); } edges(2, TC.s, TC.wd, TC.w3, 7, 3); }
+          else if (t === 3) { [[3, 4, '#f87171'], [10, 3, '#fde047'], [6, 10, '#fff'], [12, 11, '#f9a8d4']].forEach(([a, b, c]) => { const o = phase && (a + b) % 2 ? 1 : 0; twP(x, a + X, b + Y + 3, TC.gd, 1, 3); twP(x, a + X - 1 + o, b + Y, c, 3, 1); twP(x, a + X + o, b + Y - 1, c, 1, 3); twP(x, a + X + o, b + Y, '#f59e0b'); }); }
+          else if (t === 4) { for (let k = 0; k < 4; k++) { const a = (k % 2) * 8, b = Math.floor(k / 2) * 8, o = phase && (k + tx + ty) % 2 ? 1 : 0; twP(x, X + a + 1, Y + b + 2, TC.t2, 6, 6); twP(x, X + a + o, Y + b + 1, TC.t3, 2, 3); twP(x, X + a + 3 + o, Y + b + (k + tx) % 2, TC.t3, 2, 4); twP(x, X + a + 6 + o, Y + b + 1, TC.t3, 1, 3); twP(x, X + a + 1, Y + b + 7, TC.t1, 6, 1); } }
+        }
+      });
+    }
+
+    /* ---------- 포켓몬 ---------- */
+    const twSheets = {};
+    function twSheet(n, shiny) {
+      const k = n + (shiny ? 's' : '');
+      if (twSheets[k]) return twSheets[k];
+      const im = new Image(); const o = twSheets[k] = { im, ow: n <= 649 && !TW_NO_OW.has(n), ok: false };
+      const base = /^https?:$/.test(location.protocol) && !/localhost|127\.0/.test(location.hostname) ? '' : TW_RAW;
+      im.onload = () => { o.ok = true; };
+      im.onerror = () => { if (o.ow) { o.ow = false; im.src = getPokemonPixelUrl(n); } else o.fail = true; };
+      im.src = o.ow ? `${base}ow/${shiny ? 's/' : ''}${n}.png` : getPokemonPixelUrl(n);
+      return o;
+    }
+    const TW_DIR = { down: 0, left: 1, right: 2, up: 3 };
+    let twActors = [], twOcc = new Map(), twNow = 0, twNight = false, twNightK = 0, twActive = false, twRaf = 0, twCv = null, twCtx = null, twS2 = 2, twBerries = [], twToken = 0;
+    const twKey = (x, y) => x + ',' + y;
+    const twWait = ms => new Promise(r => setTimeout(r, ms));
+    const twPick = a => a[Math.floor(Math.random() * a.length)];
+    const twRnd = (a, b) => a + Math.random() * (b - a);
+    const twWaitActive = async () => { while (!twActive) await twWait(400); };
+    const TW_WATER = n => { const r = OFFICIAL_DEX.rows[n - 1]; return r && r[2].map(i => TYPE_NAMES[i]).some(t => /물/.test(t)); };
+    class TwMon {
+      constructor(n, tx, ty) {
+        this.n = n; this.name = POKEMON_NAMES_1025[n - 1]; this.tx = tx; this.ty = ty; this.x = tx * 16 + 8; this.y = ty * 16 + 14;
+        this.dir = 'down'; this.walk = false; this.hop = 0; this.emo = null; this.ride = null; this.token = twToken;
+        this.water = TW_WATER(n); this.sh = twSheet(n, twShiny(n));
+        const row = OFFICIAL_DEX.rows[n - 1]; this.big = row && row[4] > 2000; this.step = this.big ? 420 : 250;
+        this.swim = twTile[ty][tx] === 2; twOcc.set(twKey(tx, ty), this); twActors.push(this);
+      }
+      free(x, y) { const o = twOcc.get(twKey(x, y)); return !o || o === this; }
+      can(x, y) { if (x < 0 || y < 0 || x >= TW_MW || y >= TW_MH) return false; const b = twBlock[y][x]; return b === 0 || (b === 2 && this.water); }
+      path(gx, gy) {
+        const prev = new Map(), q = [[this.tx, this.ty]]; prev.set(twKey(this.tx, this.ty), null);
+        while (q.length) { const [x, y] = q.shift(); if (x === gx && y === gy) break; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy, k = twKey(nx, ny); if (!prev.has(k) && this.can(nx, ny)) { prev.set(k, [x, y]); q.push([nx, ny]); } } }
+        if (!prev.has(twKey(gx, gy))) return null;
+        const out = []; let c = [gx, gy]; while (c && !(c[0] === this.tx && c[1] === this.ty)) { out.unshift(c); c = prev.get(twKey(c[0], c[1])); } return out;
+      }
+      async stepTo(nx, ny, ms) {
+        this.dir = nx > this.tx ? 'right' : nx < this.tx ? 'left' : ny > this.ty ? 'down' : 'up';
+        for (let k = 0; k < 6 && !this.free(nx, ny); k++) { await twWait(200); if (this.halt) return false; }
+        if (!this.free(nx, ny)) return false;
+        twOcc.set(twKey(nx, ny), this);
+        const sx = this.x, sy = this.y, ex = nx * 16 + 8, ey = ny * 16 + 14, t0 = performance.now(); ms = ms || this.step;
+        this.walk = true;
+        await new Promise(res => { const st = t => { const k = Math.min(1, (t - t0) / ms); this.x = sx + (ex - sx) * k; this.y = sy + (ey - sy) * k; if (k >= 1 || !twActive) { this.x = ex; this.y = ey; res(); } else requestAnimationFrame(st); }; requestAnimationFrame(st); });
+        twOcc.delete(twKey(this.tx, this.ty)); this.tx = nx; this.ty = ny; this.walk = false; this.swim = twTile[ny][nx] === 2;
+        return true;
+      }
+      async goTo(gx, gy) { const p = this.path(gx, gy); if (!p) return false; for (const [x, y] of p) { if (this.halt || this.token !== twToken) return false; if (!await this.stepTo(x, y)) return false; } return true; }
+      async jump(h = 8, n = 1, ms = 320) { for (let i = 0; i < n; i++) { const t0 = performance.now(); await new Promise(res => { const st = t => { const k = Math.min(1, (t - t0) / ms); this.hop = Math.sin(k * Math.PI) * h; k < 1 && twActive ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); }); } this.hop = 0; }
+      emote(k, ms = 1400) { this.emo = k; clearTimeout(this._et); this._et = setTimeout(() => { if (this.emo === k) this.emo = this.sleep ? 'zz' : null; }, ms); }
+      draw(ctx) {
+        const A = twArt, o = this.sh, im = o.im;
+        if (!this.swim) { ctx.fillStyle = 'rgba(30,50,30,.28)'; const sw = this.hop > 2 ? 7 : 9; ctx.fillRect(Math.round(this.x - sw), Math.round(this.y - 1), sw * 2, 2); ctx.fillRect(Math.round(this.x - sw + 2), Math.round(this.y - 2), sw * 2 - 4, 4); }
+        let top;
+        if (o.ok && o.ow) {
+          const fw = im.width / 4, fh = im.height / 4, col = this.sleep ? 0 : Math.floor(twNow / (this.walk ? 125 : 260)) % 4, row = TW_DIR[this.dir];
+          const x = Math.round(this.x - fw / 2), y = Math.round(this.y - fh + 2 - this.hop); top = y + (fh > 32 ? fh - 40 : 0);
+          if (this.swim) ctx.drawImage(im, col * fw, row * fh, fw, fh - 7, x, y + 4, fw, fh - 7); else ctx.drawImage(im, col * fw, row * fh, fw, fh, x, y, fw, fh);
+        } else if (o.ok) {   // 걷기 그림이 없는 친구: 정면 그림으로 통통
+          const s = 40, bob = this.walk ? Math.abs(Math.sin(twNow / 90)) * 3 : 0, x = Math.round(this.x - s / 2), y = Math.round(this.y - s + 4 - this.hop - bob); top = y + 4;
+          ctx.save(); if (this.dir === 'right') { ctx.translate(x * 2 + s, 0); ctx.scale(-1, 1); } ctx.drawImage(im, 0, 0, im.width, im.height, x, y, s, s); ctx.restore();
+        } else { const x = Math.round(this.x - 8), y = Math.round(this.y - 15 - this.hop); top = y; ctx.drawImage(A.ball, x, y); }
+        if (this.swim) { ctx.fillStyle = TC.w3; const r = Math.floor(twNow / 300) % 2; ctx.fillRect(Math.round(this.x - 9 + r), Math.round(this.y - 3), 6, 1); ctx.fillRect(Math.round(this.x + 3 - r), Math.round(this.y - 3), 6, 1); }
+        if (!this.ride && twTile[this.ty] && twTile[this.ty][this.tx] === 4 && !this.walk) ctx.drawImage(twTall[Math.floor(twNow / 500) % 2], Math.round(this.x - 8), Math.round(this.y - 6));
+        if (this.emo) ctx.drawImage(A.emo[this.emo], Math.round(this.x - 7 + (this.sleep ? 8 : 0)), top - 8 - (this.sleep ? Math.floor(twNow / 500) % 2 : 0));
+        this.top = top;
+      }
+    }
+    const twNear = (cx, cy, r = 2) => { const c = []; for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++) if (x > 0 && y > 3 && x < TW_MW - 1 && y < TW_MH && twBlock[y][x] === 0 && !twOcc.has(twKey(x, y))) c.push([x, y]); return c.length ? twPick(c) : null; };
+    const twLeave = a => twOcc.delete(twKey(a.tx, a.ty));
+    function twBack(a, tx, ty) { let t = [tx, ty]; if (twOcc.has(twKey(tx, ty)) || twBlock[ty][tx]) t = twNear(tx, ty, 2) || t; twOcc.set(twKey(t[0], t[1]), a); a.tx = t[0]; a.ty = t[1]; a.x = t[0] * 16 + 8; a.y = t[1] * 16 + 14; a.ride = null; a.hop = 0; a.swim = twTile[t[1]][t[0]] === 2; }
+
+    /* ---------- 놀이 ---------- */
+    async function twSwingPlay(a) {
+      const s = twSwing.seats.find(q => !q.busy); if (!s) return false; s.busy = a; const i = twSwing.seats.indexOf(s);
+      if (!await a.goTo(6 + i, 8) || twNight) { s.busy = null; return false; }
+      twLeave(a); a.dir = 'down'; a.ride = s; a.emote('note', 1500);
+      const t0 = performance.now(), dur = twRnd(5000, 8000); while (performance.now() - t0 < dur && !twNight && a.token === twToken) await twWait(150);
+      s.busy = null; twBack(a, 6 + i, 8); a.emote('heart'); twAddLove(a.n); return true;
+    }
+    async function twSlidePlay(a) {
+      const S = twSlide; if (!S || S.busy) return false; S.busy = a;
+      if (!(a.tx === 30 && a.ty === 4) && !await a.goTo(30, 4)) { S.busy = null; return false; }
+      twLeave(a); a.ride = S; const sx = S.x + 16, top = S.y + 20, bot = S.y + 60;
+      a.dir = 'up'; for (let k = 0; k < 6; k++) { a.x = sx; a.y = S.y + 14 + k; a.hop = k * 2; await twWait(90); }
+      a.dir = 'down'; a.hop = 12; a.y = top; await twWait(350);
+      const t0 = performance.now(), d = 650;
+      await new Promise(res => { const st = t => { const k = Math.min(1, (t - t0) / d), e = k * k; a.y = top + (bot - top) * e; a.hop = 12 * (1 - e); k < 1 && twActive ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); });
+      S.busy = null; twBack(a, 30, 8); a.emote('star'); twAddLove(a.n); await a.jump(8); return true;
+    }
+    async function twSawPlay(a) {
+      const S = twSaw; if (!S || S.busy.length >= 2) return false; const i = S.busy.length; S.busy.push(a);
+      const gx = i ? 14 : 11; if (!await a.goTo(gx, 16)) { S.busy = S.busy.filter(b => b !== a); return false; }
+      twLeave(a); a.ride = S; a.side = i; a.dir = i ? 'left' : 'right'; a.x = S.x + (i ? 56 : 8);
+      for (let k = 0; k < 40 && S.busy.length < 2 && !twNight; k++) await twWait(250);
+      if (S.busy.length === 2 && !twNight) { a.emote('note'); S.go = true; await twWait(6000); twAddLove(a.n); }
+      S.go = false; S.busy = S.busy.filter(b => b !== a); twBack(a, gx, 16); return true;
+    }
+    async function twTrampPlay(a) {
+      const T = twTramp; if (!T || T.busy) return false; T.busy = a;
+      if (!await a.goTo(5, 18)) { T.busy = null; return false; }
+      twLeave(a); a.ride = T; a.dir = 'down'; a.x = T.x + 16; a.y = T.y + 18; a.emote('star', 1200);
+      for (let k = 0; k < 5 && twActive; k++) { T.press = 1; await twWait(80); T.press = 0; await a.jump(22 + k * 3, 1, 520); }
+      T.busy = null; twBack(a, 5, 18); twAddLove(a.n); return true;
+    }
+    async function twPondPlay(a) {
+      const c = []; for (let y = 17; y <= 22; y++) for (let x = 27; x <= 37; x++) if (twTile[y][x] === 2 && !twOcc.has(twKey(x, y))) c.push([x, y]);
+      if (!c.length) return false; const [x, y] = twPick(c); if (!await a.goTo(x, y)) return false;
+      a.emote('note', 1200);
+      for (let k = 0; k < 3; k++) { const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [a.tx + dx, a.ty + dy]).filter(([p, q]) => twTile[q] && twTile[q][p] === 2 && a.free(p, q)); if (n.length) await a.stepTo(...twPick(n), 400); await twWait(400); }
+      return true;
+    }
+    async function twSpar(a) {
+      const R = twArena; if (!R || R.busy.length) return false;
+      const b = twPick(twActors.filter(o => o !== a && !o.busy && !o.sleep && !o.ride)); if (!b) return false;
+      b.busy = true; R.busy = [a, b];
+      await Promise.all([a.goTo(2, 22), b.goTo(9, 22)]).catch(() => {});
+      [a, b].forEach(m => { twLeave(m); m.ride = R; });
+      a.x = R.x + 30; a.y = R.y + 40; b.x = R.x + 66; b.y = R.y + 40; a.dir = 'right'; b.dir = 'left';
+      for (let k = 0; k < 4 && twActive && !twNight; k++) {
+        a.emote(k % 2 ? 'star' : 'ex', 700); await Promise.all([a.jump(10), b.jump(4)]); await twWait(250);
+        b.emote(k % 2 ? 'ex' : 'star', 700); await Promise.all([b.jump(10), a.jump(4)]); await twWait(300);
+      }
+      a.emote('heart'); b.emote('heart'); twAddLove(a.n); twAddLove(b.n);
+      R.busy = []; twBack(a, 2, 22); twBack(b, 9, 22); b.busy = false; return true;
+    }
+    async function twMeet(a) {
+      const b = twPick(twActors.filter(o => o !== a && !o.busy && !o.sleep && !o.ride)); if (!b) return false;
+      b.busy = true;
+      const spot = twNear(Math.round((a.tx + b.tx) / 2), Math.round((a.ty + b.ty) / 2), 3); if (!spot) { b.busy = false; return false; }
+      const [x, y] = spot; const ok = await a.goTo(x, y);
+      const side = [[x + 1, y], [x - 1, y]].find(([p, q]) => p > 0 && twBlock[q][p] === 0 && !twOcc.has(twKey(p, q)));
+      if (ok && side) { await b.goTo(side[0], side[1]); a.dir = side[0] > x ? 'right' : 'left'; b.dir = side[0] > x ? 'left' : 'right'; a.emote('heart'); b.emote('heart'); await Promise.all([a.jump(6, 2), b.jump(6, 2)]); }
+      b.busy = false; return true;
+    }
+    async function twEat(a, br) {
+      br.taken = a;
+      const t = [[br.tx - 1, br.ty], [br.tx + 1, br.ty], [br.tx, br.ty + 1], [br.tx, br.ty - 1]].find(([p, q]) => twBlock[q] && twBlock[q][p] === 0) || [br.tx, br.ty + 1];
+      if (!await a.goTo(t[0], t[1])) { br.taken = null; return false; }
+      a.dir = br.tx > a.tx ? 'right' : br.tx < a.tx ? 'left' : br.ty > a.ty ? 'down' : 'up';
+      a.emote('food', 1200); for (let k = 0; k < 3; k++) { await a.jump(3); await twWait(150); }
+      a.emote('heart', 1200); twAddLove(a.n);
+      br.left--; if (br.left <= 0) { twBerries = twBerries.filter(b => b !== br); if (br.bowl) { twBowl.img = twArt.bowl; } } else br.taken = null;
+      return true;
+    }
+    function twCallEaters(n) {
+      twActors.filter(o => !o.busy && !o.sleep && !o.ride).slice(0, n).forEach(c => { c.emote('ex', 900); c.halt = true; setTimeout(() => c.halt = false, 40); });
+    }
+
+    async function twLife(a) {
+      const tok = a.token;
+      await twWait(twRnd(200, 1500));
+      while (tok === twToken) {
+        await twWaitActive(); if (tok !== twToken) return;
+        if (twNight) {
+          if (!a.sleep) { a.busy = true; const sp = [[15, 11], [17, 14], [22, 14], [24, 11], [16, 9], [23, 9], [13, 12], [26, 13], [20, 15], [18, 15], [15, 15], [24, 15]]; const s = sp[twActors.indexOf(a) % sp.length]; await a.goTo(s[0], s[1]); if (twNight) { a.sleep = true; a.dir = 'down'; a.emo = 'zz'; } a.busy = false; }
+          await twWait(800); continue;
+        }
+        if (a.sleep) { a.sleep = false; a.emo = null; a.emote('ex', 900); await a.jump(6); }
+        if (a.busy) { await twWait(300); continue; }
+        a.busy = true; a.halt = false;
+        let done = false;
+        const br = twBerries.find(b => !b.taken && b.fall >= 1);
+        if (br) done = await twEat(a, br);
+        else if (a.big && Math.random() < .5) { a.sleep = true; a.emo = 'zz'; await twWait(twRnd(6000, 10000)); a.sleep = false; a.emo = null; done = true; }
+        else {
+          const r = Math.random();
+          const opts = a.water ? [[.4, twPondPlay], [.55, twSwingPlay], [.65, twSlidePlay], [.8, twMeet]] : [[.14, twSwingPlay], [.28, twSlidePlay], [.4, twSawPlay], [.52, twTrampPlay], [.6, twSpar], [.72, twMeet]];
+          const o = opts.find(([p]) => r < p); if (o) done = await o[1](a);
+        }
+        if (!done) { const t = twNear(a.tx, a.ty, 5); if (t) await a.goTo(t[0], t[1]); await twWait(twRnd(500, 2000)); }
+        a.halt = false; a.busy = false; await twWait(twRnd(200, 800));
+      }
+    }
+
+    /* ---------- 주민 나오기 ---------- */
+    function twSpawn() {
+      twToken++; twActors = []; twOcc = new Map(); twBerries = [];
+      const s = twLoad(), all = twResidents();
+      if (!s.inited) { s.inited = 1; s.seen = all.slice(); }   // 처음 열 때는 모두 원래 살던 친구
+      const seen = new Set(s.seen);
+      const fresh = all.filter(n => !seen.has(n)).slice(0, 4), limit = 12 - fresh.length;
+      const base = all.filter(n => !fresh.includes(n) && n !== 25);
+      let show = [...new Set([25, ...base.slice(0, 4), ...fdShuffle(base.slice(4))])].slice(0, limit);
+      if (twFocusN && !show.includes(twFocusN) && !fresh.includes(twFocusN)) { if (show.length >= limit) show[show.length - 1] = twFocusN; else show.push(twFocusN); }
+      let spots = []; for (let y = 8; y < 24; y++) for (let x = 2; x < 38; x++) if (twBlock[y][x] === 0) spots.push([x, y]);
+      spots = fdShuffle(spots);
+      show.forEach((n, i) => { const [x, y] = spots[i]; const m = new TwMon(n, x, y); twLife(m); });
+      // 새로 이사 온 친구는 마을 입구에서 걸어 들어와요
+      fresh.forEach((n, i) => setTimeout(async () => {
+        if (!twActive) return;
+        const m = new TwMon(n, 20 - (i % 2), 25); m.busy = true; m.dir = 'up';
+        if (i === 0) { twSay(`새 친구 ${m.name}${sbJosa(m.name, '이')} 마을로 이사 왔어요!`); twToast(`🏡 ${m.name}${sbJosa(m.name, '이')} 이사 왔어요!`); twScrollTo(20, 19); }
+        await m.goTo(20 - (i % 2), 19 - i); m.emote('ex'); await m.jump(8, 2); m.emote('heart');
+        twActors.filter(o => o !== m && !o.busy && !o.sleep && !o.ride).slice(0, 2).forEach(o => { o.busy = true; o.halt = true; setTimeout(async () => { o.halt = false; const t = twNear(m.tx, m.ty - 1, 2); if (t) await o.goTo(t[0], t[1]); o.dir = o.tx < m.tx ? 'right' : o.tx > m.tx ? 'left' : 'down'; o.emote('heart'); await o.jump(6); o.busy = false; }, 50); });
+        m.busy = false; twLife(m);
+      }, 900 + i * 2600));
+      s.seen = all; twSave();
+    }
+
+    /* ---------- 그리기 ---------- */
+    function twFrame(t) {
+      if (!twActive) { twRaf = 0; return; }
+      twNow = t; const ctx = twCtx, A = twArt;
+      ctx.drawImage(twGround[Math.floor(t / 600) % 2], 0, 0);
+      const list = [];
+      twObjs.forEach(o => list.push({ f: o.foot, d: () => {
+        if (o === twSaw) { ctx.drawImage(o.img, o.x, o.y); const tilt = o.go ? Math.round(Math.sin(t / 220) * 4) : (o.busy.length === 1 ? 4 * (o.busy[0].side ? -1 : 1) : 0); twLine(ctx, o.x + 4, o.y + 8 + tilt, o.x + 60, o.y + 8 - tilt, TC.ol, 3); twLine(ctx, o.x + 5, o.y + 8 + tilt, o.x + 59, o.y + 8 - tilt, '#f43f5e', 2); twP(ctx, o.x + 4, o.y + 4 + tilt, TC.ol, 3, 4); twP(ctx, o.x + 57, o.y + 4 - tilt, TC.ol, 3, 4); o.tilt = tilt; return; }
+        if (o === twTramp) { ctx.drawImage(o.img, o.x, o.y + (o.press ? 1 : 0)); return; }
+        if (o.field) { const f = twLoad().field; o.img = A.field[!f ? 0 : f.day < twDay() ? 2 : 1]; }
+        ctx.drawImage(o.img, o.x, o.y);
+        if (o === twFount) for (let k = 0; k < 8; k++) { const ph = ((t / 700) + k / 8) % 1, dx = (k % 2 ? 1 : -1) * (3 + (k % 4) * 3) * ph, dy = -10 * Math.sin(ph * Math.PI); twP(ctx, Math.round(o.x + 24 + dx), Math.round(o.y + 10 + dy + ph * 18), ph > .8 ? TC.w : TC.w3, 2, 2); }
+        if (o.lot) { const b = Math.floor(t / 400) % 2; twP(ctx, o.x + 6, o.y - 3 - b, '#fde047', 2, 2); }
+      } }));
+      twSwing.seats.forEach(s => {
+        const rider = s.busy && s.busy.ride === s ? s.busy : null, sw = rider && !twNight ? Math.sin(t / 380 + s.ph) : 0, dy = Math.round(sw * 6), sy = s.y + dy;
+        list.push({ f: twSwing.foot - 2 + dy, d: () => {
+          twLine(ctx, s.x - 5, twSwing.y + 7, s.x - 5, sy, '#5a5a72'); twLine(ctx, s.x + 4, twSwing.y + 7, s.x + 4, sy, '#5a5a72');
+          twP(ctx, s.x - 7, sy - 1, TC.ol, 14, 4); twP(ctx, s.x - 6, sy, '#3a8ae0', 12, 2);
+          if (rider) { rider.x = s.x; rider.y = sy + 3; rider.draw(ctx); twLine(ctx, s.x - 5, sy - 10, s.x - 5, sy, '#5a5a72'); twLine(ctx, s.x + 4, sy - 10, s.x + 4, sy, '#5a5a72'); }
+        } });
+      });
+      twActors.forEach(a => {
+        if (a.ride && twSwing.seats.includes(a.ride)) return;
+        if (a.ride && a.ride === twSaw) { a.y = twSaw.y + 7 + (a.side ? -twSaw.tilt : twSaw.tilt); list.push({ f: twSaw.foot + 1, d: () => a.draw(ctx) }); return; }
+        if (a.ride && (a.ride === twSlide || a.ride === twTramp)) { list.push({ f: a.ride.foot + 1, d: () => a.draw(ctx) }); return; }
+        list.push({ f: a.y, d: () => a.draw(ctx) });
+      });
+      twBerries.forEach(b => { if (b.bowl) return; list.push({ f: b.fall < 1 ? 999 : b.ty * 16 + 14, d: () => { const k = b.fall, x = b.x + (b.tx0 - b.x) * k, y = b.y + (b.ty0 - b.y) * k * k; twP(ctx, Math.round(x) - 2, Math.round(y) - 2, TC.ol, 5, 5); twP(ctx, Math.round(x) - 2, Math.round(y) - 2, b.c || '#e83050', 4, 4); twP(ctx, Math.round(x) - 2, Math.round(y) - 2, '#fff'); } }); });
+      list.sort((p, q) => p.f - q.f).forEach(i => i.d());
+      if (twNightK > 0) {
+        ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(40,48,120,${.62 * twNightK})`; ctx.fillRect(0, 0, TW_PW, TW_PH);
+        ctx.globalCompositeOperation = 'lighter';
+        const glow = (x, y, r, c) => { const g = ctx.createRadialGradient(x, y, 1, x, y, r); g.addColorStop(0, `rgba(${c},${.55 * twNightK})`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
+        twObjs.filter(o => o.lamp).forEach(o => glow(o.x + 8, o.y + 8, 36, '255,220,130'));
+        glow(twFount.x + 24, twFount.y + 28, 40, '120,200,255');
+        glow(twHouse.x + 16, twHouse.y + 41, 14, '255,220,130'); glow(twHouse.x + 48, twHouse.y + 41, 14, '255,220,130');
+        ctx.restore();
+      }
+      document.querySelectorAll('#tw-over .tw-name').forEach(el => { const a = el._a; el.style.left = a.x * twS2 + 'px'; el.style.top = ((a.top || a.y - 30) - 2) * twS2 + 'px'; });
+      twRaf = requestAnimationFrame(twFrame);
+    }
+
+    /* ---------- 화면 ---------- */
+    const twSay = t => { try { speakText(t, 0.95); } catch (e) {} };
+    const twToast = t => { try { showToast(t); } catch (e) {} };
+    let twFocusN = 0, twFocusK = '';
+    function twFit() {
+      const v = document.getElementById('tw-view'); if (!v || !twCv) return;
+      const top = v.getBoundingClientRect().top, bot = typeof rnBotH === 'function' ? rnBotH() : 0;
+      const h = Math.max(260, innerHeight - Math.max(0, top) - bot - 6);
+      v.style.height = h + 'px';
+      const S = Math.min(4, Math.max(2, Math.round(Math.min(v.clientWidth / 352, h / 224))));
+      twS2 = S; twCv.style.width = TW_PW * S + 'px'; twCv.style.height = TW_PH * S + 'px';
+      document.getElementById('tw-wrap').style.width = TW_PW * S + 'px';
+    }
+    function twScrollTo(tx, ty, smooth = true) { const v = document.getElementById('tw-view'); if (!v) return; const o = { left: tx * 16 * twS2 - v.clientWidth / 2, top: ty * 16 * twS2 - v.clientHeight / 2 }; try { v.scrollTo(smooth ? Object.assign(o, { behavior: 'smooth' }) : o); } catch (e) { v.scrollLeft = o.left; v.scrollTop = o.top; } }
+    function twRenderTop() {
+      rwLoad();
+      const box = document.getElementById('tw-top'); if (!box) return;
+      const n = rwS.boxes || 0;
+      box.innerHTML = `<div class="rw-bar tw-bar"></div>
+        ${n ? `<button class="tw-btn tw-gift" onclick="twOpenPending()">🎁<b>${n}</b></button>` : ''}
+        <button class="tw-btn" onclick="rwShowAlbum()" title="주민 명부">📒</button>
+        <button class="tw-btn" onclick="twToggleNight()" title="낮과 밤">${twNight ? '☀️' : '🌙'}</button>`;
+      rwRenderBars();
+    }
+    function twOpen() {
+      twInitArt(); twLoad();
+      if (!twCv) {
+        twCv = document.getElementById('tw-cv'); twCv.width = TW_PW; twCv.height = TW_PH; twCtx = twCv.getContext('2d'); twCtx.imageSmoothingEnabled = false;
+        twCv.addEventListener('click', twTap);
+        addEventListener('resize', () => { if (twActive) twFit(); });
+      }
+      const h = new Date().getHours(); if (!twNightSet) { twNight = h >= 20 || h < 6; twNightK = twNight ? 1 : 0; }
+      twBuild(); twActive = true; twRenderTop();
+      requestAnimationFrame(() => {
+        twFit(); twSpawn();
+        if (twFocusN) { const a = twActors.find(m => m.n === twFocusN); if (a) { twScrollTo(a.tx, a.ty, false); setTimeout(() => twNameTag(a), 300); } twFocusN = 0; }
+        else if (twFocusK && TW_SPOT[twFocusK]) { twScrollTo(TW_SPOT[twFocusK][0] + 1, TW_SPOT[twFocusK][1] + 1, false); twFocusK = ''; }
+        else twScrollTo(20, 12.5, false);
+        if (!twRaf) twRaf = requestAnimationFrame(twFrame);
+      });
+      if ((rwS.boxes || 0) > 0) setTimeout(() => { if (twActive && document.getElementById('rw-ov').classList.contains('hidden')) twOpenPending(); }, 1500);
+    }
+    function twClose() { twActive = false; twToken++; document.getElementById('tw-over') && (document.getElementById('tw-over').innerHTML = ''); }
+    let twNightSet = false;
+    function twToggleNight() {
+      twNightSet = true; twNight = !twNight; const from = twNightK, t0 = performance.now();
+      const st = t => { const k = Math.min(1, (t - t0) / 1200); twNightK = from + ((twNight ? 1 : 0) - from) * k; k < 1 && requestAnimationFrame(st); }; requestAnimationFrame(st);
+      twActors.forEach(a => { a.halt = true; setTimeout(() => a.halt = false, 40); });
+      twToast(twNight ? '🌙 밤이 됐어요. 다들 잘 준비를 해요' : '☀️ 아침이에요! 다들 일어나요'); twRenderTop();
+    }
+    function twNameTag(a) {
+      const over = document.getElementById('tw-over'); if (!over) return;
+      over.querySelectorAll('.tw-name').forEach(e => { if (e._a === a) e.remove(); });
+      const el = document.createElement('div'); el.className = 'tw-name'; el._a = a;
+      const love = twLove(a.n); el.innerHTML = `${a.name}${twShiny(a.n) ? ' ✨' : ''}${a.sleep ? ' 💤' : ''}<small>❤ ${love}</small>`;
+      over.appendChild(el); setTimeout(() => el.remove(), 1800);
+    }
+    function twTap(e) {
+      const r = twCv.getBoundingClientRect(), px = (e.clientX - r.left) / twS2, py = (e.clientY - r.top) / twS2;
+      const hit = twActors.filter(a => Math.abs(px - a.x) < 13 && py < a.y + 3 && py > (a.top || a.y - 30) - 2).sort((p, q) => q.y - p.y)[0];
+      if (hit) {
+        twSay(hit.name + '!'); twNameTag(hit);
+        if (hit.sleep) { hit.emote('zz'); return; }
+        hit.emote('heart'); twAddLove(hit.n); if (!hit.walk && !hit.ride) hit.jump(10, 2); return;
+      }
+      const o = twObjs.filter(o => px >= o.x && px < o.x + o.img.width && py >= o.y && py < o.y + o.img.height && (o.lot || o.field || o.bowl || o.arena || o.house || o.townSign || o === twBerry)).sort((p, q) => q.foot - p.foot)[0];
+      if (!o) return;
+      if (o.lot) { twSay(`여기에는 선물로 ${TW_ITEMS[o.lot].n}${sbJosa(TW_ITEMS[o.lot].n, '이')} 생길 수 있어요. 스티커 열 개를 모아 봐요!`); twToast(`❓ 선물로 ${TW_ITEMS[o.lot].n} 자리`); return; }
+      if (o === twBerry) return twDropBerry();
+      if (o.field) return twFieldTap();
+      if (o.bowl) return twBowlTap();
+      if (o.arena) { twSay('배틀 경기장이에요! 대결하러 가 볼까요?'); return setTimeout(() => rnGo('adv'), 900); }
+      if (o.house) { const nm = typeof kpName === 'function' ? kpName() : ''; twSay(`${nm ? nm + '네 ' : '우리 '}집이에요. 피카츄를 돌봐 줄까요?`); return setTimeout(() => { try { rnPick('play', 5); } catch (e) {} }, 1300); }
+      if (o.townSign) { const nm = typeof kpName === 'function' ? kpName() : ''; twSay(`${nm ? nm + '의 ' : ''}포켓몬 마을. 주민 ${twResidents().length}마리가 살고 있어요.`); twToast(`🏡 ${nm ? nm + '의 ' : ''}포켓몬 마을 · 주민 ${twResidents().length}마리`); }
+    }
+    function twDropBerry() {
+      if (twBerries.filter(b => !b.bowl).length >= 3) return twSay('열매가 벌써 많이 떨어져 있어요!');
+      const t = twNear(35, 10, 1) || twNear(34, 10, 2); if (!t) return;
+      twSay('열매가 떨어졌어요!');
+      const br = { tx: t[0], ty: t[1], left: 1, fall: 0, x: twBerry.x + twRnd(8, 24), y: twBerry.y + twRnd(6, 16), c: Math.random() < .3 ? '#3a6ae0' : '#e83050' };
+      br.tx0 = t[0] * 16 + 8; br.ty0 = t[1] * 16 + 10; twBerries.push(br);
+      const t0 = performance.now(); const st = tm => { const k = Math.min(1, (tm - t0) / 500); br.fall = k; k < 1 && requestAnimationFrame(st); }; requestAnimationFrame(st);
+      setTimeout(() => twCallEaters(1), 400);
+    }
+    function twFieldTap() {
+      const s = twLoad(), today = twDay();
+      if (!s.field) { s.field = { day: today }; twSave(); playTone(520, .08); twSay('씨앗을 심었어요! 내일 열매가 열려요.'); twToast('🌱 씨앗을 심었어요. 내일 와서 따요!'); return; }
+      if (s.field.day >= today) { twSay('아직 자라는 중이에요. 내일 열매가 열려요!'); return; }
+      s.field = null; twSave(); playSuccessChime();
+      twSay('열매를 땄어요! 친구들이 먹으러 와요.');
+      for (let i = 0; i < 4; i++) { const t = twNear(23 + (i % 2) * 2, 22, 1) || twNear(23, 18, 2); if (!t) continue; const br = { tx: t[0], ty: t[1], left: 1, fall: 1, x: t[0] * 16 + 8, y: t[1] * 16 + 10, tx0: t[0] * 16 + 8, ty0: t[1] * 16 + 10, c: i % 2 ? '#3a6ae0' : '#e83050' }; twBerries.push(br); }
+      twCallEaters(4);
+      const d = twLoad(); if (d.harvest !== today) { d.harvest = today; twSave(); const cards = rwGive([twPick(twResidents())], 'town'); try { exPop && exPop('🌱 열매 수확!', '스티커 +1'); } catch (e) {} if (cards.length) setTimeout(() => rwShowCards(cards), 1400); }
+    }
+    function twBowlTap() {
+      const s = twLoad();
+      if (twBerries.some(b => b.bowl)) return twSay('밥그릇에 밥이 아직 있어요!');
+      if (Date.now() - (s.bowl || 0) < 20 * 60000) return twSay('친구들이 아직 배불러요. 조금 있다가 또 줘요!');
+      s.bowl = Date.now(); twSave(); twBowl.img = twArt.bowlFull; playTone(600, .08);
+      twSay('밥을 담았어요! 친구들이 먹으러 와요.');
+      twBerries.push({ tx: 17, ty: 19, left: 4, fall: 1, bowl: 1 });
+      twCallEaters(4);
+    }
+
+    /* ---------- 선물 상자 ---------- */
+    function twBoxOptions() {
+      const cats = {}; Object.keys(TW_ITEMS).filter(twAvail).forEach(k => (cats[TW_ITEMS[k].cat] = cats[TW_ITEMS[k].cat] || []).push(k));
+      const order = fdShuffle(Object.keys(cats)), out = ['friend'];
+      for (const c of order) { if (out.length >= 3) break; out.push(twPick(cats[c])); }
+      return out;
+    }
+    function twOpenBox(c, next) {
+      const ov = document.getElementById('rw-ov'), opts = twBoxOptions();
+      const nm = k => k === 'friend' ? '새 친구' : TW_ITEMS[k].n;
+      ov.innerHTML = `<div class="rw-box tw-box" id="tw-box">
+        <div class="rw-head">🎁 선물 상자! 하나를 골라요</div>
+        <div class="tw-opts">${opts.map(k => `<button class="tw-opt" data-k="${k}" onclick="twBoxPick('${k}')"><img src="${twIcon(k)}" alt=""><b>${nm(k)}</b><small>${k === 'friend' ? '누가 이사 올까요?' : { ride: '놀이기구', food: '먹이', build: '건물', deco: '꾸미기' }[TW_ITEMS[k].cat]}</small></button>`).join('')}</div>
+      </div>`;
+      ov.classList.remove('hidden'); ov._next = next; ov._src = c.s; ov._tw = 1;
+      playTone(660, .08);
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      twSay(`선물 상자예요! ${opts.map(nm).join(', ')} 중에서 하나를 골라요.`);
+    }
+    function twBoxPick(k) {
+      const ov = document.getElementById('rw-ov'), next = ov._next, src = ov._src;
+      rwLoad(); rwS.boxes = Math.max(0, (rwS.boxes || 0) - 1);
+      ov._tw = 0; ov.classList.add('hidden'); ov.innerHTML = '';
+      if (k === 'friend') { const card = rwNewCard(src); rwSave(); twRenderTop(); return rwShowCardsRaw([card], next); }
+      const s = twLoad(); if (k === 'flower') s.flower = Math.min(TW_ITEMS.flower.max, s.flower + 1); else s.own[k] = 1; twSave(); rwSave(); twRenderTop();
+      const it = TW_ITEMS[k];
+      ov.innerHTML = `<div class="rw-box tw-box"><div class="rw-head">🏡 마을에 ${it.n}${sbJosa(it.n, '이')} 생겼어요!</div>
+        <img class="tw-reveal" src="${twIcon(k)}" alt="">
+        <div class="tw-row"><button class="fd-btn" onclick="twRevealGo('${k}')">🏡 마을에서 보기</button><button class="rw-go" onclick="twRevealDone()">계속하기 ▶</button></div></div>`;
+      ov.classList.remove('hidden'); ov._next = next; ov._tw = 1;
+      playSuccessChime(); twSay(`마을에 ${it.n}${sbJosa(it.n, '이')} 생겼어요!`);
+      if (twActive) { twBuild(); twActors.forEach(a => { a.halt = true; setTimeout(() => a.halt = false, 40); }); }
+    }
+    function twRevealDone() { const ov = document.getElementById('rw-ov'), next = ov._next; ov._tw = 0; ov.classList.add('hidden'); ov.innerHTML = ''; if (next) next(); }
+    function twRevealGo(k) { twFocusK = k; twRevealDone(); if (document.getElementById('view-town').classList.contains('hidden')) rnGo('town'); else { twScrollTo(TW_SPOT[k] ? TW_SPOT[k][0] + 1 : 20, TW_SPOT[k] ? TW_SPOT[k][1] + 1 : 12); } }
+    function twOpenPending() { rwLoad(); if ((rwS.boxes || 0) > 0) twOpenBox({ s: 'town' }, () => twRenderTop()); }
+    function twFocus(n) { document.getElementById('rw-ov').classList.add('hidden'); twFocusN = n; if (document.getElementById('view-town').classList.contains('hidden')) rnGo('town'); else { twClose(); twOpen(); } }
+
+    /* ---------- 백업 ---------- */
+    function twBackup() {
+      const d = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^pkmn_/.test(k)) d[k] = localStorage.getItem(k); }
+      const blob = new Blob([JSON.stringify({ app: 'hangulplay', t: Date.now(), d })], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `한글쏙쏙_백업_${twDay()}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      twToast('💾 백업 파일을 저장했어요');
+    }
+    function twRestore(inp) {
+      const f = inp.files && inp.files[0]; if (!f) return;
+      const r = new FileReader(); r.onload = () => {
+        try { const j = JSON.parse(r.result); if (!j || j.app !== 'hangulplay' || !j.d) throw 0; Object.entries(j.d).forEach(([k, v]) => localStorage.setItem(k, v)); twToast('📂 백업을 불러왔어요. 다시 열어요…'); setTimeout(() => location.reload(), 900); }
+        catch (e) { twToast('이 파일은 한글 쏙쏙 백업 파일이 아니에요.'); }
+      }; r.readAsText(f);
+    }
+    function twRenderMenu() {
+      const m = document.getElementById('rn-menu'); if (!m) return;
+      let box = document.getElementById('tw-menu');
+      if (!box) { box = document.createElement('div'); box.id = 'tw-menu'; const ex = document.getElementById('ex-menu'); ex ? ex.after(box) : m.prepend(box); }
+      box.innerHTML = `<button onclick="twBackup()">💾 백업 파일 저장</button><button onclick="document.getElementById('tw-restore').click()">📂 백업 불러오기</button><input id="tw-restore" type="file" accept="application/json,.json" hidden onchange="twRestore(this)"><small>마을, 스티커, 카드, 기록을 파일 하나로 저장해요. 기기를 바꿀 때 불러오면 그대로 이어져요.</small>`;
+    }
+
+    /* ---------- 다른 기능과 잇기 ---------- */
+    Object.assign(RW_SRC, { town: ['🏡', '포켓몬 마을'] });
+    (function () {
+      const sw = switchMainView;
+      switchMainView = function (v) { if (v !== 'town' && twActive) twClose(); const r = sw.apply(this, arguments); if (v === 'town') twOpen(); return r; };
+      if (typeof exRenderMenu === 'function') { const em = exRenderMenu; exRenderMenu = function () { const r = em.apply(this, arguments); try { twRenderMenu(); } catch (e) {} return r; }; }
+      document.addEventListener('visibilitychange', () => { if (document.hidden && twActive) { twActive = false; } else if (!document.hidden && !document.getElementById('view-town').classList.contains('hidden') && !twActive) { twActive = true; if (!twRaf) twRaf = requestAnimationFrame(twFrame); } });
+    })();
+    window.addEventListener('load', () => setTimeout(() => { try { twRenderMenu(); } catch (e) {} }, 120));
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
