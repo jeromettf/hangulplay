@@ -660,7 +660,8 @@
     #tw-view { position: relative; overflow: auto; background: #284820; border-radius: 1rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     #tw-view::-webkit-scrollbar { display: none; }
     #tw-wrap { position: relative; }
-    #tw-cv { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: pointer; }
+    #tw-cv { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: grab; touch-action: pan-x pan-y !important; }   /* 앱 전체 canvas는 손가락 이동을 막아 두어서, 마을만 풀어 줘요 */
+    #tw-cv.drag { cursor: grabbing; }
     #tw-over { position: absolute; inset: 0; pointer-events: none; }
     .tw-name { position: absolute; translate: -50% -100%; background: #fff; color: #334155; border: 3px solid #3a3a52; border-radius: 10px; padding: 1px 9px; font-family: Jua, sans-serif; font-size: 16px; white-space: nowrap; box-shadow: 0 3px 0 rgba(0,0,0,.2); animation: kp-pop-in .2s; display: flex; align-items: center; gap: .35rem; }
     .tw-name small { font-size: 12px; color: #e11d48; }
@@ -675,6 +676,9 @@
     .tw-reveal { width: 8rem; height: 8rem; image-rendering: pixelated; animation: kp-pop-in .4s; }
     .tw-row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
     #tw-menu { padding: .3rem 0 .4rem; border-bottom: 1px solid #f1f5f9; margin-bottom: .3rem; }
+    .tw-hint { position: absolute; left: 50%; bottom: .8rem; translate: -50% 0; z-index: 2; background: rgba(255,255,255,.95); border: 3px solid #3a3a52; border-radius: 999px; padding: .3rem .9rem; font-family: Jua, sans-serif; font-size: .9rem; color: #334155; white-space: nowrap; pointer-events: none; transition: opacity .5s; animation: tw-swipe 1.6s ease-in-out infinite; }
+    @keyframes tw-swipe { 50% { translate: calc(-50% + 10px) 0; } }
+    #tw-view-box { position: relative; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
@@ -2429,7 +2433,7 @@
     <!-- 포켓몬 마을 -->
     <section id="view-town" class="hidden max-w-5xl mx-auto">
       <div id="tw-top"></div>
-      <div id="tw-view"><div id="tw-wrap"><canvas id="tw-cv"></canvas><div id="tw-over"></div></div></div>
+      <div id="tw-view-box"><div id="tw-view"><div id="tw-wrap"><canvas id="tw-cv"></canvas><div id="tw-over"></div></div></div></div>
     </section>
 
     <section id="view-find" class="hidden space-y-2.5 max-w-2xl mx-auto">
@@ -14389,7 +14393,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     /* ---------- 화면 ---------- */
     const twSay = t => { try { speakText(t, 0.95); } catch (e) {} };
     const twToast = t => { try { showToast(t); } catch (e) {} };
-    let twFocusN = 0, twFocusK = '';
+    let twFocusN = 0, twFocusK = '', twDrag = null, twDragMoved = false;
     function twFit() {
       const v = document.getElementById('tw-view'); if (!v || !twCv) return;
       const top = v.getBoundingClientRect().top, bot = typeof rnBotH === 'function' ? rnBotH() : 0;
@@ -14399,13 +14403,15 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       twS2 = S; twCv.style.width = TW_PW * S + 'px'; twCv.style.height = TW_PH * S + 'px';
       document.getElementById('tw-wrap').style.width = TW_PW * S + 'px';
     }
-    function twScrollTo(tx, ty, smooth = true) { const v = document.getElementById('tw-view'); if (!v) return; const o = { left: tx * 16 * twS2 - v.clientWidth / 2, top: ty * 16 * twS2 - v.clientHeight / 2 }; try { v.scrollTo(smooth ? Object.assign(o, { behavior: 'smooth' }) : o); } catch (e) { v.scrollLeft = o.left; v.scrollTop = o.top; } }
+    let twProgScroll = 0;
+    function twScrollTo(tx, ty, smooth = true) { const v = document.getElementById('tw-view'); if (!v) return; twProgScroll = Date.now(); const o = { left: tx * 16 * twS2 - v.clientWidth / 2, top: ty * 16 * twS2 - v.clientHeight / 2 }; try { v.scrollTo(smooth ? Object.assign(o, { behavior: 'smooth' }) : o); } catch (e) { v.scrollLeft = o.left; v.scrollTop = o.top; } }
     function twRenderTop() {
       rwLoad();
       const box = document.getElementById('tw-top'); if (!box) return;
       const n = rwS.boxes || 0;
       box.innerHTML = `<div class="rw-bar tw-bar"></div>
         ${n ? `<button class="tw-btn tw-gift" onclick="twOpenPending()">🎁<b>${n}</b></button>` : ''}
+        <button class="tw-btn" onclick="twScrollTo(20, 12.5)" title="광장으로">🧭</button>
         <button class="tw-btn" onclick="rwShowAlbum()" title="주민 명부">📒</button>
         <button class="tw-btn" onclick="twToggleNight()" title="낮과 밤">${twNight ? '☀️' : '🌙'}</button>`;
       rwRenderBars();
@@ -14414,7 +14420,12 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       twInitArt(); twLoad();
       if (!twCv) {
         twCv = document.getElementById('tw-cv'); twCv.width = TW_PW; twCv.height = TW_PH; twCtx = twCv.getContext('2d'); twCtx.imageSmoothingEnabled = false;
-        twCv.addEventListener('click', twTap);
+        twCv.addEventListener('click', e => { if (twDragMoved) { twDragMoved = false; return; } twTap(e); });
+        // 마우스로 끌어서 둘러보기 (손가락은 화면이 알아서 밀려요)
+        twCv.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; const v = document.getElementById('tw-view'); twDrag = { x: e.clientX, y: e.clientY, l: v.scrollLeft, t: v.scrollTop }; twDragMoved = false; });
+        addEventListener('pointermove', e => { if (!twDrag) return; const dx = e.clientX - twDrag.x, dy = e.clientY - twDrag.y; if (Math.abs(dx) + Math.abs(dy) > 6) { twDragMoved = true; twCv.classList.add('drag'); } if (twDragMoved) { const v = document.getElementById('tw-view'); v.scrollLeft = twDrag.l - dx; v.scrollTop = twDrag.t - dy; } });
+        addEventListener('pointerup', () => { twDrag = null; twCv.classList.remove('drag'); });
+        document.getElementById('tw-view').addEventListener('scroll', () => { if (Date.now() - twProgScroll < 1200 && !twDrag) return; const h = document.querySelector('.tw-hint'); if (h) { h.style.opacity = 0; setTimeout(() => h.remove(), 500); try { localStorage.setItem('pkmn_tw_hint', '1'); } catch (e) {} } }, { passive: true });
         addEventListener('resize', () => { if (twActive) twFit(); });
       }
       const h = new Date().getHours(); if (!twNightSet) { twNight = h >= 20 || h < 6; twNightK = twNight ? 1 : 0; }
@@ -14425,6 +14436,9 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         else if (twFocusK && TW_SPOT[twFocusK]) { twScrollTo(TW_SPOT[twFocusK][0] + 1, TW_SPOT[twFocusK][1] + 1, false); twFocusK = ''; }
         else twScrollTo(20, 12.5, false);
         if (!twRaf) twRaf = requestAnimationFrame(twFrame);
+        let seen = null; try { seen = localStorage.getItem('pkmn_tw_hint'); } catch (e) {}
+        const v = document.getElementById('tw-view');
+        if (!seen && !document.querySelector('.tw-hint') && (v.scrollWidth > v.clientWidth + 8 || v.scrollHeight > v.clientHeight + 8)) { const h = document.createElement('div'); h.className = 'tw-hint'; h.textContent = '👆 손가락으로 밀어서 마을을 둘러봐요'; v.parentElement.appendChild(h); }
       });
       if ((rwS.boxes || 0) > 0) setTimeout(() => { if (twActive && document.getElementById('rw-ov').classList.contains('hidden')) twOpenPending(); }, 1500);
     }
