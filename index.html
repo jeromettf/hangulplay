@@ -642,6 +642,9 @@
     .ex-sbk-open small { font-size: .7rem; color: #c2410c; }
     .ex-sbk-x { position: absolute; top: .2rem; right: .2rem; font-size: .7rem; color: #94a3b8; background: #fff; border-radius: 999px; padding: .05rem .35rem; }
     .ex-sbk-x.sure { color: #fff; background: #ef4444; }
+    #ex-inst { position: fixed; left: 50%; top: calc(4.2rem + env(safe-area-inset-top)); translate: -50% 0; z-index: 95; display: flex; align-items: center; gap: .5rem; background: #fff; border: 3px solid #f43f5e; border-radius: 999px; padding: .35rem .4rem .35rem .9rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); font-family: Jua, sans-serif; font-size: .9rem; color: #334155; white-space: nowrap; max-width: calc(100vw - 1rem); }
+    #ex-inst button { background: #f43f5e; color: #fff; border-radius: 999px; padding: .3rem .9rem; }
+    #ex-inst button.x { background: transparent; color: #94a3b8; padding: .3rem .5rem; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
@@ -13479,9 +13482,17 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
 
     // ---------- 부모님 메뉴 · 리포트 ----------
     let exInstallEvt = null;
-    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); exInstallEvt = e; exRenderMenu(); });
+    // 설치할 수 있으면 크롬이 스스로 띄우는 설치 안내는 그대로 두고, 위쪽에도 설치 버튼을 한 번 보여 줘요
+    window.addEventListener('beforeinstallprompt', e => { exInstallEvt = e; exRenderMenu(); exInstallBar(); });
+    window.addEventListener('appinstalled', () => { exInstallEvt = null; document.getElementById('ex-inst')?.remove(); exRenderMenu(); try { showToast('📲 앱으로 설치했어요! 앱 목록에서 "한글 쏙쏙"을 찾아보세요.'); } catch (e) {} });
+    function exInstallBar() {
+      if (document.getElementById('ex-inst') || exLS.get('pkmn_inst_skip', 0) > Date.now()) return;
+      const d = document.createElement('div'); d.id = 'ex-inst';
+      d.innerHTML = '<span>📲 한글 쏙쏙을 앱으로 설치할 수 있어요</span><button onclick="exInstall()">설치</button><button class="x" onclick="exLS.set(\'pkmn_inst_skip\', Date.now() + 7 * 864e5); this.parentElement.remove()">✕</button>';
+      document.body.appendChild(d);
+    }
     function exInstall() {
-      if (exInstallEvt) { exInstallEvt.prompt(); exInstallEvt.userChoice.finally(() => { exInstallEvt = null; exRenderMenu(); }); }
+      if (exInstallEvt) { exInstallEvt.prompt(); exInstallEvt.userChoice.finally(() => { exInstallEvt = null; document.getElementById('ex-inst')?.remove(); exRenderMenu(); }); }
     }
     function exRenderMenu() {
       const box = document.getElementById('ex-menu'); if (!box) return;
@@ -13492,7 +13503,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         <div class="kp-row">⏰ 쉬는 시간 ${[0, 15, 20, 30, 45].map(m => `<button class="kp-age ${b.min === m ? 'on' : ''}" onclick="event.stopPropagation(); exSetBreak(${m})">${m ? m + '분' : '끄기'}</button>`).join('')}</div>
         <small>정한 시간만큼 놀면 피카츄가 5분 쉬자고 해요. 부모님은 곱셈 문제를 풀어 바로 끌 수 있어요.</small>
         ${standalone ? '' : exInstallEvt ? '<button onclick="exInstall()">📲 홈 화면에 앱으로 추가</button><small>앱처럼 열리고, 한 번 본 그림은 인터넷이 없어도 보여요.</small>'
-          : /^https?:$/.test(location.protocol) ? `<small>📲 ${ios ? '공유 버튼 → "홈 화면에 추가"' : '브라우저 메뉴 → "홈 화면에 추가"'}를 누르면 앱처럼 쓸 수 있어요.</small>` : ''}`;
+          : /^https?:$/.test(location.protocol) ? `<small>📲 ${ios ? '공유 버튼 → "홈 화면에 추가"를 누르면 앱처럼 쓸 수 있어요.' : '크롬 오른쪽 위 ⋮ → "앱 설치"(또는 "홈 화면에 추가" → "설치")를 눌러요. 삼성 태블릿은 홈 화면이 아니라 앱스 화면에 생길 수 있어요.'}</small>` : ''}`;
     }
     function exReport() {
       document.getElementById('rn-menu').classList.add('hidden');

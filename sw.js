@@ -2,7 +2,7 @@
 // - 앱(index.html): 새 버전을 먼저 받고, 인터넷이 없으면 저장해 둔 것을 열어요
 // - 포켓몬 그림·도감 정보: 한 번 본 것은 저장해 두고 다음부터 바로 열어요
 // - 글꼴·스타일(CDN): 저장본을 먼저 쓰고 뒤에서 새로 받아 둬요
-const VER = 'v1';
+const VER = 'v2';
 const APP = 'hp-app-' + VER, IMG = 'hp-img', API = 'hp-api', CDN = 'hp-cdn';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 const LIMIT = { [IMG]: 2500, [API]: 1200, [CDN]: 80 };
