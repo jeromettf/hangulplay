@@ -679,6 +679,7 @@
     .tw-hint { position: absolute; left: 50%; bottom: .8rem; translate: -50% 0; z-index: 2; background: rgba(255,255,255,.95); border: 3px solid #3a3a52; border-radius: 999px; padding: .3rem .9rem; font-family: Jua, sans-serif; font-size: .9rem; color: #334155; white-space: nowrap; pointer-events: none; transition: opacity .5s; animation: tw-swipe 1.6s ease-in-out infinite; }
     @keyframes tw-swipe { 50% { translate: calc(-50% + 10px) 0; } }
     #tw-view-box { position: relative; }
+    .tw-fight { background: linear-gradient(135deg, #ef4444, #f59e0b); color: #fff; border: 0; font-family: Jua, sans-serif; font-size: .95rem; animation: kp-pop-in .3s; }
 </style>
 <style>
     /* ===== 포켓몬 이상형 월드컵 ===== */
@@ -746,6 +747,21 @@
     .cp-conf { position: absolute; inset: 0; pointer-events: none; }
     .cp-conf i { position: absolute; top: -10px; width: 8px; height: 12px; border-radius: 2px; animation: cp-fall 2.6s linear 2 forwards; }
     @keyframes cp-fall { to { translate: 0 110vh; rotate: 540deg; } }
+</style>
+<style>
+    /* ===== 돌보기 (도트) ===== */
+    .cc-wrap { position: relative; margin: 0 auto; }
+    #cc-cv { display: block; image-rendering: pixelated; image-rendering: crisp-edges; border-radius: .9rem; box-shadow: 0 0 0 3px #3a3a52; touch-action: none; }
+    #cc-over { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: .9rem; }
+    .cc-acc { position: absolute; translate: -50% -70%; line-height: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.25)); }
+    .cc-name { position: absolute; translate: -50% -100%; background: #fff; color: #334155; border: 3px solid #3a3a52; border-radius: 10px; padding: 0 9px; font-family: Jua, sans-serif; font-size: 16px; white-space: nowrap; }
+    .cc-dark { position: absolute; inset: 0; border-radius: .9rem; background: #0b1033; opacity: 0; pointer-events: none; transition: opacity .6s; }
+    .cc-dark.on { opacity: .6; }
+    .cc-dark.on.eyes { opacity: .92; }
+    .cc-stat { margin: .4rem auto 0; max-width: 32rem; font-family: Jua, sans-serif; font-size: .85rem; color: #475569; text-align: center; }
+    .cc-stat b { font-weight: normal; color: #be123c; }
+    .cc-stat .cr-bar { margin: .25rem auto .1rem; max-width: 18rem; }
+    .cc-mv:disabled { opacity: .45; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
@@ -14112,8 +14128,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         [[8, 12, '#f87171'], [16, 9, '#fde047'], [24, 13, '#f9a8d4'], [11, 20, '#fff'], [20, 19, '#f87171'], [15, 25, '#c4b5fd'], [26, 22, '#fde047'], [6, 22, '#f9a8d4']].forEach(([a, b, c]) => { twP(x, a, b + 2, TC.gd, 1, 3); twP(x, a - 1, b, c, 3, 1); twP(x, a, b - 1, c, 1, 3); twP(x, a, b, '#f59e0b'); });
       });
       // 말풍선
-      const PAT = { heart: ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'], note: ['...XXX', '...X.X', '...X..', '.XXX..', 'XXXX..', '.XX...'], zz: ['XXXX..', '...X..', '..X...', '.X.XXX', 'XXXX.X', '....X.', '...XXX'], ex: ['.XX.', '.XX.', '.XX.', '.XX.', '....', '.XX.'], star: ['...X...', '..XXX..', 'XXXXXXX', '.XXXXX.', '.XX.XX.', 'X.....X'], food: ['..X..', '.XXX.', 'XXXXX', 'XXXXX', '.XXX.'] };
-      const COL = { heart: '#e83050', note: '#3a6ae0', zz: '#5a5a72', ex: '#e83050', star: '#f0b020', food: '#e8603a' };
+      const PAT = { heart: ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'], note: ['...XXX', '...X.X', '...X..', '.XXX..', 'XXXX..', '.XX...'], zz: ['XXXX..', '...X..', '..X...', '.X.XXX', 'XXXX.X', '....X.', '...XXX'], ex: ['.XX.', '.XX.', '.XX.', '.XX.', '....', '.XX.'], star: ['...X...', '..XXX..', 'XXXXXXX', '.XXXXX.', '.XX.XX.', 'X.....X'], food: ['..X..', '.XXX.', 'XXXXX', 'XXXXX', '.XXX.'], sweat: ['..X..', '.XXX.', '.XXX.', 'XXXXX', '.XXX.'], q: ['.XXX.', 'X...X', '...X.', '..X..', '.....', '..X..'] };
+      const COL = { heart: '#e83050', note: '#3a6ae0', zz: '#5a5a72', ex: '#e83050', star: '#f0b020', food: '#e8603a', sweat: '#58a0f0', q: '#3a6ae0' };
       A.emo = {};
       for (const k in PAT) A.emo[k] = twMk(14, 15, x => { twP(x, 1, 0, TC.ol, 12, 12); twP(x, 0, 1, TC.ol, 14, 10); twP(x, 2, 1, '#fff', 10, 10); twP(x, 1, 2, '#fff', 12, 8); twP(x, 5, 12, TC.ol, 4, 1); twP(x, 6, 13, TC.ol, 2, 1); twP(x, 6, 12, '#fff', 2, 1);
         const p = PAT[k], ox = Math.floor((14 - p[0].length) / 2), oy = Math.floor((12 - p.length) / 2); p.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === 'X') twP(x, ox + i, oy + j, COL[k]); })); });
@@ -14180,7 +14196,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       if (twHas('berry')) twBerry = place(A.berry, 34, 7, { blocks: [[0, 0], [1, 0], [0, 1], [1, 1]] }); else lot('berry', 34.5, 7);
       if (twHas('field')) { twField = place(A.field[0], 22, 19, { field: 1 }); for (let y = 19; y <= 21; y++) for (let x = 22; x <= 25; x++) B[y][x] = 1; } else lot('field', 23.5, 19);
       if (twHas('bowl')) { twBowl = place(A.bowl, 17, 19, { bowl: 1 }); B[19][17] = 1; } else lot('bowl', 17, 18.5);
-      if (twHas('arena')) { twArena = place(A.arena, 3, 20, { arena: 1 }); twArena.busy = []; for (let y = 21; y <= 23; y++) for (let x = 3; x <= 8; x++) B[y][x] = 1; } else lot('arena', 5.5, 20.5);
+      if (twHas('arena')) { twArena = place(A.arena, 3, 20, { arena: 1, foot: 20 * 16 + 10 }); twArena.busy = []; for (let y = 21; y <= 23; y++) for (let x = 3; x <= 8; x++) B[y][x] = 1; } else lot('arena', 5.5, 20.5);
       // 트램펄린 울타리
       const LX = 3, LY = 15, LW = 5, LH = 4;
       for (let x = LX - 1; x <= LX + LW; x++) { if (x !== LX + 2) place(A.fenceH, x, LY - 1, { blocks: [[0, 0]] }); place(A.fenceH, x, LY + LH, { blocks: [[0, 0]] }); }
@@ -14271,6 +14287,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         const A = twArt, o = this.sh, im = o.im;
         if (!this.swim) { ctx.fillStyle = 'rgba(30,50,30,.28)'; const sw = this.hop > 2 ? 7 : 9; ctx.fillRect(Math.round(this.x - sw), Math.round(this.y - 1), sw * 2, 2); ctx.fillRect(Math.round(this.x - sw + 2), Math.round(this.y - 2), sw * 2 - 4, 4); }
         let top;
+        if (this.alpha != null) ctx.globalAlpha = this.alpha;
         if (o.ok && o.ow) {
           const fw = im.width / 4, fh = im.height / 4, col = this.sleep ? 0 : Math.floor(twNow / (this.walk ? 125 : 260)) % 4, row = TW_DIR[this.dir];
           const x = Math.round(this.x - fw / 2), y = Math.round(this.y - fh + 2 - this.hop); top = y + (fh > 32 ? fh - 40 : 0);
@@ -14279,9 +14296,10 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           const s = 40, bob = this.walk ? Math.abs(Math.sin(twNow / 90)) * 3 : 0, x = Math.round(this.x - s / 2), y = Math.round(this.y - s + 4 - this.hop - bob); top = y + 4;
           ctx.save(); if (this.dir === 'right') { ctx.translate(x * 2 + s, 0); ctx.scale(-1, 1); } ctx.drawImage(im, 0, 0, im.width, im.height, x, y, s, s); ctx.restore();
         } else { const x = Math.round(this.x - 8), y = Math.round(this.y - 15 - this.hop); top = y; ctx.drawImage(A.ball, x, y); }
+        ctx.globalAlpha = 1;
         if (this.swim) { ctx.fillStyle = TC.w3; const r = Math.floor(twNow / 300) % 2; ctx.fillRect(Math.round(this.x - 9 + r), Math.round(this.y - 3), 6, 1); ctx.fillRect(Math.round(this.x + 3 - r), Math.round(this.y - 3), 6, 1); }
         if (!this.ride && twTile[this.ty] && twTile[this.ty][this.tx] === 4 && !this.walk) ctx.drawImage(twTall[Math.floor(twNow / 500) % 2], Math.round(this.x - 8), Math.round(this.y - 6));
-        if (this.emo) ctx.drawImage(A.emo[this.emo], Math.round(this.x - 7 + (this.sleep ? 8 : 0)), top - 8 - (this.sleep ? Math.floor(twNow / 500) % 2 : 0));
+        if (this.emo && A.emo[this.emo]) ctx.drawImage(A.emo[this.emo], Math.round(this.x - 7 + (this.sleep ? 8 : 0)), top - 8 - (this.sleep ? Math.floor(twNow / 500) % 2 : 0));
         this.top = top;
       }
     }
@@ -14329,19 +14347,89 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       for (let k = 0; k < 3; k++) { const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [a.tx + dx, a.ty + dy]).filter(([p, q]) => twTile[q] && twTile[q][p] === 2 && a.free(p, q)); if (n.length) await a.stepTo(...twPick(n), 400); await twWait(400); }
       return true;
     }
-    async function twSpar(a) {
-      const R = twArena; if (!R || R.busy.length) return false;
-      const b = twPick(twActors.filter(o => o !== a && !o.busy && !o.sleep && !o.ride)); if (!b) return false;
-      b.busy = true; R.busy = [a, b];
+    // 배틀 경기장: 주민 둘이 기술을 주고받으며 겨뤄요. 지면 잠깐 쉬고, 끝나면 사이좋게 하트
+    const TW_FX = { '전기': ['#fde047', '#f59e0b', 'bolt'], '불꽃': ['#fdba74', '#ef4444', 'ball'], '물': ['#bae6fd', '#3b82f6', 'bubble'], '풀': ['#86efac', '#16a34a', 'leaf'], '얼음': ['#f0f9ff', '#38bdf8', 'ball'], '에스퍼': ['#fbcfe8', '#db2777', 'ring'], '고스트': ['#ddd6fe', '#6d28d9', 'ring'], '페어리': ['#fce7f3', '#ec4899', 'star'], '드래곤': ['#c7d2fe', '#4f46e5', 'ball'], '격투': ['#fecaca', '#b91c1c', 'star'], '독': ['#e9d5ff', '#9333ea', 'bubble'], '땅': ['#fde68a', '#a16207', 'ball'], '바위': ['#e7e5e4', '#78716c', 'ball'], '벌레': ['#d9f99d', '#65a30d', 'leaf'], '비행': ['#f1f5f9', '#64748b', 'leaf'], '강철': ['#e2e8f0', '#475569', 'star'], '악': ['#d6d3d1', '#292524', 'ring'] };
+    const twFxOf = n => { const r = OFFICIAL_DEX.rows[n - 1]; const t = r ? TYPE_NAMES[r[2][0]] : '노말'; return TW_FX[t] || ['#ffffff', '#94a3b8', 'star']; };
+    let twBattle = null;
+    async function twSpar(a, b, watch) {
+      const R = twArena; if (!R || R.busy.length || twBattle) return false;
+      b = b || twPick(twActors.filter(o => o !== a && !o.busy && !o.sleep && !o.ride)); if (!b) return false;
+      const tok = twToken; R.busy = [a, b];
+      for (let k = 0; k < 30 && b.busy && b.hold; k++) await twWait(200);   // 불려 온 친구가 하던 놀이를 마칠 때까지
+      b.busy = true; b.hold = false;
+      if (watch) { twScrollTo(6, 21); twSay(`${a.name} 대 ${b.name}! 배틀 시작!`); }
       await Promise.all([a.goTo(2, 22), b.goTo(9, 22)]).catch(() => {});
+      const quit = () => { R.busy = []; b.busy = false; twBattle = null; };
+      if (tok !== twToken || !twActive || twNight) { quit(); return true; }
+      if (Math.abs(a.tx - 2) + Math.abs(a.ty - 22) > 6 || Math.abs(b.tx - 9) + Math.abs(b.ty - 22) > 6) { await Promise.all([a.goTo(2, 22), b.goTo(9, 22)]).catch(() => {}); }   // 길이 막혔으면 한 번 더
       [a, b].forEach(m => { twLeave(m); m.ride = R; });
-      a.x = R.x + 30; a.y = R.y + 40; b.x = R.x + 66; b.y = R.y + 40; a.dir = 'right'; b.dir = 'left';
-      for (let k = 0; k < 4 && twActive && !twNight; k++) {
-        a.emote(k % 2 ? 'star' : 'ex', 700); await Promise.all([a.jump(10), b.jump(4)]); await twWait(250);
-        b.emote(k % 2 ? 'ex' : 'star', 700); await Promise.all([b.jump(10), a.jump(4)]); await twWait(300);
+      a.x = R.x + 24; a.y = R.y + 44; b.x = R.x + 72; b.y = R.y + 44; a.dir = 'right'; b.dir = 'left';
+      // 구경하는 친구들
+      const fans = twActors.filter(o => o !== a && o !== b && !o.busy && !o.sleep && !o.ride).slice(0, 3), seats = [[2, 24], [9, 24], [10, 21]];
+      fans.forEach((f, i) => { f.busy = true; f.halt = true; setTimeout(async () => { f.halt = false; if (await f.goTo(...seats[i])) f.dir = i === 2 ? 'left' : 'up'; }, 40); });
+      const max = 3 + Math.floor(Math.random() * 2);
+      twBattle = { a, b, hp: [max, max], max, fx: [], fans };
+      if (!watch && R.watch) { watch = true; twSay(`${a.name} 대 ${b.name}! 배틀 시작!`); }
+      await twWait(500);
+      for (let turn = 0; twBattle && twBattle.hp[0] > 0 && twBattle.hp[1] > 0 && tok === twToken && twActive && !twNight; turn++) {
+        const at = turn % 2 ? b : a, tg = turn % 2 ? a : b, side = turn % 2 ? -1 : 1, ti = turn % 2 ? 0 : 1;
+        at.emote(Math.random() < .5 ? 'ex' : 'star', 700); at.x += 4 * side; await at.jump(6);
+        const [c1, c2, kind] = twFxOf(at.n), p = { x: at.x + 8 * side, y: at.y - 16, c1, c2, kind, t0: performance.now() };
+        twBattle.fx.push(p); playTone(kind === 'bolt' ? 880 : 520, .06, kind === 'bolt' ? 'square' : 'sine');
+        const sx = p.x, ex = tg.x - 6 * side;
+        await new Promise(res => { const st = t => { const k = Math.min(1, (t - p.t0) / 480); p.x = sx + (ex - sx) * k; p.y = at.y - 16 - Math.sin(k * Math.PI) * 6; k < 1 && twActive ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); });
+        twBattle && (twBattle.fx = twBattle.fx.filter(q => q !== p));
+        if (!twBattle) break;
+        if (Math.random() < .2) { tg.emote('note', 700); await tg.jump(12); }   // 피했다!
+        else {
+          twBattle.fx.push({ burst: 1, x: tg.x, y: tg.y - 14, c1, c2, t0: performance.now() });
+          playTone(260, .08, 'square'); twBattle.hp[ti]--;
+          tg.x -= 3 * side; for (let k = 0; k < 3; k++) { tg.alpha = .2; await twWait(70); tg.alpha = 1; await twWait(70); } tg.x += 3 * side;
+        }
+        at.x -= 4 * side; await twWait(350);
       }
-      a.emote('heart'); b.emote('heart'); twAddLove(a.n); twAddLove(b.n);
-      R.busy = []; twBack(a, 2, 22); twBack(b, 9, 22); b.busy = false; return true;
+      if (twBattle && tok === twToken) {
+        const win = twBattle.hp[0] > 0 ? a : b, lose = win === a ? b : a;
+        lose.emote('sweat', 1800); lose.dir = 'down'; win.emote('star', 1800); playSuccessChime();
+        if (watch && twActive) twSay(`${win.name} 승리! ${lose.name}${sbJosa(lose.name, '도')} 정말 잘했어요!`);
+        await win.jump(12, 2); fans.forEach(f => f.emote('heart', 1500)); await twWait(900);
+        a.dir = 'right'; b.dir = 'left'; a.emote('heart'); b.emote('heart'); twAddLove(a.n); twAddLove(b.n); await twWait(900);
+      }
+      fans.forEach(f => { f.busy = false; });
+      twBattle = null; R.busy = []; R.watch = false; if (a.ride === R) twBack(a, 2, 22); if (b.ride === R) twBack(b, 9, 22); b.busy = false; a.alpha = b.alpha = 1;
+      return true;
+    }
+    function twDrawBattle(ctx, t) {
+      const B = twBattle; if (!B) return;
+      [[B.a, 0], [B.b, 1]].forEach(([m, i]) => { if (m.ride !== twArena) return; const y = Math.round((m.top || m.y - 30) - 5), x = Math.round(m.x - 9), w = 18, f = Math.max(0, B.hp[i] / B.max);
+        twP(ctx, x - 1, y - 1, TC.ol, w + 2, 4); twP(ctx, x, y, '#cbd5e1', w, 2); twP(ctx, x, y, f > .5 ? '#22c55e' : f > .25 ? '#f59e0b' : '#ef4444', Math.round(w * f), 2); });
+      B.fx.forEach(p => {
+        const x = Math.round(p.x), y = Math.round(p.y);
+        if (p.burst) { const k = (t - p.t0) / 400; if (k > 1) return; for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3, r = 3 + k * 9; twP(ctx, Math.round(x + Math.cos(an) * r), Math.round(y + Math.sin(an) * r), i % 2 ? p.c1 : p.c2, 2, 2); } return; }
+        if (p.kind === 'bolt') { const o = Math.floor(t / 60) % 2; [[0, 0], [2, -2], [4, 1], [6, -1], [8, 2]].forEach(([dx, dy], i) => twP(ctx, x - 4 + dx, y + (o ? -dy : dy), i % 2 ? p.c2 : p.c1, 2, 2)); }
+        else if (p.kind === 'bubble') { twDisc(ctx, x, y, 3, 3, p.c2); twDisc(ctx, x, y, 2, 2, p.c1); twP(ctx, x - 1, y - 2, '#fff'); twDisc(ctx, x - 6, y + 2, 1, 1, p.c1); }
+        else if (p.kind === 'leaf') { const o = Math.floor(t / 80) % 2; twP(ctx, x - 2, y - 1 + o, p.c2, 4, 2); twP(ctx, x - 1, y - 2 + o, p.c1, 2, 4); twP(ctx, x + 3, y + 2 - o, p.c2, 3, 2); }
+        else if (p.kind === 'ring') { const r = 3 + Math.floor(t / 100) % 2; twDisc(ctx, x, y, r, r, p.c2); twDisc(ctx, x, y, r - 1, r - 1, p.c1); twDisc(ctx, x, y, r - 2, r - 2, p.c2); }
+        else if (p.kind === 'star') { twP(ctx, x - 1, y - 3, p.c2, 2, 6); twP(ctx, x - 3, y - 1, p.c2, 6, 2); twP(ctx, x - 1, y - 1, p.c1, 2, 2); }
+        else { twDisc(ctx, x, y, 3, 3, p.c2); twDisc(ctx, x - 1, y - 1, 2, 2, p.c1); twP(ctx, x - 4 - Math.floor(t / 70) % 2, y, p.c1, 2, 1); }
+      });
+    }
+    function twArenaTap() {
+      if (twBattle) {   // 응원하기
+        twBattle.fans.forEach(f => f.emote('note', 900)); [twBattle.a, twBattle.b].forEach(m => m.emote('heart', 600)); playTone(700, .05);
+        twSay(twPick([`${twBattle.a.name} 힘내!`, `${twBattle.b.name} 힘내!`, '둘 다 힘내요!']));
+      } else {
+        if (twArena.busy.length) { twArena.watch = true; twScrollTo(6, 21); twSay('곧 배틀이 시작돼요! 잘 봐요.'); return; }
+        const d = o => Math.abs(o.tx - 5) + Math.abs(o.ty - 22) + (o.busy ? 20 : 0);
+        const cand = twActors.filter(o => !o.sleep && !o.ride && !o.want && !o.hold).sort((p, q) => d(p) - d(q));
+        if (cand.length < 2) { twSay('경기장에 올 친구가 지금 없어요. 조금 있다가 다시 눌러 봐요!'); }
+        else {
+          const [a, b] = cand; twSay(`${a.name}${sbJosa(a.name, '와')} ${b.name}${sbJosa(b.name, '이')} 경기장으로 가요!`); twScrollTo(6, 21);
+          b.hold = true; a.want = () => twSpar(a, b, true); [a, b].forEach(m => { m.halt = true; setTimeout(() => m.halt = false, 60); });
+          setTimeout(() => { if (b.hold && !twBattle) b.hold = false; }, 15000);
+        }
+      }
+      const top = document.getElementById('tw-top'); if (top && !top.querySelector('.tw-fight')) { top.insertAdjacentHTML('beforeend', `<button class="tw-btn tw-fight" onclick="rnGo('adv')">⚔️ 나도 대결</button>`); setTimeout(() => top.querySelector('.tw-fight')?.remove(), 8000); }
     }
     async function twMeet(a) {
       const b = twPick(twActors.filter(o => o !== a && !o.busy && !o.sleep && !o.ride)); if (!b) return false;
@@ -14376,7 +14464,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           await twWait(800); continue;
         }
         if (a.sleep) { a.sleep = false; a.emo = null; a.emote('ex', 900); await a.jump(6); }
-        if (a.busy) { await twWait(300); continue; }
+        if (a.want && !a.busy) { const f = a.want; a.want = null; a.busy = true; a.halt = false; await f(); a.busy = false; continue; }   // 누가 불러서 할 일
+        if (a.busy || a.hold) { await twWait(300); continue; }
         a.busy = true; a.halt = false;
         let done = false;
         const br = twBerries.find(b => !b.taken && b.fall >= 1);
@@ -14384,7 +14473,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         else if (a.big && Math.random() < .5) { a.sleep = true; a.emo = 'zz'; await twWait(twRnd(6000, 10000)); a.sleep = false; a.emo = null; done = true; }
         else {
           const r = Math.random();
-          const opts = a.water ? [[.4, twPondPlay], [.55, twSwingPlay], [.65, twSlidePlay], [.8, twMeet]] : [[.14, twSwingPlay], [.28, twSlidePlay], [.4, twSawPlay], [.52, twTrampPlay], [.6, twSpar], [.72, twMeet]];
+          const opts = a.water ? [[.4, twPondPlay], [.55, twSwingPlay], [.65, twSlidePlay], [.8, twMeet]] : [[.14, twSwingPlay], [.28, twSlidePlay], [.4, twSawPlay], [.52, twTrampPlay], [.64, twSpar], [.74, twMeet]];
           const o = opts.find(([p]) => r < p); if (o) done = await o[1](a);
         }
         if (!done) { const t = twNear(a.tx, a.ty, 5); if (t) await a.goTo(t[0], t[1]); await twWait(twRnd(500, 2000)); }
@@ -14447,6 +14536,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       });
       twBerries.forEach(b => { if (b.bowl) return; list.push({ f: b.fall < 1 ? 999 : b.ty * 16 + 14, d: () => { const k = b.fall, x = b.x + (b.tx0 - b.x) * k, y = b.y + (b.ty0 - b.y) * k * k; twP(ctx, Math.round(x) - 2, Math.round(y) - 2, TC.ol, 5, 5); twP(ctx, Math.round(x) - 2, Math.round(y) - 2, b.c || '#e83050', 4, 4); twP(ctx, Math.round(x) - 2, Math.round(y) - 2, '#fff'); } }); });
       list.sort((p, q) => p.f - q.f).forEach(i => i.d());
+      twDrawBattle(ctx, t);
       if (twNightK > 0) {
         ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(40,48,120,${.62 * twNightK})`; ctx.fillRect(0, 0, TW_PW, TW_PH);
         ctx.globalCompositeOperation = 'lighter';
@@ -14512,7 +14602,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       });
       if ((rwS.boxes || 0) > 0) setTimeout(() => { if (twActive && document.getElementById('rw-ov').classList.contains('hidden')) twOpenPending(); }, 1500);
     }
-    function twClose() { twActive = false; twToken++; document.getElementById('tw-over') && (document.getElementById('tw-over').innerHTML = ''); }
+    function twClose() { twActive = false; twToken++; twBattle = null; if (twArena) twArena.busy = []; twActors.forEach(a => { a.want = null; a.hold = false; }); document.getElementById('tw-over') && (document.getElementById('tw-over').innerHTML = ''); }
     let twNightSet = false;
     // 마을이 자는 시간 (부모님이 ⚙️ 메뉴에서 정해요. 기본: 밤 9시 ~ 아침 7시)
     const twSleepH = () => { const v = twLoad().sleepH; return v == null ? 21 : v; };
@@ -14550,7 +14640,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       if (o === twBerry) return twDropBerry();
       if (o.field) return twFieldTap();
       if (o.bowl) return twBowlTap();
-      if (o.arena) { twSay('배틀 경기장이에요! 대결하러 가 볼까요?'); return setTimeout(() => rnGo('adv'), 900); }
+      if (o.arena) return twArenaTap();
       if (o.house) { const nm = typeof kpName === 'function' ? kpName() : ''; twSay(`${nm ? nm + '네 ' : '우리 '}집이에요. 피카츄를 돌봐 줄까요?`); return setTimeout(() => { try { rnPick('play', 5); } catch (e) {} }, 1300); }
       if (o.townSign) { const nm = typeof kpName === 'function' ? kpName() : ''; twSay(`${nm ? nm + '의 ' : ''}포켓몬 마을. 주민 ${twResidents().length}마리가 살고 있어요.`); twToast(`🏡 ${nm ? nm + '의 ' : ''}포켓몬 마을 · 주민 ${twResidents().length}마리`); }
     }
@@ -14797,6 +14887,458 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     (function () {
       const sw = switchMainView;
       switchMainView = function (v) { const r = sw.apply(this, arguments); if (v === 'cup' && !cpG) cpHome(); return r; };
+    })();
+    /**
+     * ==============================================================
+     * [돌보기 · 도트] 마을과 같은 하트골드 느낌으로 집 안 · 마당 · 욕실에서 돌봐요
+     *  - 밥 주기(집 안), 씻겨 주기(욕실), 놀아 주기(마당: 공놀이 · 숨바꼭질 · 따라 하기), 재워 주기(침대)
+     *  - 하트 · 진화 · 스티커 규칙은 예전 돌보기와 같아요 (crFinish, crState 그대로 사용)
+     * ==============================================================
+     */
+    let ccCv = null, ccCtx = null, ccS = 4, ccNow = 0, ccScene = null, ccMon = null, ccFx = [], ccRaf = 0, ccMode = null, ccDrag = null, ccTok = 0;
+    const ccWait = ms => new Promise(r => setTimeout(r, ms));
+    const ccP = (x, px, py, c, w = 1, h = 1) => { x.fillStyle = c; x.fillRect(px, py, w, h); };
+    const ccRnd = (a, b) => a + Math.random() * (b - a);
+    const ccLive = tok => tok === ccTok && fdG && fdG.kind === 'care';
+
+    /* ---------- 장면 그림 ---------- */
+    let ccArt = null;
+    function ccInitArt() {
+      if (ccArt) return ccArt;
+      const A = twInitArt(), mk = twMk, P = twP, disc = twDisc, C = TC;
+      const seeded = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
+      const grass = (x, X, Y, r) => { P(x, X, Y, C.g, 16, 16); for (let k = 0; k < 3; k++) { const a = Math.floor(r() * 14), b = Math.floor(r() * 13); P(x, X + a, Y + b, C.g2); P(x, X + a + 1, Y + b - 1, C.g2); P(x, X + a + 2, Y + b, C.g2); } };
+      const R = ccArt = { A };
+      R.berry = mk(8, 8, x => { P(x, 1, 2, C.ol, 6, 6); P(x, 0, 3, C.ol, 8, 4); P(x, 1, 3, '#e83050', 6, 4); P(x, 2, 2, '#e83050', 4, 5); P(x, 2, 3, '#fff'); P(x, 3, 0, C.gd, 2, 2); });
+      R.ball = mk(8, 8, x => { disc(x, 4, 4, 3, 3, C.ol); disc(x, 4, 4, 2, 2, '#fff'); P(x, 2, 2, '#e83050', 4, 2); P(x, 1, 4, C.ol, 7, 1); P(x, 4, 4, '#fff'); });
+      R.bush = mk(32, 24, x => { disc(x, 16, 21, 14, 2, 'rgba(40,72,32,.35)'); disc(x, 16, 13, 15, 10, C.to); disc(x, 16, 13, 14, 9, C.t1); disc(x, 15, 12, 13, 8, C.t2); disc(x, 10, 9, 5, 3, C.t3); disc(x, 21, 8, 4, 3, C.t3); disc(x, 9, 8, 2, 1, C.t4); });
+      R.crate = mk(24, 24, x => { disc(x, 12, 22, 11, 2, 'rgba(40,72,32,.35)'); P(x, 1, 3, C.ol, 22, 19); P(x, 2, 4, C.wo, 20, 17); P(x, 2, 4, C.wo2, 20, 2); P(x, 2, 11, C.wod, 20, 2); P(x, 2, 18, C.wod, 20, 2); P(x, 4, 4, C.wod, 2, 17); P(x, 18, 4, C.wod, 2, 17); });
+      R.tall = mk(32, 24, x => { for (let k = 0; k < 8; k++) { const a = (k % 4) * 8, b = Math.floor(k / 4) * 10; P(x, a + 1, b + 4, C.t2, 6, 8); P(x, a, b + 2, C.t3, 2, 4); P(x, a + 3, b, C.t3, 2, 6); P(x, a + 6, b + 2, C.t3, 1, 4); P(x, a + 1, b + 11, C.t1, 6, 1); } });
+      R.emo = Object.assign({ q: A.emo.q, sweat: A.emo.sweat }, A.emo, {
+        q0: mk(14, 15, x => { x.drawImage(A.emo.ex, 0, 0); P(x, 2, 1, '#fff', 10, 10); ['.XXX.', 'X...X', '...X.', '..X..', '.....', '..X..'].forEach((r, j) => [...r].forEach((c, i) => c === 'X' && P(x, 4 + i, 3 + j, '#3a6ae0'))); }),
+        sweat0: mk(14, 15, x => { x.drawImage(A.emo.ex, 0, 0); P(x, 2, 1, '#fff', 10, 10); ['..X..', '.XXX.', '.XXX.', 'XXXXX', '.XXX.'].forEach((r, j) => [...r].forEach((c, i) => c === 'X' && P(x, 4 + i, 3 + j, '#58a0f0'))); })
+      });
+      // 집 안 (12×9)
+      R.room = mk(192, 144, x => {
+        for (let ty = 0; ty < 9; ty++) for (let tx = 0; tx < 12; tx++) { const X = tx * 16, Y = ty * 16;
+          if (ty < 2) { P(x, X, Y, '#f6e7c8', 16, 16); for (let i = 0; i < 16; i += 4) P(x, X + i, Y, '#ecd8b0', 2, 16); if (ty === 1) { P(x, X, Y + 12, '#a0683a', 16, 4); P(x, X, Y + 12, '#c88848', 16, 1); } }
+          else { P(x, X, Y, '#d8a064', 16, 16); P(x, X, Y + 7, '#b88048', 16, 1); P(x, X, Y + 15, '#b88048', 16, 1); P(x, X + ((tx + ty) % 2 ? 4 : 11), Y, '#b88048', 1, 7); P(x, X + ((tx + ty) % 2 ? 9 : 2), Y + 8, '#b88048', 1, 7); P(x, X, Y, '#e4b478', 16, 1); } }
+        P(x, 66, 6, C.ol, 28, 18); P(x, 68, 8, '#8fd3ff', 24, 14); P(x, 79, 8, C.ol, 2, 14); P(x, 68, 14, C.ol, 24, 2); P(x, 69, 9, '#fff', 4, 2);
+        P(x, 130, 8, C.ol, 20, 16); P(x, 132, 10, '#fde68a', 16, 12); disc(x, 140, 16, 4, 3, '#f87171'); P(x, 137, 18, C.gd, 6, 2);
+        disc(x, 176, 12, 6, 6, C.ol); disc(x, 176, 12, 5, 5, '#fff'); P(x, 176, 8, C.ol, 1, 4); P(x, 176, 12, C.ol, 3, 1);
+        P(x, 40, 10, C.ol, 6, 9); P(x, 41, 11, '#fff', 4, 7); P(x, 42, 12, '#94a3b8', 2, 3);   // 불 스위치
+        disc(x, 98, 112, 26, 12, '#3a6ae0'); disc(x, 98, 112, 23, 10, '#5b8cf0'); disc(x, 98, 112, 14, 6, '#8fb0ff');
+        P(x, 80, 136, C.ol, 32, 8); P(x, 81, 137, '#b45309', 30, 6); P(x, 84, 139, '#d97706', 24, 2);
+      });
+      R.bed = mk(32, 48, x => { P(x, 1, 2, C.ol, 30, 44); P(x, 2, 3, '#c88848', 28, 6); P(x, 3, 9, '#fff', 26, 10); P(x, 4, 10, '#e4e4ee', 24, 8); P(x, 2, 19, '#e8603a', 28, 25); P(x, 2, 19, '#f08860', 28, 2); for (let i = 0; i < 28; i += 6) P(x, 2 + i, 26, '#c8482a', 3, 16); P(x, 2, 44, '#a0683a', 28, 2); });
+      R.blanket = mk(28, 26, x => { P(x, 0, 0, C.ol, 28, 1); P(x, 0, 1, '#e8603a', 28, 25); P(x, 0, 1, '#f08860', 28, 2); for (let i = 0; i < 28; i += 6) P(x, i, 8, '#c8482a', 3, 16); });
+      R.table = mk(32, 32, x => { disc(x, 16, 29, 14, 2, 'rgba(0,0,0,.2)'); P(x, 1, 6, C.ol, 30, 14); P(x, 2, 7, '#c88848', 28, 11); P(x, 2, 7, '#e8b070', 28, 2); P(x, 4, 20, C.ol, 3, 9); P(x, 25, 20, C.ol, 3, 9); });
+      R.tub = mk(32, 32, x => { disc(x, 16, 29, 14, 2, 'rgba(0,0,0,.2)'); P(x, 1, 8, C.ol, 30, 20); P(x, 2, 9, '#fff', 28, 18); P(x, 4, 10, C.w, 24, 7); P(x, 6, 11, C.w3, 6, 1); P(x, 2, 22, '#e4e4ee', 28, 4); P(x, 5, 28, C.ol, 3, 3); P(x, 24, 28, C.ol, 3, 3); P(x, 26, 2, C.ol, 3, 8); });
+      R.basket = mk(24, 16, x => { disc(x, 12, 14, 10, 2, 'rgba(0,0,0,.2)'); P(x, 1, 5, C.ol, 22, 10); P(x, 2, 6, C.wo, 20, 8); P(x, 2, 8, C.wod, 20, 1); P(x, 2, 11, C.wod, 20, 1); });
+      R.bowl = mk(16, 12, x => { disc(x, 8, 7, 7, 4, C.ol); disc(x, 8, 6, 6, 3, '#f06090'); disc(x, 8, 5, 5, 1, '#ffd0e0'); });
+      R.plant = mk(16, 32, x => { disc(x, 8, 30, 6, 1, 'rgba(0,0,0,.2)'); P(x, 3, 20, C.ol, 10, 10); P(x, 4, 21, '#c0482a', 8, 8); disc(x, 8, 12, 7, 8, C.to); disc(x, 8, 12, 6, 7, C.t2); disc(x, 6, 9, 2, 2, C.t3); });
+      // 마당 (14×9)
+      const r = seeded(9);
+      R.yard = mk(224, 144, x => {
+        for (let ty = 0; ty < 9; ty++) for (let tx = 0; tx < 14; tx++) grass(x, tx * 16, ty * 16, r);
+        P(x, 0, 0, '#f8f0d8', 224, 22); P(x, 0, 0, C.ol, 224, 1); for (let i = 0; i < 224; i += 16) P(x, i, 0, '#ecdcb8', 1, 22); P(x, 0, 22, '#e0d4b0', 224, 4); P(x, 0, 26, C.ol, 224, 1);
+        P(x, 98, 2, C.ol, 28, 25); P(x, 100, 4, '#a8682e', 24, 23); P(x, 111, 4, C.ol, 1, 23);
+        [[40, 6], [160, 6]].forEach(([a, b]) => { P(x, a, b, C.ol, 22, 13); P(x, a + 1, b + 1, '#a8d8ff', 20, 11); P(x, a + 10, b + 1, C.ol, 1, 11); P(x, a + 2, b + 2, '#fff', 2, 2); });
+        for (let tx = 0; tx < 14; tx++) { const Y = 128; P(x, tx * 16, Y + 6, C.ol, 16, 4); P(x, tx * 16, Y + 7, C.wo, 16, 2); P(x, tx * 16 + 6, Y + 2, C.ol, 4, 12); P(x, tx * 16 + 7, Y + 3, C.wo2, 2, 10); }
+        for (let ty = 2; ty < 8; ty++) for (const tx of [0, 13]) { P(x, tx * 16 + 6, ty * 16, C.ol, 4, 16); P(x, tx * 16 + 7, ty * 16, C.wo2, 2, 16); }
+        [[3, 3], [10, 4], [6, 7], [12, 6]].forEach(([a, b]) => { [[3, 4, '#f87171'], [10, 3, '#fde047'], [6, 10, '#fff'], [12, 11, '#f9a8d4']].forEach(([c, d, col]) => { P(x, a * 16 + c - 1, b * 16 + d, col, 3, 1); P(x, a * 16 + c, b * 16 + d - 1, col, 1, 3); }); });
+      });
+      // 욕실 (8×6, 가까이 보기)
+      R.bath = mk(128, 96, x => {
+        for (let ty = 0; ty < 6; ty++) for (let tx = 0; tx < 8; tx++) { const X = tx * 16, Y = ty * 16;
+          if (ty < 2) { P(x, X, Y, '#bfe3ff', 16, 16); P(x, X, Y, '#a5d4f7', 16, 1); P(x, X, Y, '#a5d4f7', 1, 16); P(x, X + 8, Y + 8, '#a5d4f7', 8, 1); }
+          else { P(x, X, Y, (tx + ty) % 2 ? '#f1f5f9' : '#e2e8f0', 16, 16); } }
+        P(x, 0, 30, '#7fb6e0', 128, 2);
+        P(x, 98, 6, C.ol, 20, 16); P(x, 99, 7, '#e0f2fe', 18, 14); P(x, 100, 8, '#fff', 4, 3);   // 거울
+        disc(x, 18, 14, 6, 4, '#fde047'); disc(x, 17, 13, 2, 1, '#fff');   // 고무 오리
+        P(x, 22, 13, '#f59e0b', 3, 2);
+      });
+      R.bigTub = mk(80, 44, x => { disc(x, 40, 40, 38, 4, 'rgba(0,0,0,.18)'); P(x, 2, 6, C.ol, 76, 32); P(x, 3, 7, '#fff', 74, 30); P(x, 3, 30, '#e4e4ee', 74, 7); P(x, 6, 36, C.ol, 5, 6); P(x, 69, 36, C.ol, 5, 6); P(x, 70, 0, C.ol, 4, 10); disc(x, 70, 2, 4, 2, C.ol); });
+      R.tubWater = mk(72, 22, x => { P(x, 0, 0, C.w, 72, 22); P(x, 0, 0, C.w3, 72, 2); for (let i = 0; i < 6; i++) { disc(x, 8 + i * 12, 2, 5, 3, '#fff'); disc(x, 8 + i * 12, 1, 3, 2, '#f0f9ff'); } });
+      return R;
+    }
+
+    /* ---------- 장면 정의 ---------- */
+    const CC_SCENES = {
+      room: { w: 12, h: 9, bg: 'room', objs: R => [{ img: R.bed, x: 8, y: 22, foot: 70, bed: 1 }, { img: R.table, x: 80, y: 40, foot: 72 }, { img: R.tub, x: 152, y: 26, foot: 58 }, { img: R.plant, x: 2, y: 104, foot: 136 }, { img: R.basket, x: 150, y: 96, foot: 112, basket: 1 }] },
+      yard: { w: 14, h: 9, bg: 'yard', objs: R => [{ img: R.bush, x: 22, y: 40, foot: 64, k: '덤불', hide: 1 }, { img: R.crate, x: 182, y: 44, foot: 68, k: '상자', hide: 1 }, { img: R.bush, x: 168, y: 92, foot: 116, k: '덤불', hide: 1 }, { img: R.tall, x: 24, y: 94, foot: 118, k: '풀숲', hide: 1 }, { img: R.crate, x: 92, y: 96, foot: 120, k: '상자', hide: 1 }, { img: R.bush, x: 132, y: 34, foot: 58, k: '덤불', hide: 1 }] },
+      bath: { w: 8, h: 6, bg: 'bath', objs: R => [{ img: R.bigTub, x: 24, y: 40, foot: 84, tub: 1 }] }
+    };
+
+    /* ---------- 포켓몬 ---------- */
+    class CcMon {
+      constructor(n, x, y) { this.n = n; this.x = x; this.y = y; this.dir = 'down'; this.walk = false; this.hop = 0; this.emo = null; this.vis = true; this.sh = twSheet(n, false); this.alpha = 1; }
+      async moveTo(tx, ty, speed = 70) {
+        const sx = this.x, sy = this.y, d = Math.hypot(tx - sx, ty - sy); if (d < 1) return;
+        this.dir = Math.abs(tx - sx) > Math.abs(ty - sy) ? (tx > sx ? 'right' : 'left') : (ty > sy ? 'down' : 'up');
+        const dur = d / speed * 1000, t0 = performance.now(); this.walk = true;
+        await new Promise(res => { const st = t => { const k = Math.min(1, (t - t0) / dur); this.x = sx + (tx - sx) * k; this.y = sy + (ty - sy) * k; k < 1 && ccRaf ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); });
+        this.x = tx; this.y = ty; this.walk = false;
+      }
+      async jump(h = 8, n = 1, ms = 320) { for (let i = 0; i < n; i++) { const t0 = performance.now(); await new Promise(res => { const st = t => { const k = Math.min(1, (t - t0) / ms); this.hop = Math.sin(k * Math.PI) * h; k < 1 && ccRaf ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); }); } this.hop = 0; }
+      async spin() { const o = ['down', 'left', 'up', 'right']; for (let i = 0; i < 8; i++) { this.dir = o[i % 4]; await ccWait(70); } this.dir = 'down'; }
+      emote(k, ms = 1400) { this.emo = k; clearTimeout(this._t); this._t = setTimeout(() => { if (this.emo === k) this.emo = null; }, ms); }
+      draw(ctx, clipBottom = 0) {
+        if (!this.vis) return;
+        const o = this.sh, im = o.im; let top;
+        if (!clipBottom && !this.lie) { ctx.fillStyle = 'rgba(30,40,30,.28)'; const sw = this.hop > 3 ? 6 : 9; ctx.fillRect(Math.round(this.x - sw), Math.round(this.y - 1), sw * 2, 2); ctx.fillRect(Math.round(this.x - sw + 2), Math.round(this.y - 2), sw * 2 - 4, 4); }
+        ctx.globalAlpha = this.alpha;
+        if (o.ok && o.ow) {
+          const fw = im.width / 4, fh = im.height / 4, col = this.lie ? 0 : Math.floor(ccNow / (this.walk ? 110 : 260)) % 4, row = TW_DIR[this.dir];
+          const x = Math.round(this.x - fw / 2), y = Math.round(this.y - fh + 2 - this.hop); top = y + (fh > 32 ? fh - 40 : 0);
+          ctx.drawImage(im, col * fw, row * fh, fw, fh - clipBottom, x, y, fw, fh - clipBottom);
+        } else if (o.ok) {
+          const s = 40, bob = this.walk ? Math.abs(Math.sin(ccNow / 90)) * 3 : 0, x = Math.round(this.x - s / 2), y = Math.round(this.y - s + 4 - this.hop - bob); top = y + 4;
+          const sh = s * (1 - clipBottom / 32);
+          ctx.drawImage(im, 0, 0, im.width, im.height * (1 - clipBottom / 32), x, y, s, sh);
+        } else { const x = Math.round(this.x - 8), y = Math.round(this.y - 15 - this.hop); top = y; ctx.drawImage(ccArt.A.ball, x, y); }
+        ctx.globalAlpha = 1;
+        if (this.carry) ctx.drawImage(ccArt.ball, Math.round(this.x - 4), top + 4);
+        if (this.emo) ctx.drawImage(ccArt.emo[this.emo] || ccArt.A.emo.heart, Math.round(this.x - 7), top - 8 - (this.emo === 'zz' ? Math.floor(ccNow / 500) % 2 : 0));
+        this.top = top;
+      }
+    }
+
+    /* ---------- 화면 틀 ---------- */
+    function ccSetup(scene, extraHtml = '') {
+      ccTok++; ccInitArt(); const c = crState();
+      ccScene = Object.assign({ key: scene }, CC_SCENES[scene]); ccScene.objs = ccScene.objs(ccArt); ccFx = []; ccMode = null; ccDrag = null;
+      document.getElementById('fd-game').innerHTML = `<div class="cc-wrap" id="cc-wrap"><canvas id="cc-cv"></canvas><div id="cc-over"></div><div class="cc-dark" id="cc-dark"></div></div>${extraHtml}`;
+      ccCv = document.getElementById('cc-cv'); ccCv.width = ccScene.w * 16; ccCv.height = ccScene.h * 16; ccCtx = ccCv.getContext('2d'); ccCtx.imageSmoothingEnabled = false;
+      ccMon = new CcMon(c.form, ccScene.w * 8, ccScene.h * 16 - 30);
+      ccCv.addEventListener('pointerdown', e => { const [x, y] = ccPx(e); ccDrag = { x, y, t: performance.now() }; if (ccMode === 'bath') ccRub(x, y, true); });
+      ccCv.addEventListener('pointermove', e => { if (ccMode === 'bath' && ccDrag) { const [x, y] = ccPx(e); ccRub(x, y); } });
+      ccCv.addEventListener('pointerup', ccTap); ccCv.addEventListener('pointercancel', () => { ccDrag = null; });
+      ccFit();
+      if (!ccRaf) ccRaf = requestAnimationFrame(ccFrame);
+      return c;
+    }
+    function ccFit() {
+      if (!ccCv) return;
+      const g = document.getElementById('fd-game'), w = g.clientWidth || innerWidth - 24;
+      const extra = [...document.querySelectorAll('#fd-game > :not(#cc-wrap)')].reduce((a, e) => a + e.getBoundingClientRect().height + 8, 0);
+      let h = (typeof fdAvailH === 'function' ? fdAvailH() : innerHeight * .6) - extra;
+      if (!document.getElementById('fd-play')?.classList.contains('fd-full')) h = innerHeight - (typeof rwHdr === 'function' ? rwHdr() : 0) - (typeof rnBotH === 'function' ? rnBotH() : 0) - extra - 110;   // 화면 높이를 넉넉히 쓰고, 아래 버튼은 살짝 내려서 봐요
+      let fit = Math.min(w / ccCv.width, Math.max(180, h || 0) / ccCv.height);
+      if (!isFinite(fit) || fit <= 0) fit = Math.max(1, (w || 360) / ccCv.width);
+      ccS = fit >= 2 ? Math.floor(fit) : fit;
+      ccCv.style.width = ccCv.width * ccS + 'px'; ccCv.style.height = ccCv.height * ccS + 'px';
+      document.getElementById('cc-wrap').style.width = ccCv.width * ccS + 'px';
+    }
+    addEventListener('resize', () => { if (ccCv && ccCv.isConnected) ccFit(); });
+    const ccPx = e => { const r = ccCv.getBoundingClientRect(); return [(e.clientX - r.left) / ccS, (e.clientY - r.top) / ccS]; };
+    function ccFrame(t) {
+      if (!ccCv || !ccCv.isConnected) { ccRaf = 0; return; }
+      ccNow = t; const x = ccCtx, R = ccArt;
+      x.drawImage(R[ccScene.bg], 0, 0);
+      const list = [];
+      ccScene.objs.forEach(o => list.push({ f: o.foot, d: () => {
+        let dx = 0; if (o.shake && t < o.shake) dx = Math.round(Math.sin(t / 40) * 1.5);
+        x.drawImage(o.img, o.x + dx, o.y);
+        if (o === ccScene.hidden && o.peek && Math.floor(t / 900) % 3 === 0 && ccMon.sh.ok && ccMon.sh.ow) { const im = ccMon.sh.im, fw = im.width / 4; x.drawImage(im, 0, 0, fw, 6, Math.round(o.x + o.img.width / 2 - fw / 2 + 6), o.y - 3, fw, 6); }
+        if (o.tub && ccMode) {   // 욕조 속 포켓몬
+          ccMon.draw(x, 12); x.drawImage(R.tubWater, o.x + 4, o.y + 20 + Math.round(Math.sin(t / 400))); x.drawImage(R.bigTub, 0, 30, 80, 14, o.x, o.y + 30, 80, 14);
+          (fdG.spots || []).forEach(s => { if (s.gone) return; x.globalAlpha = Math.max(0, 1 - (s.hp || 0) / 4); twDisc(x, Math.round(s.x), Math.round(s.y), s.r, Math.max(1, s.r - 1), '#7a5230'); twDisc(x, Math.round(s.x) - 1, Math.round(s.y) - 1, Math.max(1, s.r - 2), Math.max(1, s.r - 3), '#946640'); x.globalAlpha = 1; });
+        }
+        if (o.bed && ccMon.lie) { ccMon.draw(x); x.drawImage(R.blanket, o.x + 2, o.y + 19); }
+      } }));
+      if (!(ccScene.key === 'bath' && ccMode) && !ccMon.lie) list.push({ f: ccMon.y, d: () => ccMon.draw(x) });
+      ccFx.forEach(f => list.push({ f: f.foot != null ? (typeof f.foot === 'function' ? f.foot() : f.foot) : 999, d: () => f.draw(x, t) }));
+      list.sort((a, b) => a.f - b.f).forEach(i => i.d());
+      // 꾸미기 (돌보기 꾸미기에서 고른 물건)
+      const ov = document.getElementById('cc-over');
+      if (ov) { const c = fdS.care, wear = (c && c.wear) || {}, key = JSON.stringify(wear) + ccMon.vis + !!ccMon.lie;
+        if (ov._k !== key) { ov._k = key; ov.innerHTML = ccMon.vis && !ccMon.lie && typeof EX_ACC !== 'undefined' ? Object.entries(wear).map(([slot, k]) => { const a = EX_ACC.find(q => q.k === k); return a ? `<span class="cc-acc cc-${slot}">${a.e}</span>` : ''; }).join('') : ''; }
+        const top = ccMon.top != null ? ccMon.top : ccMon.y - 30;
+        ov.querySelectorAll('.cc-acc').forEach(el => { el.style.left = ccMon.x * ccS + 'px'; el.style.top = top * ccS + 'px'; el.style.fontSize = 11 * ccS + 'px'; });
+        ov.querySelectorAll('.cc-name').forEach(el => { el.style.left = ccMon.x * ccS + 'px'; el.style.top = (top - 4) * ccS + 'px'; });
+      }
+      ccRaf = requestAnimationFrame(ccFrame);
+    }
+    function ccMsg(t) { document.getElementById('fd-list').innerHTML = `<div class="cd-msg">${t}</div>`; }
+    function ccTap(e) {
+      const [x, y] = ccPx(e), d = ccDrag; ccDrag = null;
+      if (ccMode === 'ball' && d) { const dx = x - d.x, dy = y - d.y, len = Math.hypot(dx, dy); if (len > 10) { const k = Math.min(3.2, 140 / Math.max(40, performance.now() - d.t)); return ccThrow(fdG.ball.x + dx * k * 1.2, fdG.ball.y + dy * k * 1.2); } return ccThrow(x, y); }
+      if (ccMode === 'hide') return ccHideTap(x, y);
+      if (ccMode === 'feed') return ccFeedTap(x, y);
+      if (ccMode === 'sleep') return ccPat(x, y);
+      if (ccMode === 'bath') return;
+      const m = ccMon; if (m.vis && Math.abs(x - m.x) < 13 && y < m.y + 3 && y > (m.top || m.y - 30) - 2) {
+        const nm = fdPkName(m.n); try { speakText(nm + '!', 1); } catch (er) {}
+        const ov = document.getElementById('cc-over'); ov.insertAdjacentHTML('beforeend', `<span class="cc-name">${nm}</span>`); const el = ov.lastElementChild; setTimeout(() => el.remove(), 1400);
+        m.emote('heart'); if (!m.walk) m.jump(10, 2);
+      }
+    }
+
+    /* ---------- 집 (돌보기 첫 화면) ---------- */
+    async function ccWander(tok) {
+      await ccWait(1200);
+      while (ccLive(tok) && fdG.screen === 'home') {
+        const r = Math.random(), m = ccMon;
+        if (r < .15) { await m.moveTo(96, 74, 50); m.dir = 'up'; m.emote('food', 1200); }
+        else if (r < .25) { await m.moveTo(26, 78, 50); m.dir = 'up'; m.emote('zz', 1200); }
+        else if (r < .35) { m.emote('note', 1200); await m.spin(); }
+        else await m.moveTo(ccRnd(24, 170), ccRnd(64, 128), 45);
+        await ccWait(ccRnd(900, 2400));
+      }
+    }
+    function ccHome(quiet) {
+      const c = crState(); fdG = { kind: 'care', screen: 'home' };
+      const need = crNextNeed(c), nm = fdPkName(c.form);
+      const ready = need && c.hearts >= need && !c.skip;
+      const doneN = Object.keys(CR_TASKS).filter(k => c.done[k]).length;
+      fdG.say = c.newDay ? `${nm}${sbJosa(nm, '이')} 반가워해요! 보고 싶었대요. 오늘도 같이 놀아요!` : doneN >= 4 ? `오늘 돌보기를 다 했어요! ${nm}${sbJosa(nm, '이')} 정말 행복해해요.` : `${nm}${sbJosa(nm, '와')} 무엇을 할까요?`;
+      c.newDay = false; fdSave();
+      const bar = need ? `<div class="cr-bar"><span style="width:${Math.min(100, c.hearts / need * 100)}%"></span></div><small>${ready ? '진화할 수 있어요!' : `진화까지 ❤ ${need - c.hearts}개`}</small>` : '<small>다 컸어요! 앞으로도 사이좋게 지내요.</small>';
+      ccSetup('room', `<div class="cc-stat"><b>${nm}</b> · 함께한 지 ${c.days || 1}일째 · ❤ ${c.hearts}${bar}</div>
+        <div class="cr-tasks">${Object.entries(CR_TASKS).map(([k, t]) => `<button class="cr-task ${c.done[k] ? 'ok' : ''}" onclick="crTask('${k}')">${fdIcon(t[0])}<b>${t[1]}</b>${c.done[k] ? '<i>✔</i>' : ''}</button>`).join('')}</div>`);
+      ccMon.x = 96; ccMon.y = 100;
+      if (doneN >= 4) ccMon.emote('heart', 3000);
+      ccMsg(doneN >= 4 ? '오늘 돌보기 끝! 내일 또 만나요. (다시 놀아 줘도 돼요)' : `오늘 할 일 ${doneN} / 4`);
+      fdBottom((ready ? `<button class="fd-btn fd-primary" onclick="crEvolve()">✨ 진화하기</button><button class="fd-btn" onclick="crStay()">지금 모습이 좋아요</button>` : '')
+        + (typeof exDecor === 'function' ? `<button class="fd-btn ex-decor-btn" onclick="exDecor()">🎀 꾸미기</button>` : '')
+        + (typeof rnGo === 'function' ? `<button class="fd-btn" onclick="rnGo('town')">🏡 마을로</button>` : ''));
+      ccFit();
+      if (!quiet) fdSay(fdG.say);
+      if (ready && !quiet) fdLater(() => fdSay(`우와, ${nm}${sbJosa(nm, '이')} 진화할 수 있어요! 진화할까요?`), 2600);
+      ccWander(ccTok);
+    }
+    const ccBack = () => `<button class="fd-btn" onclick="crHome()">🏠 돌아가기</button>`;
+
+    /* ---------- 밥 주기 ---------- */
+    function ccFeed() {
+      const c = ccSetup('room'), nm = fdPkName(c.form);
+      const N = [fdRand(1, 3), fdRand(2, 4), fdRand(3, 5), fdRand(4, 7), fdRand(5, 9)][fdS.age - 3] || 3;
+      fdG = { kind: 'care', screen: 'feed', N, given: 0, berries: [] };
+      for (let i = 0; i < 10; i++) fdG.berries.push({ x: 154 + (i % 5) * 3, y: 97 + Math.floor(i / 5) * 3, home: true, i });
+      ccMode = 'feed'; ccMon.x = 96; ccMon.y = 110;
+      ccFx = [{ foot: 113, draw: x => fdG.berries && fdG.berries.forEach(b => { if (b.home || b.fly) x.drawImage(ccArt.berry, Math.round(b.x), Math.round(b.y)); }) },
+              { foot: 73, draw: x => { x.drawImage(ccArt.bowl, 88, 44); for (let i = 0; i < (fdG.given || 0); i++) x.drawImage(ccArt.berry, 88 + (i % 3) * 4, 41 - Math.floor(i / 3) * 3); } }];
+      ccMon.moveTo(96, 76, 60).then(() => { ccMon.dir = 'up'; ccMon.emote('food', 3000); });
+      ccMsg(`${nm}${sbJosa(nm, '이')} 사과 <b>${N}개</b>를 먹고 싶대요! 바구니를 눌러 그릇에 담아 줘요.`);
+      fdBottom(`<button class="fd-btn fd-primary" onclick="ccFed()">✅ 다 담았어요</button><button class="fd-btn" onclick="ccFeedTake()">↩ 하나 빼기</button>${ccBack()}`);
+      fdSay(`${nm}${sbJosa(nm, '이')} 배고파요. 사과 ${MM_CNT[N]} 개를 먹고 싶대요! 바구니의 사과를 눌러서 그릇에 담아 줘요.`);
+    }
+    function ccFeedTap(x, y) {
+      const g = fdG; if (g.fin) return;
+      if (!(x > 146 && x < 178 && y > 88 && y < 116)) return;
+      const b = g.berries.find(q => q.home); if (!b) return;
+      b.home = false; b.fly = true; const sx = b.x, sy = b.y, t0 = performance.now();
+      const st = t => { const k = Math.min(1, (t - t0) / 450); b.x = sx + (90 - sx) * k; b.y = sy + (40 - sy) * k - Math.sin(k * Math.PI) * 26; if (k < 1) requestAnimationFrame(st); else { b.fly = false; g.given++; playTone(520 + g.given * 40, 0.05); fdSay(MM_NATIVE[g.given] || String(g.given)); } };
+      requestAnimationFrame(st);
+    }
+    function ccFeedTake() { const g = fdG; if (!g || g.screen !== 'feed' || g.fin || !g.given) return; g.given--; const b = g.berries.find(q => !q.home && !q.fly); if (b) { b.home = true; b.x = 154 + (b.i % 5) * 3; b.y = 97 + Math.floor(b.i / 5) * 3; } playTone(380, 0.05); }
+    async function ccFed() {
+      const g = fdG; if (!g || g.screen !== 'feed' || g.fin) return;
+      if (g.given !== g.N) { playTone(220, 0.1, 'sawtooth'); return fdSay(g.given > g.N ? `사과가 ${g.given - g.N}개 많아요. 하나 빼 줄래요?` : g.given === 0 ? '아직 사과를 안 줬어요!' : `사과가 ${g.N - g.given}개 모자라요. 더 줄래요?`); }
+      g.fin = true; const tok = ccTok; document.getElementById('fd-bottom').innerHTML = '';
+      await ccMon.moveTo(96, 64, 60); ccMon.dir = 'up';
+      for (let i = 0; i < g.N && ccLive(tok); i++) { ccMon.emote('food', 500); await ccMon.jump(4); playTone(600 + i * 50, .05); g.given--; await ccWait(300); }
+      if (!ccLive(tok)) return;
+      ccMon.dir = 'down'; ccMon.emote('heart', 1600); await ccMon.spin(); await ccMon.jump(10, 2);
+      crFinish('feed');
+    }
+
+    /* ---------- 씻겨 주기 (욕실에서 크게) ---------- */
+    function ccBath() {
+      const c = ccSetup('bath'), nm = fdPkName(c.form);
+      const tub = ccScene.objs[0]; ccMon.x = tub.x + 40; ccMon.y = tub.y + 30;
+      const sp = [], body = { x0: ccMon.x - 10, x1: ccMon.x + 10, y0: ccMon.y - 25, y1: ccMon.y - 13 };
+      for (let t = 0; t < 400 && sp.length < 3 + fdS.age; t++) { const s = { x: ccRnd(body.x0, body.x1), y: ccRnd(body.y0, body.y1), r: 2 + Math.round(Math.random()) }; if (sp.every(o => Math.hypot(o.x - s.x, o.y - s.y) > o.r + s.r + 1.5)) sp.push(s); }
+      fdG = { kind: 'care', screen: 'bath', spots: sp, left: sp.length, bub: [] };
+      ccMode = 'bath'; ccMon.dir = 'down'; ccMon.emote('sweat', 2500);
+      ccFx = [{ foot: 999, draw: (x, t) => { fdG.bub = (fdG.bub || []).filter(b => t - b.t < 900); fdG.bub.forEach(b => { const k = (t - b.t) / 900; twDisc(x, Math.round(b.x), Math.round(b.y - k * 10), b.r, b.r, `rgba(255,255,255,${.9 - k * .7})`); x.fillStyle = `rgba(160,210,255,${.8 - k})`; x.fillRect(Math.round(b.x - b.r + 1), Math.round(b.y - k * 10 - b.r + 1), 1, 1); }); } }];
+      ccMsg('흙탕물이 묻었어요! 손가락으로 문질러서 깨끗이 씻겨 줘요.');
+      fdBottom(ccBack());
+      fdSay(`${nm}${sbJosa(nm, '이')} 흙놀이를 했나 봐요. 손가락으로 쓱쓱 문질러서 씻겨 줘요!`);
+    }
+    function ccRub(x, y, first) {
+      const g = fdG; if (!g || g.screen !== 'bath' || g.fin) return;
+      if (Math.random() < .4 || first) g.bub.push({ x: x + ccRnd(-2, 2), y: y + ccRnd(-2, 2), r: 1 + Math.round(Math.random() * 2), t: performance.now() });
+      g.spots.forEach(s => {
+        if (s.gone || Math.hypot(s.x - x, s.y - y) > s.r + 3) return;
+        s.hp = (s.hp || 0) + 1;
+        if (s.hp >= 4) { s.gone = true; g.left--; playTone(700 + (g.spots.length - g.left) * 40, 0.05);
+          if (!g.left) { g.fin = true; const tok = ccTok; ccMon.emote('star', 1500); fdSay('반짝반짝 깨끗해졌어요!'); setTimeout(async () => { if (!ccLive(tok)) return; await ccMon.jump(6, 2); if (ccLive(tok)) crFinish('bath'); }, 900); } }
+      });
+    }
+
+    /* ---------- 재워 주기 (침대) ---------- */
+    async function ccSleep() {
+      const c = ccSetup('room'), nm = fdPkName(c.form), tok = ccTok;
+      fdG = { kind: 'care', screen: 'sleep', cnt: 0, dark: false };
+      ccMode = 'walk'; ccMon.x = 96; ccMon.y = 110;
+      ccMsg('졸려 보여요. 침대로 가서 누울 거예요.');
+      fdBottom(ccBack());
+      fdSay(`${nm}${sbJosa(nm, '이')} 졸린가 봐요. 불을 끄고 토닥토닥 재워 줘요.`);
+      ccMon.emote('zz', 2000);
+      await ccMon.moveTo(48, 76, 55); await ccMon.moveTo(26, 76, 55); if (!ccLive(tok)) return;
+      ccMon.x = 24; ccMon.y = 52; ccMon.dir = 'down'; ccMon.lie = true; ccMode = 'sleep';
+      ccMsg('💡 불 끄기를 누르고, 포켓몬을 토닥토닥 3번 해 줘요.');
+      fdBottom(`<button class="fd-btn fd-primary" id="cc-lamp" onclick="ccLamp()">💡 불 끄기</button>${ccBack()}`);
+    }
+    function ccLamp() { const g = fdG; if (!g || g.screen !== 'sleep' || g.dark) return; g.dark = true; document.getElementById('cc-dark').classList.add('on'); document.getElementById('cc-lamp')?.remove(); playTone(300, 0.08); fdSay('불을 껐어요. 이제 토닥토닥 해 줘요.'); }
+    function ccPat(x, y) {
+      const g = fdG; if (!g || g.screen !== 'sleep' || g.fin) return;
+      if (!(x > 6 && x < 44 && y > 20 && y < 72)) return;
+      if (!g.dark) return fdSay('먼저 💡 불 끄기를 눌러 줘요.');
+      g.cnt++; playTone([523, 587, 659][g.cnt - 1] || 523, 0.25); ccMon.hop = 1; setTimeout(() => ccMon.hop = 0, 150);
+      if (g.cnt >= 3) { g.fin = true; ccMon.emo = 'zz'; const tok = ccTok; setTimeout(() => { if (ccLive(tok)) crFinish('sleep'); }, 1500); }
+      else fdSay('토닥토닥');
+    }
+
+    /* ---------- 놀아 주기 (마당) ---------- */
+    function ccPlay(again) {
+      const c = ccSetup('yard'), nm = fdPkName(c.form);
+      fdG = { kind: 'care', screen: 'play' };
+      ccMon.x = 112; ccMon.y = 30; ccMon.dir = 'down'; ccMon.moveTo(112, 70, 60);
+      ccMsg('무엇을 하고 놀까요?');
+      fdBottom(`<button class="fd-btn fd-primary" onclick="ccBall()">⚽ 공놀이</button><button class="fd-btn fd-primary" onclick="ccHide()">🙈 숨바꼭질</button><button class="fd-btn fd-primary" onclick="ccSimon()">🕺 따라 하기</button>${ccBack()}`);
+      if (!again) fdSay(`마당이에요! ${nm}${sbJosa(nm, '와')} 무엇을 하고 놀까요? 공놀이, 숨바꼭질, 따라 하기 중에 골라요.`);
+    }
+    // 공놀이
+    function ccBall() {
+      const nm = fdPkName(ccMon.n);
+      fdG = Object.assign(fdG, { screen: 'ball', cnt: 0, goal: fdS.age <= 3 ? 3 : 5, ball: { x: 112, y: 120, z: 0, state: 'hand' } });
+      ccMode = 'ball'; ccScene.hidden = null; ccMon.vis = true;
+      ccFx = [{ foot: () => fdG.ball ? fdG.ball.y : 0, draw: x => { const b = fdG.ball; if (!b || b.state === 'carried') return; x.fillStyle = 'rgba(30,40,30,.3)'; x.fillRect(Math.round(b.x - 3), Math.round(b.y - 1), 6, 2); x.drawImage(ccArt.ball, Math.round(b.x - 4), Math.round(b.y - 7 - b.z)); } }];
+      ccMon.moveTo(112, 96, 60).then(() => ccMon.dir = 'down');
+      ccMsg(`화면을 손가락으로 쭉 밀면 공을 던져요! 콕 누르면 그 자리로 던져요. (0 / ${fdG.goal})`);
+      fdBottom(`<button class="fd-btn" onclick="ccPlay(true)">다른 놀이</button>${ccBack()}`);
+      fdSay(`${nm}${sbJosa(nm, '와')} 공놀이해요! 화면을 쭉 밀어서 공을 던져 봐요.`);
+    }
+    async function ccThrow(tx, ty) {
+      const g = fdG, b = g.ball; if (!b || b.state !== 'hand' || g.fin) return;
+      const tok = ccTok;
+      tx = Math.max(24, Math.min(200, tx)); ty = Math.max(40, Math.min(122, ty));
+      b.state = 'fly'; playTone(500, 0.05);
+      const sx = b.x, sy = b.y, d = Math.hypot(tx - sx, ty - sy), dur = 350 + d * 3.2, t0 = performance.now(), peak = 14 + d / 5;
+      ccMon.emote('ex', 700);
+      const run = ccMon.moveTo(tx + (tx > ccMon.x ? -6 : 6), ty + 2, 105);
+      await new Promise(res => { const st = t => { const k = Math.min(1, (t - t0) / dur); b.x = sx + (tx - sx) * k; b.y = sy + (ty - sy) * k; b.z = Math.sin(k * Math.PI) * peak; k < 1 ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); });
+      b.z = 0; b.state = 'ground'; playTone(300, .05);
+      await run; if (!ccLive(tok)) return;
+      g.cnt++;
+      if (Math.random() < .2 && g.cnt > 1) { ccMon.emote('sweat', 1200); for (const d2 of ['left', 'up', 'right', 'down']) { ccMon.dir = d2; await ccWait(140); } fdSay('데굴데굴! 괜찮아요!'); await ccMon.jump(6); }
+      else if (d > 70) { ccMon.emote('star', 900); await ccMon.jump(14); fdSay(fdPick(['멀리 갔다!', '와, 높이 날았어요!'])); }
+      b.state = 'carried'; ccMon.carry = true; ccMon.emote('note', 1000);
+      await ccMon.moveTo(112, 104, 95); if (!ccLive(tok)) return;
+      ccMon.dir = 'down'; ccMon.carry = false; b.x = 112; b.y = 120; b.state = 'hand'; playTone(760, 0.08);
+      ccMon.emote('heart', 900); await ccMon.jump(8);
+      ccMsg(`물어 왔어요! (${g.cnt} / ${g.goal})`);
+      if (g.cnt >= g.goal) { g.fin = true; await ccMon.spin(); if (ccLive(tok)) crFinish('play'); }
+      else fdSay(fdPick(['물어 왔어요!', '또 던져 줘요!', '신나요!']));
+    }
+    // 숨바꼭질
+    async function ccHide() {
+      fdG = Object.assign(fdG, { screen: 'hide', round: 0, goal: fdS.age <= 3 ? 2 : 3 });
+      ccFx = []; ccMon.carry = false;
+      fdBottom(`<button class="fd-btn" onclick="ccPlay(true)">다른 놀이</button>${ccBack()}`);
+      ccHideRound();
+    }
+    async function ccHideRound() {
+      const tok = ccTok, nm = fdPkName(ccMon.n), g = fdG; ccMode = 'hide-wait';
+      ccMsg(`${nm}${sbJosa(nm, '이')} 숨을 거예요. 눈 감고 셋까지 세요!`); fdSay(`${nm}${sbJosa(nm, '이')} 숨을 거예요. 눈 감고 셋까지 세요!`);
+      await ccWait(1800); if (!ccLive(tok)) return;
+      const dk = document.getElementById('cc-dark'); dk.classList.add('on', 'eyes');
+      for (const w of ['하나', '둘', '셋']) { fdSay(w); await ccWait(850); if (!ccLive(tok)) return; }
+      // 나이가 어리면 숨을 곳이 적어요
+      const all = ccScene.objs.filter(o => o.hide), n = Math.min(all.length, [3, 3, 4, 5, 6][fdS.age - 3] || 4);
+      const spots = all.slice(0, n);
+      all.forEach(o => o.off = !spots.includes(o));
+      const h = fdPick(spots.filter(o => o !== ccScene.hidden)); ccScene.hidden = h; h.peek = true; h.tries = 0; ccMon.vis = false;
+      dk.classList.remove('on', 'eyes'); ccMode = 'hide';
+      ccMsg(`${nm}${sbJosa(nm, '은')} 어디에 숨었을까요? 흔들리는 곳을 찾아봐요! (${g.round} / ${g.goal})`);
+      fdSay(`${nm}${sbJosa(nm, '은')} 어디에 숨었을까요? 흔들리는 곳을 찾아봐요!`);
+      (async () => { while (ccLive(tok) && ccScene.hidden === h && ccMode === 'hide') { await ccWait(ccRnd(1600, 3000)); if (ccScene.hidden === h && ccMode === 'hide') { h.shake = performance.now() + 450; playTone(880, .03); } } })();
+    }
+    async function ccHideTap(x, y) {
+      const g = fdG, hid = ccScene.hidden, tok = ccTok;
+      const o = ccScene.objs.find(q => q.hide && !q.off && x >= q.x - 2 && x < q.x + q.img.width + 2 && y >= q.y - 4 && y < q.y + q.img.height + 2); if (!o) return;
+      if (o !== hid) { o.shake = performance.now() + 300; playTone(240, .08); fdSay(fdPick([`${o.k} 뒤에는 없어요.`, '여기는 아니에요!', '음, 다른 곳일까요?'])); hid.tries++; if (hid.tries >= 2) hid.shake = performance.now() + 900; return; }
+      ccMode = 'found'; hid.peek = false;
+      ccMon.x = o.x + o.img.width / 2; ccMon.y = o.foot + 6; ccMon.vis = true; ccMon.dir = 'down';
+      playTone(880, .1); ccMon.emote('ex', 900); fdSay(fdPick(['찾았다!', '들켰다!', '와, 찾았어요!'])); await ccMon.jump(14); ccMon.emote('heart');
+      g.round++;
+      if (g.round >= g.goal) { g.fin = true; await ccMon.spin(); if (ccLive(tok)) crFinish('play'); return; }
+      ccMsg(`찾았어요! (${g.round} / ${g.goal}) 한 번 더 숨을게요!`); await ccWait(1500); if (ccLive(tok)) ccHideRound();
+    }
+    // 따라 하기: 포켓몬이 보여 준 순서대로 눌러요
+    const CC_MOVES = { jump: ['⬆️', '점프'], spin: ['🔄', '빙글'], left: ['⬅️', '왼쪽'], right: ['➡️', '오른쪽'] };
+    async function ccDo(m) {
+      const M = ccMon;
+      if (m === 'jump') return M.jump(14);
+      if (m === 'spin') return M.spin();
+      const dx = m === 'left' ? -18 : 18; await M.moveTo(112 + dx, 84, 120); M.dir = 'down'; await M.moveTo(112, 84, 120); M.dir = 'down';
+    }
+    async function ccSimon() {
+      const len = [2, 2, 3, 4, 5][fdS.age - 3] || 3;
+      fdG = Object.assign(fdG, { screen: 'simon', round: 0, goal: 2, len, seq: [], pos: 0, lock: true });
+      ccMode = 'simon'; ccFx = []; ccScene.hidden = null; ccMon.vis = true;
+      await ccMon.moveTo(112, 84, 70); ccMon.dir = 'down';
+      ccSimonRound();
+    }
+    async function ccSimonRound() {
+      const g = fdG, tok = ccTok, nm = fdPkName(ccMon.n);
+      g.seq = Array.from({ length: g.len + g.round }, () => fdPick(Object.keys(CC_MOVES))); g.pos = 0; g.lock = true;
+      fdBottom(`${Object.entries(CC_MOVES).map(([k, v]) => `<button class="fd-btn cc-mv" disabled onclick="ccSimonTap('${k}')">${v[0]} ${v[1]}</button>`).join('')}${ccBack()}`);
+      ccMsg(`${nm}${sbJosa(nm, '이')} 하는 걸 잘 보세요!`); fdSay(`${nm}${sbJosa(nm, '이')} 하는 걸 잘 보고 따라 해요!`);
+      await ccWait(1600);
+      for (const m of g.seq) { if (!ccLive(tok)) return; fdSay(CC_MOVES[m][1]); ccMon.emote('note', 500); await ccDo(m); await ccWait(450); }
+      if (!ccLive(tok)) return;
+      g.lock = false; document.querySelectorAll('.cc-mv').forEach(b => b.disabled = false);
+      ccMsg(`이제 똑같이 눌러 봐요! (${g.seq.length}개)`); fdSay('이제 똑같이 눌러 봐요!');
+    }
+    async function ccSimonTap(m) {
+      const g = fdG, tok = ccTok; if (!g || g.screen !== 'simon' || g.lock) return;
+      g.lock = true;
+      if (m !== g.seq[g.pos]) { playTone(240, .1); ccMon.emote('q', 1200); fdSay('어? 다시 한 번 볼까요?'); await ccWait(900); if (ccLive(tok)) { g.round = Math.max(0, g.round); ccSimonRound(); } return; }
+      playTone(600 + g.pos * 80, .06); await ccDo(m); g.pos++;
+      if (g.pos < g.seq.length) { g.lock = false; return; }
+      ccMon.emote('heart', 1200); fdSay(fdPick(['똑같아요! 최고!', '잘 따라 했어요!', '와, 기억력 짱!'])); g.round++;
+      if (g.round >= g.goal) { g.fin = true; await ccMon.spin(); if (ccLive(tok)) crFinish('play'); return; }
+      await ccWait(1300); if (ccLive(tok)) ccSimonRound();
+    }
+
+    /* ---------- 진화 (큰 그림으로) ---------- */
+    function ccEvolve(to) {
+      const c = crState(), line = CR_LINES[c.line];
+      if (line.length === 1 && !to) {
+        ccTok++;
+        document.getElementById('fd-game').innerHTML = `<div class="cr-pick">${CR_EEVEE.map(n => `<button class="cr-pk" onclick="crEvolve(${n})">${rwImg(n)}<b>${fdPkName(n)}</b></button>`).join('')}</div>`;
+        ccMsg('이브이는 여러 모습으로 진화해요. 어떤 모습이 될까요?');
+        fdBottom(`<button class="fd-btn" onclick="crHome(true)">돌아가기</button>`);
+        return fdSay('이브이는 여러 모습으로 진화할 수 있어요. 하나를 골라요!');
+      }
+      ccTok++;
+      const from = c.form, next = to || line[c.stage + 1];
+      fdG = { kind: 'care', screen: 'evolve' };
+      document.getElementById('fd-game').innerHTML = `<div class="fd-box cr-room"><img class="mm-bg" src="${SBA.url('meadow')}" alt=""><div class="cr-me" id="cr-me">${rwImg(from)}</div></div>`;
+      document.getElementById('fd-bottom').innerHTML = '';
+      const me = document.getElementById('cr-me'); me.classList.add('evolving');
+      fdSay(`어? ${fdPkName(from)}의 모습이…!`);
+      setTimeout(() => {
+        c.stage++; c.form = next; fdSave();
+        me.innerHTML = rwImg(next); me.classList.remove('evolving'); me.classList.add('evolved');
+        playSuccessChime();
+        const msg = `축하해요! ${fdPkName(from)}${sbJosa(fdPkName(from), '이')} ${fdPkName(next)}${sbJosa(fdPkName(next), '으로')} 진화했어요!`;
+        fdSay(msg); document.getElementById('fd-list').innerHTML = `<div class="mm-fb">🎉 ${msg}</div>`;
+        const cards = rwGive([next, next, next], 'care');
+        setTimeout(() => { if (cards.length) rwShowCards(cards, () => crHome(true)); else crHome(true); }, 3200);
+      }, 2600);
+    }
+
+    // 예전 돌보기 화면을 도트 화면으로 바꿔 끼워요 (하트 · 진화 · 스티커 규칙은 그대로)
+    (function () {
+      if (typeof crHome !== 'function') return;
+      crHome = ccHome;
+      crTask = function (k) { if (k === 'feed') return ccFeed(); if (k === 'bath') return ccBath(); if (k === 'play') return ccPlay(); return ccSleep(); };
+      crEvolve = ccEvolve;
     })();
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
