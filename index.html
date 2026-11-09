@@ -680,6 +680,73 @@
     @keyframes tw-swipe { 50% { translate: calc(-50% + 10px) 0; } }
     #tw-view-box { position: relative; }
 </style>
+<style>
+    /* ===== 포켓몬 이상형 월드컵 ===== */
+    #cp-root { font-family: Jua, sans-serif; color: #334155; }
+    .cp-home { display: flex; flex-direction: column; gap: .55rem; }
+    .cp-title { display: flex; align-items: center; gap: .6rem; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 3px solid #fcd34d; border-radius: 1.2rem; padding: .6rem .8rem; }
+    .cp-title > span { font-size: 2.4rem; }
+    .cp-title b { font-weight: normal; font-size: 1.3rem; color: #92400e; display: block; }
+    .cp-title small { font-size: .8rem; color: #a16207; }
+    .cp-sub { font-size: .95rem; color: #475569; margin-top: .2rem; }
+    .cp-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .cp-chip { background: #fff; border: 2px solid #e2e8f0; border-radius: 999px; padding: .35rem .8rem; font-size: .95rem; color: #475569; }
+    .cp-chip.on { background: #f43f5e; border-color: #f43f5e; color: #fff; }
+    .cp-types .cp-chip { font-size: .82rem; padding: .25rem .6rem; }
+    .cp-pools { display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); gap: .4rem; }
+    .cp-pool { display: flex; flex-direction: column; align-items: center; background: #fff; border: 3px solid #e2e8f0; border-radius: 1rem; padding: .45rem .3rem; font-size: .95rem; color: #334155; }
+    .cp-pool span { font-size: 1.6rem; line-height: 1.2; }
+    .cp-pool small { font-size: .7rem; color: #94a3b8; }
+    .cp-pool.on { border-color: #f43f5e; background: #fff1f2; }
+    .cp-pool.off { opacity: .45; }
+    .cp-more summary { font-size: .8rem; color: #94a3b8; cursor: pointer; padding: .2rem 0; }
+    .cp-go { margin-top: .3rem; font-size: 1.4rem; color: #fff; background: linear-gradient(135deg, #f43f5e, #f59e0b); border-radius: 1.2rem; padding: .7rem; box-shadow: 0 5px 0 #be123c; width: 100%; }
+    .cp-go:active { transform: translateY(3px); box-shadow: 0 2px 0 #be123c; }
+    .cp-fame { background: #fff; border: 2px solid #fde68a; border-radius: 1rem; padding: .4rem .5rem; }
+    .cp-fame-row { display: flex; gap: .4rem; overflow-x: auto; }
+    .cp-fame-pk { position: relative; flex: 0 0 auto; width: 5rem; display: flex; flex-direction: column; align-items: center; font-size: .78rem; }
+    .cp-fame-pk img { width: 3.6rem; height: 3.6rem; object-fit: contain; }
+    .cp-fame-pk.top img { width: 4.4rem; height: 4.4rem; }
+    .cp-fame-pk i { position: absolute; top: -.3rem; font-style: normal; font-size: 1.1rem; }
+    .cp-fame-pk small { font-size: .65rem; color: #b45309; }
+    .cp-match { display: flex; flex-direction: column; gap: .6rem; }
+    .cp-bar { display: flex; align-items: center; gap: .5rem; background: #fff; border: 2px solid #e2e8f0; border-radius: 999px; padding: .3rem .5rem; }
+    .cp-bar b { font-weight: normal; font-size: 1.15rem; color: #be123c; }
+    .cp-bar span { font-size: .85rem; color: #94a3b8; }
+    .cp-dots { flex: 1; display: flex; gap: .2rem; justify-content: flex-end; flex-wrap: wrap; }
+    .cp-dots i { width: .55rem; height: .55rem; border-radius: 999px; background: #e2e8f0; }
+    .cp-dots i.done { background: #fda4af; }
+    .cp-dots i.now { background: #f43f5e; transform: scale(1.3); }
+    .cp-x, .cp-undo { width: 2rem; height: 2rem; border-radius: 999px; background: #f1f5f9; color: #64748b; font-size: 1rem; flex: 0 0 auto; }
+    .cp-undo:disabled { opacity: .35; }
+    .cp-vs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .4rem; }
+    .cp-vs-mark { font-size: 1.4rem; color: #fff; background: #f43f5e; border-radius: 999px; width: 2.6rem; height: 2.6rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 0 #be123c; }
+    .cp-card { display: flex; flex-direction: column; align-items: center; gap: .2rem; background: #fff; border: 4px solid #e2e8f0; border-radius: 1.4rem; padding: .5rem .3rem .6rem; transition: transform .35s, opacity .35s, border-color .2s; }
+    .cp-card:active { transform: scale(.97); }
+    .cp-img { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #fff 40%, #f1f5f9); border-radius: 1rem; }
+    .cp-img img { width: 92%; height: 92%; object-fit: contain; }
+    .cp-card b { font-weight: normal; font-size: clamp(1.1rem, 4vw, 1.6rem); }
+    .cp-tys { display: flex; gap: .25rem; }
+    .cp-tys span { color: #fff; font-size: .7rem; border-radius: 999px; padding: 0 .45rem; }
+    .cp-card.win { border-color: #f59e0b; transform: scale(1.06); box-shadow: 0 0 0 6px #fde68a; }
+    .cp-card.lose { opacity: .25; transform: scale(.9); }
+    .cp-q { text-align: center; font-size: 1.15rem; color: #64748b; }
+    .cp-match.final .cp-card { border-color: #fcd34d; background: linear-gradient(#fff, #fffbeb); }
+    .cp-win { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: .4rem; background: radial-gradient(circle at 50% 30%, #fff7d6, #fde68a); border: 4px solid #fcd34d; border-radius: 1.6rem; padding: 1rem .8rem; text-align: center; }
+    .cp-crown { font-size: 3rem; line-height: 1; animation: cp-bob 1.6s ease-in-out infinite; }
+    @keyframes cp-bob { 50% { translate: 0 -6px; } }
+    .cp-win-img img { width: min(15rem, 60vw); height: min(15rem, 60vw); object-fit: contain; animation: kp-pop-in .5s; }
+    .cp-win-name { font-size: 2rem; color: #92400e; }
+    .cp-win-msg { font-size: 1rem; color: #a16207; }
+    .cp-podium { display: flex; gap: .6rem; justify-content: center; }
+    .cp-podium div { display: flex; flex-direction: column; align-items: center; font-size: .75rem; color: #78716c; }
+    .cp-podium img { width: 3.4rem; height: 3.4rem; object-fit: contain; }
+    .cp-acts { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; }
+    .cp-home-btn { font-size: .85rem; color: #a16207; text-decoration: underline; }
+    .cp-conf { position: absolute; inset: 0; pointer-events: none; }
+    .cp-conf i { position: absolute; top: -10px; width: 8px; height: 12px; border-radius: 2px; animation: cp-fall 2.6s linear 2 forwards; }
+    @keyframes cp-fall { to { translate: 0 110vh; rotate: 540deg; } }
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
 
@@ -2430,6 +2497,9 @@
     </section>
 
     <!-- 그림 찾기 -->
+    <!-- 포켓몬 이상형 월드컵 -->
+    <section id="view-cup" class="hidden max-w-2xl mx-auto"><div id="cp-root"></div></section>
+
     <!-- 포켓몬 마을 -->
     <section id="view-town" class="hidden max-w-5xl mx-auto">
       <div id="tw-top"></div>
@@ -5552,7 +5622,7 @@
       if (viewKey !== 'math' && typeof mmStopSpeech === 'function') mmStopSpeech();
       if (viewKey !== 'find' && viewKey !== 'play' && typeof fdStopSpeech === 'function') fdStopSpeech();
       if (viewKey !== 'battle' && typeof bxStopSpeech === 'function') bxStopSpeech();
-      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'find', 'play', 'favs', 'town'].forEach(v => {
+      ['dex', 'battle', 'catch', 'study', 'coloring', 'quiz', 'guess', 'descquiz', 'story', 'math', 'find', 'play', 'favs', 'town', 'cup'].forEach(v => {
         const sec = document.getElementById(`view-${v}`);
         const tab = document.getElementById(`nav-${v}`);
         if (sec) sec.classList.toggle('hidden', v !== viewKey);
@@ -12956,7 +13026,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       { k: 'play', e: '🎮', n: '놀이', items: [
         { e: '⚡', n: '찌리리공 찾기', v: 'find', g: 'hide' }, { e: '👀', n: '틀린그림', v: 'find', g: 'diff' }, { e: '🧩', n: '퍼즐', v: 'find', g: 'puzzle' },
         { e: '🃏', n: '짝 맞추기', v: 'play', g: 'memory' }, { e: '🧭', n: '길 코딩', v: 'play', g: 'code' }, { e: '🏠', n: '돌보기', v: 'play', g: 'care' },
-        { e: '❓', n: '누구게?', v: 'guess' }, { e: '🎨', n: '색칠', v: 'coloring' }] },
+        { e: '❓', n: '누구게?', v: 'guess' }, { e: '🎨', n: '색칠', v: 'coloring' }, { e: '🏆', n: '월드컵', v: 'cup' }] },
       { k: 'adv', e: '⚔️', n: '모험', items: [{ e: '⚔️', n: '배틀 · 리그', v: 'battle' }, { e: '📡', n: '포획', v: 'catch' }] }
     ];
     let rnS = null, rnView = 'dex', rnBusy = false, rnReady = false;
@@ -14584,6 +14654,150 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       document.addEventListener('visibilitychange', () => { if (document.hidden && twActive) { twActive = false; } else if (!document.hidden && !document.getElementById('view-town').classList.contains('hidden') && !twActive) { twActive = true; if (!twRaf) twRaf = requestAnimationFrame(twFrame); } });
     })();
     window.addEventListener('load', () => setTimeout(() => { try { twRenderMenu(); } catch (e) {} }, 120));
+    /**
+     * ==============================================================
+     * [포켓몬 이상형 월드컵] 둘 중 더 좋은 친구를 골라 최애 포켓몬 찾기
+     *  - 8강 · 16강 · 32강, 고를 친구 묶음(아이 수준 · 마을 친구 · 찜 · 타입 · 세대)
+     *  - 우승한 친구는 명예의 전당에 남고, 찜 · 마을 · 색칠로 이어져요
+     * ==============================================================
+     */
+    const CP_KEY = 'pkmn_cup_v1';
+    const CP_TYPES = [['불꽃', '🔥'], ['물', '💧'], ['풀', '🌿'], ['전기', '⚡'], ['노말', '⭐'], ['에스퍼', '🔮'], ['고스트', '👻'], ['드래곤', '🐉'], ['페어리', '🎀'], ['얼음', '❄️'], ['비행', '🕊️'], ['격투', '🥊']];
+    let cpS = null, cpG = null;
+    function cpLoad() { if (cpS) return cpS; try { cpS = JSON.parse(localStorage.getItem(CP_KEY) || 'null'); } catch (e) {} cpS = Object.assign({ size: 0, pool: 'kid', wins: {}, finals: {}, hist: [] }, cpS || {}); return cpS; }
+    const cpSave = () => { try { localStorage.setItem(CP_KEY, JSON.stringify(cpLoad())); } catch (e) {} };
+    const cpName = n => POKEMON_NAMES_1025[n - 1];
+    const cpTypes = n => OFFICIAL_DEX.rows[n - 1][2].map(i => TYPE_NAMES[i]);
+    const cpSay = t => { try { speakText(t, 0.95); } catch (e) {} };
+    const cpDefSize = () => { const a = typeof kpAge === 'function' ? kpAge() : 5; return a <= 4 ? 8 : 16; };
+    const CP_ROUND = n => n === 2 ? '결승' : n === 4 ? '준결승' : `${n}강`;
+
+    function cpPoolOf(k) {
+      const all = Array.from({ length: 1025 }, (_, i) => i + 1);
+      const kid = typeof kpPool === 'function' ? kpPool() : all;
+      if (k === 'kid') return kid;
+      if (k === 'town') return typeof twResidents === 'function' ? twResidents() : [];
+      if (k === 'fav') return Array.from(favoritesSet);
+      if (k === 'all') return all;
+      if (k.startsWith('gen')) { const g = +k.slice(3); return all.filter(n => getGeneration(n).gen === g); }
+      if (k.startsWith('t:')) { const t = k.slice(2); const base = (typeof kpAge === 'function' && kpAge() >= 7) ? all : kid.length >= 60 ? kid : all.filter(n => n <= 493); return base.filter(n => cpTypes(n).includes(t)); }
+      return kid;
+    }
+    const CP_POOLS = () => [
+      { k: 'kid', e: '⭐', n: '우리 아이 수준' },
+      { k: 'town', e: '🏡', n: '마을 친구' },
+      { k: 'fav', e: '💛', n: '찜한 포켓몬' },
+      { k: 'all', e: '🎲', n: '전체 1,025' }
+    ];
+
+    function cpHome() {
+      const s = cpLoad(), el = document.getElementById('cp-root'); cpG = null;
+      if (!s.size) s.size = cpDefSize();
+      const pools = CP_POOLS().map(p => ({ ...p, c: cpPoolOf(p.k).length }));
+      const fame = Object.entries(s.wins).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const nm = typeof kpName === 'function' ? kpName() : '';
+      el.innerHTML = `<div class="cp-home">
+        <div class="cp-title"><span>🏆</span><div><b>포켓몬 이상형 월드컵</b><small>둘 중에 더 좋은 친구를 골라요. 마지막까지 남는 친구는?</small></div></div>
+        ${fame.length ? `<div class="cp-fame"><div class="cp-sub">👑 ${nm ? exEscC(nm) + '의 ' : ''}명예의 전당</div><div class="cp-fame-row">${fame.map(([n, w], i) => `<div class="cp-fame-pk ${i === 0 ? 'top' : ''}">${i === 0 ? '<i>👑</i>' : ''}${rwImg(+n)}<span>${cpName(+n)}</span><small>우승 ${w}번</small></div>`).join('')}</div></div>` : ''}
+        <div class="cp-sub">몇 명이 겨룰까요?</div>
+        <div class="cp-chips">${[4, 8, 16, 32].map(z => `<button class="cp-chip ${s.size === z ? 'on' : ''}" onclick="cpSet('size', ${z})">${z}강</button>`).join('')}</div>
+        <div class="cp-sub">누구누구 나올까요?</div>
+        <div class="cp-pools">${pools.map(p => `<button class="cp-pool ${s.pool === p.k ? 'on' : ''} ${p.c < 4 ? 'off' : ''}" onclick="cpSet('pool', '${p.k}')"><span>${p.e}</span>${p.n}<small>${p.c < 4 ? '친구가 더 필요해요' : p.c + '마리'}</small></button>`).join('')}</div>
+        <div class="cp-chips cp-types">${CP_TYPES.map(([t, e]) => `<button class="cp-chip ${s.pool === 't:' + t ? 'on' : ''}" onclick="cpSet('pool', 't:${t}')">${e} ${t}</button>`).join('')}</div>
+        <details class="cp-more"><summary>세대별로 (부모님)</summary><div class="cp-chips">${Array.from({ length: 9 }, (_, i) => `<button class="cp-chip ${s.pool === 'gen' + (i + 1) ? 'on' : ''}" onclick="cpSet('pool', 'gen${i + 1}')">${i + 1}세대</button>`).join('')}</div></details>
+        <button class="cp-go" onclick="cpStart()">시작! ▶</button>
+      </div>`;
+    }
+    const exEscC = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function cpSet(k, v) {
+      const s = cpLoad();
+      if (k === 'pool' && cpPoolOf(v).length < 4) { cpSay(v === 'town' ? '마을 친구가 네 마리보다 적어요. 스티커를 모아서 친구를 더 데려와요!' : '찜한 친구가 네 마리보다 적어요. 도감에서 별을 눌러 찜해 봐요!'); return; }
+      s[k] = v; cpSave(); playTone(620, .05); cpHome();
+    }
+    function cpStart() {
+      const s = cpLoad(); let pool = cpPoolOf(s.pool);
+      if (pool.length < 4) pool = cpPoolOf('kid');
+      let size = s.size; while (size > pool.length && size > 4) size /= 2;
+      // 마을 친구 · 찜이 모자라면 아이 수준 친구로 채워요
+      let pick = fdShuffle(pool).slice(0, size);
+      if (pick.length < size) pick = pick.concat(fdShuffle(cpPoolOf('kid').filter(n => !pick.includes(n))).slice(0, size - pick.length));
+      cpG = { size, round: pick, next: [], i: 0, hist: [], semis: [], t0: Date.now(), pool: s.pool };
+      cpSay(`포켓몬 이상형 월드컵, ${CP_ROUND(size)} 시작! 더 좋은 친구를 골라요.`);
+      cpMatch();
+    }
+    function cpMatch() {
+      const g = cpG, el = document.getElementById('cp-root');
+      if (g.i >= g.round.length) {
+        if (g.next.length === 1) return cpWin(g.next[0]);
+        if (g.next.length === 2) g.semis = g.round.slice();
+        g.round = g.next; g.next = []; g.i = 0;
+        cpSay(g.round.length === 2 ? '두근두근, 결승이에요!' : `${CP_ROUND(g.round.length)}이에요!`);
+      }
+      const a = g.round[g.i], b = g.round[g.i + 1], left = g.round.length, k = g.i / 2 + 1, tot = left / 2;
+      [g.round[g.i + 2], g.round[g.i + 3]].forEach(n => { if (n) { const im = new Image(); im.src = getPokemonArtworkUrl(n); } });
+      const card = (n, side) => `<button class="cp-card" data-n="${n}" onclick="cpChoose(${n}, this)">
+          <div class="cp-img">${rwImg(n)}</div><b>${cpName(n)}</b>
+          <div class="cp-tys">${cpTypes(n).map(t => `<span style="background:${TYPE_COLORS[t] || '#94a3b8'}">${t}</span>`).join('')}</div></button>`;
+      el.innerHTML = `<div class="cp-match ${left === 2 ? 'final' : ''}">
+        <div class="cp-bar"><button class="cp-x" onclick="cpQuit()">✕</button><b>${left === 2 ? '🏆 결승' : CP_ROUND(left)}</b><span>${left === 2 ? '' : `${k} / ${tot}`}</span>
+          <div class="cp-dots">${Array.from({ length: tot }, (_, i) => `<i class="${i < k - 1 ? 'done' : i === k - 1 ? 'now' : ''}"></i>`).join('')}</div>
+          <button class="cp-undo" onclick="cpUndo()" ${g.hist.length ? '' : 'disabled'}>↩</button></div>
+        <div class="cp-vs">${card(a)}<div class="cp-vs-mark">VS</div>${card(b)}</div>
+        <p class="cp-q">누가 더 좋아요?</p>
+      </div>`;
+      cpSay(`${cpName(a)}, ${cpName(b)}. 누가 더 좋아요?`);
+    }
+    function cpChoose(n, btn) {
+      const g = cpG; if (!g || g.lock) return; g.lock = 1;
+      const a = g.round[g.i], b = g.round[g.i + 1];
+      btn.classList.add('win'); document.querySelectorAll('.cp-card').forEach(c => { if (c !== btn) c.classList.add('lose'); });
+      playTone(780, .06);
+      g.hist.push({ round: g.round.slice(), next: g.next.slice(), i: g.i, semis: g.semis.slice() });
+      g.next.push(n); g.i += 2;
+      cpSay(cpName(n) + '!');
+      setTimeout(() => { g.lock = 0; cpMatch(); }, 750);
+    }
+    function cpUndo() {
+      const g = cpG; if (!g || !g.hist.length || g.lock) return;
+      const h = g.hist.pop(); Object.assign(g, { round: h.round, next: h.next, i: h.i, semis: h.semis }); cpMatch();
+    }
+    function cpQuit() { cpG = null; try { window.speechSynthesis.cancel(); } catch (e) {} cpHome(); }
+    function cpWin(n) {
+      const g = cpG, s = cpLoad(), el = document.getElementById('cp-root');
+      const runner = g.round.find(x => x !== n), four = (g.semis || []).filter(x => x !== n && x !== runner);
+      s.wins[n] = (s.wins[n] || 0) + 1; if (runner) s.finals[runner] = (s.finals[runner] || 0) + 1;
+      s.hist.unshift({ n, r: runner, t: Date.now(), z: g.size, p: g.pool }); s.hist = s.hist.slice(0, 30); cpSave();
+      const nm = typeof kpName === 'function' ? kpName() : '', name = cpName(n);
+      const isRes = typeof twResidents === 'function' && twResidents().includes(n);
+      if (isRes) twAddLove(n, 3);
+      const conf = Array.from({ length: 28 }, (_, i) => `<i style="left:${(i * 37) % 100}%;animation-delay:${(i % 7) * .18}s;background:${['#f43f5e', '#f59e0b', '#22c55e', '#0ea5e9', '#a855f7'][i % 5]}"></i>`).join('');
+      el.innerHTML = `<div class="cp-win">
+        <div class="cp-conf">${conf}</div>
+        <div class="cp-crown">👑</div>
+        <div class="cp-win-img">${rwImg(n)}</div>
+        <div class="cp-win-name">${name}</div>
+        <p class="cp-win-msg">${nm ? exEscC(nm) + '의 ' : ''}최애 포켓몬은 ${name}! ${s.wins[n] > 1 ? `벌써 ${s.wins[n]}번째 우승이에요.` : ''}</p>
+        ${runner ? `<div class="cp-podium"><div>${rwImg(runner)}<span>🥈 ${cpName(runner)}</span></div>${four.map(x => `<div>${rwImg(x)}<span>🥉 ${cpName(x)}</span></div>`).join('')}</div>` : ''}
+        <div class="cp-acts">
+          <button class="fd-btn" onclick="cpFav(${n}, this)">${favoritesSet.has(n) ? '⭐ 찜했어요' : '☆ 찜하기'}</button>
+          ${isRes ? `<button class="fd-btn" onclick="twFocus(${n})">🏡 마을에서 보기</button>` : ''}
+          <button class="fd-btn" onclick="openColoringForPokemon(${n})">🎨 색칠하기</button>
+        </div>
+        <button class="cp-go" onclick="cpStart()">한 번 더! 🔁</button>
+        <button class="cp-home-btn" onclick="cpHome()">처음으로</button>
+      </div>`;
+      playSuccessChime();
+      cpSay(`우승은 ${name}! ${nm ? nm + '의 ' : ''}최애 포켓몬은 ${name}${sbJosa(name, '이')}에요!${isRes ? ` 마을의 ${name}${sbJosa(name, '이')} 무척 기뻐해요.` : ''}`);
+      setTimeout(() => { try { kpSticker([n], 'cup'); } catch (e) { const c = rwGive([n], 'cup'); if (c.length) rwShowCards(c); } }, 2200);
+    }
+    function cpFav(n, btn) { if (!favoritesSet.has(n)) toggleFavorite(n); btn.textContent = '⭐ 찜했어요'; }
+
+    Object.assign(RW_SRC, { cup: ['🏆', '이상형 월드컵'] });
+    if (typeof EX_CAT !== 'undefined') EX_CAT.play.src.push('cup');
+    (function () {
+      const sw = switchMainView;
+      switchMainView = function (v) { const r = sw.apply(this, arguments); if (v === 'cup' && !cpG) cpHome(); return r; };
+    })();
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
