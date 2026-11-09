@@ -776,6 +776,7 @@
     .cc-stat b { font-weight: normal; color: #be123c; }
     .cc-stat .cr-bar { margin: .25rem auto .1rem; max-width: 18rem; }
     .cc-mv:disabled { opacity: .45; }
+    .cc-sv { font-size: .62rem; color: #be123c; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-rose-200">
@@ -14038,7 +14039,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     function twResidents() {
       rwLoad();
       const out = [25];
-      try { if (typeof fdS !== 'undefined' && fdS && fdS.care && fdS.care.form) out.push(fdS.care.form); } catch (e) {}
+      try { if (typeof fdS !== 'undefined' && fdS && fdS.care && fdS.care.form) out.push(fdS.care.form); Object.values((fdS && fdS.careAll) || {}).forEach(c => c && c.form && out.push(c.form)); } catch (e) {}   // 예전에 돌본 친구도 마을에 살아요
       [...rwS.cards].reverse().forEach(c => out.push(c.n));
       (rwS.caught || []).slice().reverse().forEach(n => out.push(n));
       return [...new Set(out)];
@@ -15206,6 +15207,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const forms = ccForms(c);
       fdBottom((ready ? `<button class="fd-btn fd-primary" onclick="crEvolve()">✨ 진화하기</button>${c.noAsk ? '' : '<button class="fd-btn" onclick="crStay()">지금 모습이 좋아요</button>'}` : '')
         + (forms.length > 1 ? `<button class="fd-btn" onclick="ccPickForm()">🔁 모습 바꾸기</button>` : '')
+        + `<button class="fd-btn" onclick="ccSwap()">🤝 친구 바꾸기</button>`
         + (typeof exDecor === 'function' ? `<button class="fd-btn ex-decor-btn" onclick="exDecor()">🎀 꾸미기</button>` : '')
         + (typeof rnGo === 'function' ? `<button class="fd-btn" onclick="rnGo('town')">🏡 마을로</button>` : ''));
       ccFit();
@@ -15449,6 +15451,26 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     }
     function ccSetForm(m) { const c = crState(); c.forms = ccForms(c); c.form = m; fdSave(); document.getElementById('rw-ov').classList.add('hidden'); fdSay(fdPkName(m) + '!'); crHome(true); }
     function ccStay() { const c = crState(); c.noAsk = true; fdSave(); fdSay('그래요, 지금 모습 그대로 지내요. 진화하고 싶을 때 진화하기 버튼을 눌러요.'); crHome(true); }
+
+    // 돌보기 친구 바꾸기: 지금 친구의 하트 · 진화는 그대로 저장되고, 다시 고르면 이어서 키워요
+    function ccSwap() {
+      const c = crState(), all = fdS.careAll || {}, ov = document.getElementById('rw-ov');
+      ov.innerHTML = `<div class="rw-box tw-box"><div class="rw-head">🤝 누구랑 지낼까요?</div>
+        <div class="kp-kb-grid">${CR_LINES.map((l, i) => { const sv = i === c.line ? c : all[i]; const f = sv ? sv.form : l[0];
+          return `<button class="kp-kb-pk ${i === c.line ? 'on' : ''}" onclick="ccSwapTo(${i})">${rwImg(f)}<span>${fdPkName(f)}</span>${sv ? `<small class="cc-sv">❤ ${sv.hearts} · ${sv.days || 1}일</small>` : '<small class="cc-sv">새 친구</small>'}</button>`; }).join('')}</div>
+        <p class="rw-tip">지금 친구의 하트와 진화는 그대로 남아요. 다시 고르면 이어서 함께 지내요. 함께 지낸 친구들은 모두 마을에서 살아요.</p>
+        <button class="fd-btn" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
+      ov.classList.remove('hidden');
+      fdSay('누구랑 함께 지낼까요? 지금 친구의 하트는 그대로 남아요.');
+    }
+    function ccSwapTo(i) {
+      const c = crState(); document.getElementById('rw-ov').classList.add('hidden');
+      if (i === c.line) return;
+      fdS.careAll = fdS.careAll || {}; fdS.careAll[c.line] = c;
+      const sv = fdS.careAll[i];
+      if (sv) { fdS.care = sv; delete fdS.careAll[i]; fdSave(); const nm = fdPkName(sv.form); playSuccessChime(); fdSay(`${nm}${sbJosa(nm, '이')} 돌아왔어요! 다시 같이 지내요.`); return crHome(true); }
+      crPick(i);
+    }
     // 예전 돌보기 화면을 도트 화면으로 바꿔 끼워요 (하트 · 진화 · 스티커 규칙은 그대로)
     (function () {
       if (typeof crHome !== 'function') return;
