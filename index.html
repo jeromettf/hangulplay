@@ -694,6 +694,28 @@
     .tw-forms button.on { border-color: #f43f5e; background: #fff1f2; }
     .rw-mini { position: relative; }
     .rw-evo { position: absolute; top: 0; right: .1rem; font-size: .9rem; animation: kp-pulse 1.2s infinite; }
+    /* ===== 마을 넓히기 ===== */
+    .tx-lock { position: absolute; translate: -50% -50%; background: rgba(255,255,255,.95); border: 3px solid #3a3a52; border-radius: 14px; padding: 4px 12px; font-family: Jua, sans-serif; font-size: 17px; color: #334155; white-space: nowrap; text-align: center; box-shadow: 0 3px 0 rgba(0,0,0,.2); display: flex; flex-direction: column; align-items: center; }
+    .tx-lock small { font-size: 12px; color: #64748b; }
+    .tx-learn { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; width: 100%; }
+    .tx-learn button { flex: 1 1 8rem; display: flex; flex-direction: column; align-items: center; gap: .1rem; background: #f8fafc; border: 3px solid #e2e8f0; border-radius: 1rem; padding: .6rem .4rem; font-family: Jua, sans-serif; font-size: 1rem; color: #334155; }
+    .tx-learn button span { font-size: 1.8rem; }
+    .tx-learn button:active { transform: scale(.95); border-color: #3b82f6; }
+    .tx-shot { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff; border: 0; font-family: Jua, sans-serif; font-size: .95rem; animation: kp-pulse 1.2s infinite; }
+    .tx-photo { width: 100%; max-height: 55vh; object-fit: contain; border-radius: .6rem; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+    .tx-mus { max-height: 86vh; overflow-y: auto; }
+    .tx-mus h4 { align-self: flex-start; font-family: Jua, sans-serif; font-weight: normal; color: #475569; margin: .3rem 0 0; }
+    .tx-mus-row { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; width: 100%; }
+    .tx-mus-row > div { display: flex; flex-direction: column; align-items: center; width: 5.2rem; background: #fffbeb; border: 3px solid #fde68a; border-radius: .9rem; padding: .2rem; font-family: Jua, sans-serif; font-size: .75rem; color: #334155; }
+    .tx-mus-row img, .tx-mus-evo img { width: 3.6rem; height: 3.6rem; object-fit: contain; }
+    .tx-mus-row small { color: #b45309; }
+    .tx-mus-evo { display: flex; align-items: center; justify-content: center; gap: .2rem; color: #f59e0b; }
+    .tx-map { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; width: 100%; }
+    .tx-map button { display: flex; flex-direction: column; align-items: center; background: #f0fdf4; border: 3px solid #bbf7d0; border-radius: 1rem; padding: .5rem .3rem; font-family: Jua, sans-serif; color: #334155; }
+    .tx-map button span { font-size: 1.7rem; }
+    .tx-map button b { font-weight: normal; }
+    .tx-map button small { font-size: .7rem; color: #64748b; }
+    .tx-map button.off { background: #f1f5f9; border-color: #e2e8f0; }
 </style>
 <style>
     /* ===== 포켓몬 이상형 월드컵 ===== */
@@ -14029,7 +14051,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
      *  - 마을 상태는 이 기기에 저장돼요 (⚙️ 메뉴에서 백업 파일로도 저장)
      * ==============================================================
      */
-    const TW_KEY = 'pkmn_town_v1', TW_TS = 16, TW_MW = 40, TW_MH = 26, TW_PW = 640, TW_PH = 416;
+    const TW_KEY = 'pkmn_town_v1', TW_TS = 16, TW_MW = 64, TW_MH = 44, TW_PW = 1024, TW_PH = 704;   // 마을이 넓어졌어요: 공부 거리 · 바닷가 · 숲 · 산
     const TW_RAW = 'https://raw.githubusercontent.com/jeromettf/hangulplay/main/';
     const TW_NO_OW = new Set([494, 521, 550, 585, 586, 593]);   // 1~5세대 중 걷기 그림이 없는 친구
     const TW_ITEMS = {
@@ -14038,14 +14060,18 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       arena: { n: '배틀 경기장', cat: 'build' }, flower: { n: '꽃밭', cat: 'deco', max: 4 }, stone: { n: '변하지 않는 돌', cat: 'deco' },
       f_peach: { n: '복숭아', cat: 'food', food: 'peach' }, f_banana: { n: '바나나', cat: 'food', food: 'banana' }, f_honey: { n: '꿀단지', cat: 'food', food: 'honey' },
       f_cookie: { n: '쿠키', cat: 'food', food: 'cookie' }, f_cake: { n: '컵케이크', cat: 'food', food: 'cake' }, f_ice: { n: '아이스크림', cat: 'food', food: 'ice' },
-      picnic: { n: '소풍 바구니', cat: 'event' }
+      picnic: { n: '소풍 바구니', cat: 'event' },
+      photo: { n: '사진관', cat: 'build', reg: 'study' }, museum: { n: '박물관', cat: 'build', reg: 'study' },
+      balloon: { n: '열기구', cat: 'ride', reg: 'beach' }, windmill: { n: '풍차', cat: 'build', reg: 'beach' }, stage: { n: '무대', cat: 'build', reg: 'beach' },
+      green: { n: '온실', cat: 'build', reg: 'forest' }, camp: { n: '모닥불 캠프', cat: 'deco', reg: 'forest' }, carousel: { n: '회전목마', cat: 'ride', reg: 'forest' },
+      cave: { n: '동굴', cat: 'build', reg: 'mount' }, ferris: { n: '관람차', cat: 'ride', reg: 'mount' }, train: { n: '미니 기차', cat: 'ride', reg: 'mount' }
     };
     // 먹이 종류: 사과 · 파란 열매는 처음부터, 나머지는 선물 상자에서. 친구마다 좋아하는 먹이가 있어요
     const TW_FOODS = [['apple', '사과'], ['blue', '파란 열매'], ['peach', '복숭아'], ['banana', '바나나'], ['honey', '꿀'], ['cookie', '쿠키'], ['cake', '컵케이크'], ['ice', '아이스크림']];
     const twFoodName = k => (TW_FOODS.find(f => f[0] === k) || [k, k])[1];
     const twFoodsOwned = () => TW_FOODS.map(f => f[0]).filter(k => k === 'apple' || k === 'blue' || twLoad().own['f_' + ({ ice: 'ice' }[k] || k)]);
     const twFav = n => TW_FOODS[(n * 7 + 3) % TW_FOODS.length][0];
-    const TW_FLOWER_SPOTS = [[3, 9], [26, 5], [15, 20], [36, 12]];
+    const TW_FLOWER_SPOTS = [[3, 9], [26, 5], [15, 20], [31, 14]];
     let twS = null;
     function twLoad() {
       if (twS) return twS;
@@ -14209,7 +14235,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     function twIcon(k) {
       const A = twInitArt();
       if (TW_ITEMS[k] && TW_ITEMS[k].food) return twMk(64, 64, x => { x.imageSmoothingEnabled = false; x.drawImage(A.food8[TW_ITEMS[k].food], 4, 4, 56, 56); }).toDataURL();
-      const src = { picnic: A.picnic, stone: A.stone, slide: A.slide, seesaw: null, tramp: A.tramp, berry: A.berry, field: A.field[2], bowl: A.bowlFull, arena: A.arena, flower: A.flower, friend: null }[k];
+      const src = ({ picnic: A.picnic, stone: A.stone, slide: A.slide, seesaw: null, tramp: A.tramp, berry: A.berry, field: A.field[2], bowl: A.bowlFull, arena: A.arena, flower: A.flower, friend: null })[k] || (txArt()['ic_' + k] || txArt()[k]);
       const c = twMk(64, 64, x => {
         x.imageSmoothingEnabled = false;
         if (k === 'friend') { x.drawImage(A.ball, 8, 8, 48, 48); twP(x, 26, 20, '#fff', 0, 0); return; }
@@ -14222,7 +14248,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
 
     /* ---------- 지도 만들기 ---------- */
     let twTile, twBlock, twObjs, twGround, twTall, twFount, twSwing, twSlide, twSaw, twBerry, twField, twBowl, twArena, twTramp, twHouse;
-    const TW_SPOT = { slide: [29, 4], seesaw: [11, 16], tramp: [4.5, 15.6], berry: [34, 7], field: [22, 19], bowl: [17, 19], arena: [3, 20] };
+    const TW_SPOT = { slide: [29, 4], seesaw: [11, 16], tramp: [4.5, 15.6], berry: [34, 7], field: [22, 19], bowl: [17, 19], arena: [3, 20], photo: [22, 26], museum: [27, 25], balloon: [42, 5], windmill: [47, 4], stage: [42, 16], green: [3, 36], camp: [11, 38], carousel: [26, 36], cave: [53, 24], ferris: [41, 31], train: [53, 33] };
     function twBuild() {
       const A = twInitArt(), s = twLoad();
       const T = twTile = Array.from({ length: TW_MH }, () => Array(TW_MW).fill(0));
@@ -14239,6 +14265,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       }
       for (let y = 20; y <= 23; y++) for (let x = 11; x <= 15; x++) if (!(x === 11 && y === 20)) T[y][x] = 4;
       [[37, 9], [36, 8], [25, 23], [26, 23], [9, 24], [10, 24]].forEach(([x, y]) => T[y][x] = 3);
+      txTiles(T);
       for (let x = 0; x < TW_MW; x++) B[0][x] = B[1][x] = B[2][x] = B[3][x] = 1;
       for (let y = 0; y < TW_MH; y++) B[y][0] = B[y][TW_MW - 1] = 1;
       for (let y = 0; y < TW_MH; y++) for (let x = 0; x < TW_MW; x++) if (T[y][x] === 2) B[y][x] = 2;
@@ -14246,10 +14273,14 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const place = (img, tx, ty, opt = {}) => { const o = Object.assign({ img, x: tx * TW_TS + (opt.ox || 0), y: ty * TW_TS + (opt.oy || 0) }, opt); o.foot = o.foot || (o.y + img.height); twObjs.push(o); (opt.blocks || []).forEach(([a, b]) => { const yy = Math.floor(ty) + b, xx = Math.floor(tx) + a; if (B[yy]) B[yy][xx] = 1; }); return o; };
       twObjs.place = place;
       const trees = [];
-      for (let x = -1; x < TW_MW; x += 2) { trees.push([x, 0]); trees.push([x + 1, 2]); }
-      for (let y = 4; y < TW_MH; y += 2) { trees.push([-1, y]); trees.push([38, y + 1]); }
-      for (let y = 24; y < TW_MH; y += 2) for (const x of [1, 35]) trees.push([x, y]);
-      trees.push([2, 4], [36, 4], [16, 3], [23, 3], [33, 3]);
+      for (let x = -1; x < 51; x += 2) { trees.push([x, 0]); trees.push([x + 1, 2]); }   // 오른쪽 위는 바다
+      for (let y = 4; y < TW_MH; y += 2) trees.push([-1, y]);
+      for (let y = 22; y < TW_MH; y += 2) trees.push([62, y]);
+      for (let x = 1; x < 62; x += 2) trees.push([x, 42]);
+      for (let y = 4; y < 42; y += 2) if (y !== 12 && y !== 28 && y !== 30) trees.push([38, y]);   // 바닷가 · 산으로 가는 길만 비워요
+      for (let x = 1; x < 38; x += 2) if (x !== 19) trees.push([x, 34]);   // 숲으로 가는 길
+      for (let x = 40; x < 62; x += 2) if (x !== 50) trees.push([x, 22]);   // 바닷가 ↔ 산
+      trees.push([2, 4], [36, 4], [16, 3], [23, 3], [33, 3], [8, 36], [15, 36], [22, 39], [33, 37], [36, 40]);
       trees.forEach(([tx, ty]) => place(A.tree, tx, ty, { blocks: [[0, 0], [1, 0], [0, 1], [1, 1]] }));
       twFount = place(A.fountain, 18.5, 9.5, {}); for (let y = 10; y <= 12; y++) for (let x = 18; x <= 21; x++) B[y][x] = 1;
       twHouse = place(A.house, 10, 3.5, { house: 1 }); for (let y = 4; y <= 7; y++) for (let x = 10; x <= 13; x++) B[y][x] = 1;
@@ -14272,6 +14303,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       for (let y = LY; y < LY + LH; y++) { place(A.fenceV, LX - 1, y, { blocks: [[0, 0]] }); place(A.fenceV, LX + LW, y, { blocks: [[0, 0]] }); }
       if (twHas('tramp')) { twTramp = place(A.tramp, 4.5, 15.6, {}); twTramp.busy = null; twTramp.foot = 17.6 * 16; } else lot('tramp', 5, 15.6);
       for (let i = 0; i < s.flower; i++) { const [fx, fy] = TW_FLOWER_SPOTS[i]; place(A.flower, fx, fy, { foot: fy * 16 + 2 }); }
+      txBuild(place, T, B);
       twGround = [0, 1].map(ph => twDrawGround(ph));
       twTall = [0, 1].map(ph => twMk(16, 8, x => { for (let k = 0; k < 2; k++) { const a = k * 8, o = ph && k % 2 ? 1 : 0; twP(x, a + 1, 2, TC.t2, 6, 6); twP(x, a + o, 1, TC.t3, 2, 3); twP(x, a + 3 + o, 0, TC.t3, 2, 4); twP(x, a + 6 + o, 1, TC.t3, 1, 3); twP(x, a + 1, 7, TC.t1, 6, 1); } }));
     }
@@ -14297,6 +14329,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
           if (t === 1) { twP(x, X, Y, TC.s, 16, 16); for (let k = 0; k < 4; k++) twP(x, X + Math.floor(r() * 15), Y + Math.floor(r() * 15), TC.s3); edges(1, TC.g, TC.s2, TC.s2, 6, 2); }
           else if (t === 2) { twP(x, X, Y, TC.w, 16, 16); for (let k = 0; k < 2; k++) { const a = (Math.floor(r() * 10) + phase * 3) % 12, b = Math.floor(r() * 13); twP(x, X + a, Y + b, TC.w3, 4, 1); twP(x, X + a + 1, Y + b + 1, TC.w2, 3, 1); } edges(2, TC.s, TC.wd, TC.w3, 7, 3); }
           else if (t === 3) { [[3, 4, '#f87171'], [10, 3, '#fde047'], [6, 10, '#fff'], [12, 11, '#f9a8d4']].forEach(([a, b, c]) => { const o = phase && (a + b) % 2 ? 1 : 0; twP(x, a + X, b + Y + 3, TC.gd, 1, 3); twP(x, a + X - 1 + o, b + Y, c, 3, 1); twP(x, a + X + o, b + Y - 1, c, 1, 3); twP(x, a + X + o, b + Y, '#f59e0b'); }); }
+          else if (t === 5) { twP(x, X, Y, TC.s, 16, 16); for (let k = 0; k < 5; k++) twP(x, X + Math.floor(r() * 15), Y + Math.floor(r() * 15), k % 2 ? TC.s3 : TC.s2); if (r() < .06) { twP(x, X + 5, Y + 6, '#fda4af', 3, 2); twP(x, X + 6, Y + 5, '#fecdd3', 1, 1); } }
+          else if (t === 6) { for (let k = 0; k < 3; k++) { const a = Math.floor(r() * 13), b = Math.floor(r() * 13); twP(x, X + a, Y + b, '#9ca3af', 3, 2); twP(x, X + a, Y + b, '#d1d5db', 2, 1); } }
           else if (t === 4) { for (let k = 0; k < 4; k++) { const a = (k % 2) * 8, b = Math.floor(k / 2) * 8, o = phase && (k + tx + ty) % 2 ? 1 : 0; twP(x, X + a + 1, Y + b + 2, TC.t2, 6, 6); twP(x, X + a + o, Y + b + 1, TC.t3, 2, 3); twP(x, X + a + 3 + o, Y + b + (k + tx) % 2, TC.t3, 2, 4); twP(x, X + a + 6 + o, Y + b + 1, TC.t3, 1, 3); twP(x, X + a + 1, Y + b + 7, TC.t1, 6, 1); } }
         }
       });
@@ -14309,9 +14343,11 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       if (twSheets[k]) return twSheets[k];
       const im = new Image(); const o = twSheets[k] = { im, ow: n <= 649 && !TW_NO_OW.has(n), ok: false };
       const base = /^https?:$/.test(location.protocol) && !/localhost|127\.0/.test(location.hostname) ? '' : TW_RAW;
+      // 다른 주소의 그림은 CORS로 받아야 사진관에서 마을 사진을 저장할 수 있어요 (?c=1: 예전 캐시와 겹치지 않게)
+      const cors = u => { if (/^https?:/.test(u) && !u.startsWith(location.origin)) { im.crossOrigin = 'anonymous'; return u + '?c=1'; } im.removeAttribute('crossorigin'); return u; };
       im.onload = () => { o.ok = true; };
-      im.onerror = () => { if (o.ow) { o.ow = false; im.src = getPokemonPixelUrl(n); } else o.fail = true; };
-      im.src = o.ow ? `${base}ow/${shiny ? 's/' : ''}${n}.png` : getPokemonPixelUrl(n);
+      im.onerror = () => { if (o.ow) { o.ow = false; im.src = cors(getPokemonPixelUrl(n)); } else o.fail = true; };
+      im.src = cors(o.ow ? `${base}ow/${shiny ? 's/' : ''}${n}.png` : getPokemonPixelUrl(n));
       return o;
     }
     const TW_DIR = { down: 0, left: 1, right: 2, up: 3 };
@@ -14413,7 +14449,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       T.busy = null; twBack(a, 5, 18); twAddLove(a.n); return true;
     }
     async function twPondPlay(a) {
-      const c = []; for (let y = 17; y <= 22; y++) for (let x = 27; x <= 37; x++) if (twTile[y][x] === 2 && !twOcc.has(twKey(x, y))) c.push([x, y]);
+      const c = []; for (let y = Math.max(0, a.ty - 12); y <= Math.min(TW_MH - 1, a.ty + 12); y++) for (let x = Math.max(0, a.tx - 12); x <= Math.min(TW_MW - 1, a.tx + 12); x++) if (twBlock[y][x] === 2 && !twOcc.has(twKey(x, y))) c.push([x, y]);
       if (!c.length) return false; const [x, y] = twPick(c); if (!await a.goTo(x, y)) return false;
       a.emote('note', 1200);
       for (let k = 0; k < 3; k++) { const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [a.tx + dx, a.ty + dy]).filter(([p, q]) => twTile[q] && twTile[q][p] === 2 && a.free(p, q)); if (n.length) await a.stepTo(...twPick(n), 400); await twWait(400); }
@@ -14545,7 +14581,8 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         if (br) done = await twEat(a, br);
         else if (a.big && Math.random() < .5) { a.sleep = true; a.emo = 'zz'; await twWait(twRnd(6000, 10000)); a.sleep = false; a.emo = null; done = true; }
         else {
-          const r = Math.random();
+          if (Math.random() < .45) done = await txPlay(a);   // 새 시설 · 좋아하는 곳
+          const r = done ? 1 : Math.random();
           const opts = a.water ? [[.4, twPondPlay], [.55, twSwingPlay], [.65, twSlidePlay], [.8, twMeet]] : [[.14, twSwingPlay], [.28, twSlidePlay], [.4, twSawPlay], [.52, twTrampPlay], [.64, twSpar], [.74, twMeet]];
           const o = opts.find(([p]) => r < p); if (o) done = await o[1](a);
         }
@@ -14586,6 +14623,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       ctx.drawImage(twGround[Math.floor(t / 600) % 2], 0, 0);
       const list = [];
       twObjs.forEach(o => list.push({ f: o.foot, d: () => {
+        if (o.txd) return o.txd(ctx, t, o);
         if (o === twSaw) { ctx.drawImage(o.img, o.x, o.y); const tilt = o.go ? Math.round(Math.sin(t / 220) * 4) : (o.busy.length === 1 ? 4 * (o.busy[0].side ? -1 : 1) : 0); twLine(ctx, o.x + 4, o.y + 8 + tilt, o.x + 60, o.y + 8 - tilt, TC.ol, 3); twLine(ctx, o.x + 5, o.y + 8 + tilt, o.x + 59, o.y + 8 - tilt, '#f43f5e', 2); twP(ctx, o.x + 4, o.y + 4 + tilt, TC.ol, 3, 4); twP(ctx, o.x + 57, o.y + 4 - tilt, TC.ol, 3, 4); o.tilt = tilt; return; }
         if (o === twTramp) { ctx.drawImage(o.img, o.x, o.y + (o.press ? 1 : 0)); return; }
         if (o.field) { const f = twLoad().field; o.img = A.field[!f ? 0 : f.day < twDay() ? 2 : 1]; }
@@ -14604,14 +14642,17 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         } });
       });
       twActors.forEach(a => {
+        if (a.inside || (a.ride && a.ride.txRide)) return;   // 건물 안 · 새 놀이기구는 그 시설이 그려요
         if (a.ride && twSwing.seats.includes(a.ride)) return;
         if (a.ride && a.ride === twSaw) { a.y = twSaw.y + 7 + (a.side ? -twSaw.tilt : twSaw.tilt); list.push({ f: twSaw.foot + 1, d: () => a.draw(ctx) }); return; }
         if (a.ride && (a.ride === twSlide || a.ride === twTramp)) { list.push({ f: a.ride.foot + 1, d: () => a.draw(ctx) }); return; }
         list.push({ f: a.y, d: () => a.draw(ctx) });
       });
       twBerries.forEach(b => { if (b.bowl || b.pic) return; list.push({ f: b.fall < 1 ? 999 : b.ty * 16 + 14, d: () => { const k = b.fall, x = b.x + (b.tx0 - b.x) * k, y = b.y + (b.ty0 - b.y) * k * k; twP(ctx, Math.round(x) - 2, Math.round(y) - 2, TC.ol, 5, 5); twP(ctx, Math.round(x) - 2, Math.round(y) - 2, b.c || '#e83050', 4, 4); twP(ctx, Math.round(x) - 2, Math.round(y) - 2, '#fff'); } }); });
+      txDraw(list, t);
       list.sort((p, q) => p.f - q.f).forEach(i => i.d());
       twDrawBattle(ctx, t);
+      txDrawTop(ctx, t);
       if (twNightK > 0) {
         ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(40,48,120,${.62 * twNightK})`; ctx.fillRect(0, 0, TW_PW, TW_PH);
         ctx.globalCompositeOperation = 'lighter';
@@ -14619,6 +14660,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         twObjs.filter(o => o.lamp).forEach(o => glow(o.x + 8, o.y + 8, 36, '255,220,130'));
         glow(twFount.x + 24, twFount.y + 28, 40, '120,200,255');
         glow(twHouse.x + 16, twHouse.y + 41, 14, '255,220,130'); glow(twHouse.x + 48, twHouse.y + 41, 14, '255,220,130');
+        txGlow(glow);
         ctx.restore();
       }
       document.querySelectorAll('#tw-over .tw-name').forEach(el => { const a = el._a; el.style.left = a.x * twS2 + 'px'; el.style.top = ((a.top || a.y - 30) - 2) * twS2 + 'px'; });
@@ -14647,6 +14689,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       box.innerHTML = `<div class="rw-bar tw-bar"></div>
         ${n ? `<button class="tw-btn tw-gift" onclick="twOpenPending()">🎁<b>${n}</b></button>` : ''}
         <button class="tw-btn" onclick="twScrollTo(20, 12.5)" title="광장으로">🧭</button>
+        <button class="tw-btn" onclick="txMap()" title="마을 지도">🗺️</button>${txShotBtn()}
         <button class="tw-btn" onclick="rwShowAlbum()" title="주민 명부">📒</button>
         <button class="tw-btn" onclick="twToggleNight()" title="낮과 밤">${twNight ? '☀️' : '🌙'}</button>`;
       rwRenderBars();
@@ -14715,6 +14758,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
         return;
       }
       const o = twObjs.filter(o => px >= o.x && px < o.x + o.img.width && py >= o.y && py < o.y + o.img.height && (o.lot || o.field || o.bowl || o.arena || o.house || o.townSign || o === twBerry)).sort((p, q) => q.foot - p.foot)[0];
+      if (txTapAt(px, py, o)) return;
       if (!o) return;
       if (o.lot) { twSay(`여기에는 선물로 ${TW_ITEMS[o.lot].n}${sbJosa(TW_ITEMS[o.lot].n, '이')} 생길 수 있어요. 스티커 열 개를 모아 봐요!`); twToast(`❓ 선물로 ${TW_ITEMS[o.lot].n} 자리`); return; }
       if (o === twBerry) return twDropBerry();
@@ -14771,7 +14815,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     }
     /* ---------- 선물 상자 ---------- */
     function twBoxOptions() {
-      const cats = {}; Object.keys(TW_ITEMS).filter(k => TW_ITEMS[k].cat !== 'event' && twAvail(k)).forEach(k => (cats[TW_ITEMS[k].cat] = cats[TW_ITEMS[k].cat] || []).push(k));
+      const cats = {}; Object.keys(TW_ITEMS).filter(k => TW_ITEMS[k].cat !== 'event' && twAvail(k) && txOpen(TW_ITEMS[k].reg)).forEach(k => (cats[TW_ITEMS[k].cat] = cats[TW_ITEMS[k].cat] || []).push(k));
       const out = [];
       for (const c of fdShuffle(Object.keys(cats))) { if (out.length >= 3) break; out.push(twPick(cats[c])); }
       const rest = fdShuffle(Object.values(cats).flat().filter(k => !out.includes(k)));
@@ -14908,6 +14952,601 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       document.addEventListener('visibilitychange', () => { if (document.hidden && twActive) { twActive = false; } else if (!document.hidden && !document.getElementById('view-town').classList.contains('hidden') && !twActive) { twActive = true; if (!twRaf) twRaf = requestAnimationFrame(twFrame); } });
     })();
     window.addEventListener('load', () => setTimeout(() => { try { twRenderMenu(); } catch (e) {} }, 120));
+    /**
+     * ==============================================================
+     * [포켓몬 마을 넓히기] 공부 거리 · 바닷가 · 숲 · 산
+     *  - 공부 거리: 학교(한글) · 빵집(수학) · 도서관(동화) · 길 찾기 미로(길 코딩)
+     *  - 선물 상자로 마을 시설을 모으면 새 땅이 열려요 (바닷가 3개 · 숲 6개 · 산 10개)
+     *  - 타입마다 좋아하는 곳이 있어요 (물: 바다, 전기: 풍차, 불꽃: 모닥불, 풀·벌레: 온실, 바위·땅: 동굴, 비행: 열기구)
+     * ==============================================================
+     */
+    const TX_REG = {
+      study: { n: '공부 거리', e: '📚', c: [19, 29.5] },
+      beach: { n: '바닷가', e: '🏖️', need: 3, r: [40, 0, 24, 22], c: [48, 12], gate: [[38, 12], [39, 12], [38, 13], [39, 13]] },
+      forest: { n: '숲', e: '🌲', need: 6, r: [0, 36, 38, 8], c: [19, 38.5], gate: [[19, 34], [20, 34], [19, 35], [20, 35]] },
+      mount: { n: '산', e: '⛰️', need: 10, r: [40, 24, 24, 20], c: [51, 32], gate: [[38, 29], [39, 29], [38, 30], [39, 30], [50, 22], [51, 22], [50, 23], [51, 23]] }
+    };
+    const txCount = () => { const s = twLoad(); return Object.keys(s.own).filter(k => s.own[k] && TW_ITEMS[k]).length + (s.flower || 0); };
+    const txOpen = reg => !reg || !TX_REG[reg] || !TX_REG[reg].need || txCount() >= TX_REG[reg].need;
+    const txTypes = n => { const r = OFFICIAL_DEX.rows[n - 1]; return new Set(r ? r[2].map(i => TYPE_NAMES[i]) : []); };
+    // 타입별 좋아하는 곳 (그곳에서 놀면 하트를 두 개 받아요)
+    function txFavOf(n) {
+      const t = txTypes(n);
+      if (t.has('물')) return 'sea'; if (t.has('전기')) return 'windmill'; if (t.has('불꽃')) return 'camp';
+      if (t.has('풀') || t.has('벌레')) return 'green'; if (t.has('바위') || t.has('땅')) return 'cave'; if (t.has('비행')) return 'balloon';
+      return '';
+    }
+    const TX_FAV_NAME = { sea: '바다', windmill: '풍차', camp: '모닥불', green: '온실', cave: '동굴', balloon: '열기구' };
+
+    /* ---------- 그림 ---------- */
+    let txA = null;
+    function txPat(x, rows, ox, oy, cm) { rows.forEach((r, j) => [...r].forEach((ch, i) => { if (ch !== '.' && cm[ch]) twP(x, ox + i, oy + j, cm[ch]); })); }
+    function txHouse(w, h, o) {
+      return twMk(w, h, x => {
+        const rh = o.rh || 18, top = o.top || 0;
+        twDisc(x, w / 2, h - 3, w / 2 - 2, 3, 'rgba(40,72,32,.3)');
+        twP(x, 3, top + rh - 2, TC.ol, w - 6, h - rh - top - 1); twP(x, 4, top + rh - 1, o.wall, w - 8, h - rh - top - 3); twP(x, 4, top + rh - 1, o.wall2, w - 8, 2); twP(x, 4, h - 7, o.base || '#d6cfc0', w - 8, 3);
+        for (let i = 0; i < rh; i++) { const ins = Math.round((rh - i) * .45); twP(x, ins, top + i, TC.ol, w - ins * 2, 1); if (i > 0) twP(x, ins + 1, top + i, (o.stripe ? (Math.floor(ins / 3) + i) % 2 : i % 4 < 2) ? o.roof : o.roof2, w - ins * 2 - 2, 1); }
+        twP(x, 0, top + rh - 2, TC.ol, w, 3); twP(x, 1, top + rh - 1, o.roof2, w - 2, 1);
+        const dw = o.dw || 10, dx = (w - dw) >> 1; twP(x, dx, h - 20, TC.ol, dw, 17); twP(x, dx + 1, h - 19, o.door || '#a8682e', dw - 2, 16); twP(x, dx + dw - 4, h - 12, '#f0c040', 2, 2);
+        (o.win || []).forEach(([a, b]) => { twP(x, a, b, TC.ol, 10, 10); twP(x, a + 1, b + 1, '#a8d8ff', 8, 8); twP(x, a + 4, b + 1, TC.ol, 1, 8); twP(x, a + 1, b + 4, TC.ol, 8, 1); twP(x, a + 2, b + 2, '#fff', 2, 2); });
+      });
+    }
+    const txPlaque = (c, cx, cy, w, h, bg) => { const x = c.getContext('2d'); twP(x, cx - (w >> 1) - 1, cy - 1, TC.ol, w + 2, h + 2); twP(x, cx - (w >> 1), cy, bg, w, h); return x; };
+    function txArt() {
+      if (txA) return txA;
+      twInitArt(); const A = txA = {};
+      const OL = TC.ol;
+      // 학교 (한글)
+      A.school = txHouse(64, 64, { wall: '#fff7e0', wall2: '#fffbef', roof: '#3a6ae0', roof2: '#2850b0', rh: 20, top: 8, win: [[8, 36], [46, 36]], door: '#2850b0' });
+      { const x = A.school.getContext('2d'); twP(x, 25, 0, OL, 14, 12); twP(x, 26, 1, '#fff7e0', 12, 10); twP(x, 24, 0, OL, 16, 2); twP(x, 25, 0, '#e83050', 14, 1); twDisc(x, 32, 6, 3, 3, OL); twDisc(x, 32, 6, 2, 2, '#fde047');
+        txPlaque(A.school, 32, 15, 14, 10, '#fff'); txPat(x, ['XXX.X.', '..X.X.', '..X.XX', '.X..X.', 'X...X.'], 27, 17, { X: '#e83050' }); }
+      // 빵집 (수학)
+      A.bakery = txHouse(48, 48, { wall: '#fde2e4', wall2: '#fff1f2', roof: '#f43f5e', roof2: '#ffffff', rh: 14, stripe: 1, win: [[5, 22]], door: '#c2410c', dw: 9 });
+      { const x = A.bakery.getContext('2d'); twP(x, 30, 21, OL, 14, 11); twP(x, 31, 22, '#fef3c7', 12, 9); [[32, 25], [37, 26]].forEach(([a, b]) => txPat(x, ['.oooo.', 'oOOOOo', 'oOoOOo', '.oooo.'], a, b, { o: '#a16207', O: '#f59e0b' }));
+        txPlaque(A.bakery, 24, 2, 12, 8, '#fff7d6'); txPat(x, ['..oooo..', '.oOOOOo.', 'oOoOoOOo', '.oooooo.'], 20, 4, { o: '#a16207', O: '#f59e0b' }); }
+      // 도서관 (동화)
+      A.library = txHouse(64, 64, { wall: '#e8d5b0', wall2: '#f3e6c8', roof: '#7c3aed', roof2: '#5b21b6', rh: 20, top: 4, win: [[7, 32], [47, 32]], door: '#7c2d12', dw: 12 });
+      { const x = A.library.getContext('2d'); [[18, 30], [42, 30]].forEach(([a, b]) => { twP(x, a, b, OL, 4, 26); twP(x, a + 1, b, '#fff', 2, 26); });
+        txPlaque(A.library, 32, 10, 15, 9, '#fff'); txPat(x, ['XXXX.XXXX', 'XwwwXwwwX', 'XwbbXbbwX', 'XwwwXwwwX', 'XXXXXXXXX'], 28, 12, { X: OL, w: '#fff', b: '#93c5fd' }); }
+      // 사진관
+      A.photo = txHouse(48, 48, { wall: '#fef3c7', wall2: '#fffbeb', roof: '#f59e0b', roof2: '#d97706', rh: 14, win: [[5, 22], [33, 22]], door: '#0e7490', dw: 9 });
+      { const x = A.photo.getContext('2d'); txPlaque(A.photo, 24, 2, 13, 9, '#fff'); txPat(x, ['..XXX....', 'XXXXXXXXX', 'XgggXXggX', 'XggXwXggX', 'XXXXXXXXX'], 20, 4, { X: OL, g: '#475569', w: '#bae6fd' }); }
+      // 박물관
+      A.museum = twMk(64, 64, x => {
+        twDisc(x, 32, 61, 30, 3, 'rgba(40,72,32,.3)');
+        for (let i = 0; i < 16; i++) { twP(x, 30 - i * 2, 4 + i, OL, 4 + i * 4, 1); if (i > 0) twP(x, 31 - i * 2, 4 + i, i < 14 ? '#f1f5f9' : '#cbd5e1', 2 + i * 4, 1); }
+        twP(x, 2, 20, OL, 60, 4); twP(x, 3, 21, '#e2e8f0', 58, 2);
+        twP(x, 6, 24, OL, 52, 30); twP(x, 7, 25, '#f8fafc', 50, 29);
+        [9, 21, 37, 49].forEach(a => { twP(x, a, 25, '#cbd5e1', 6, 28); twP(x, a + 1, 25, '#fff', 2, 28); });
+        twP(x, 27, 34, OL, 10, 20); twP(x, 28, 35, '#92400e', 8, 19);
+        twP(x, 2, 54, OL, 60, 8); twP(x, 3, 55, '#e2e8f0', 58, 3); twP(x, 3, 58, '#cbd5e1', 58, 3);
+        txPat(x, ['YYYYYYY', 'YyyyyyY', '.yyyyy.', '..yyy..', '...y...', '.YYYYY.'], 29, 11, { Y: '#b45309', y: '#fde047' });
+      });
+      // 길 찾기 미로
+      A.maze = twMk(80, 48, x => {
+        const M = ['#.########', '#...#....#', '###.#.##.#', '#...#..#.#', '#.####.#.#', '#......#.#'];
+        M.forEach((r, j) => [...r].forEach((ch, i) => { const X = i * 8, Y = j * 8; if (ch === '#') { twP(x, X, Y, '#2f6a28', 8, 8); twP(x, X, Y, '#4a9a3a', 8, 5); twP(x, X + 1, Y + 1, '#6cbc58', 3, 2); } else { twP(x, X, Y, TC.s, 8, 8); twP(x, X + 3, Y + 4, TC.s3, 2, 1); } }));
+        twP(x, 66, 41, OL, 1, 7); txPat(x, ['XX', 'XXX', 'XX'], 67, 40, { X: '#e83050' });
+        txPat(x, ['..X..', '.XXX.', 'XXXXX'], 10, 1, { X: '#f59e0b' });
+      });
+      // 무대
+      A.stage = twMk(80, 48, x => {
+        twDisc(x, 40, 45, 38, 3, 'rgba(40,72,32,.3)');
+        twP(x, 4, 0, OL, 72, 24); for (let i = 0; i < 70; i += 6) { twP(x, 5 + i, 1, '#dc2626', 6, 22); twP(x, 5 + i, 1, '#f87171', 2, 22); }
+        twP(x, 4, 0, OL, 72, 4); twP(x, 5, 1, '#fde047', 70, 2);
+        twP(x, 0, 22, OL, 80, 20); twP(x, 1, 23, '#d4a373', 78, 12); for (let i = 1; i < 79; i += 13) twP(x, i, 23, '#b07d4f', 1, 12); twP(x, 1, 23, '#e9c39b', 78, 2);
+        twP(x, 1, 35, '#8b5a2b', 78, 6); [10, 70].forEach(a => { twP(x, a - 3, 36, OL, 6, 4); twP(x, a - 2, 37, '#fde047', 4, 2); });
+        [[8, 6], [72, 6]].forEach(([a, b]) => txPat(x, ['..X..', '.XXX.', 'XXXXX', '.X.X.'], a - 2, b, { X: '#fde047' }));
+      });
+      // 열기구
+      A.balloonTop = twMk(48, 50, x => {
+        const C = ['#ef4444', '#fde047', '#3b82f6', '#22c55e', '#f97316'];
+        for (let y = -20; y <= 20; y++) { const hw = Math.round(20 * Math.sqrt(Math.max(0, 1 - (y * y) / 420)) * (y > 6 ? 1 - (y - 6) / 26 : 1)); twP(x, 24 - hw - 1, 21 + y, OL, hw * 2 + 3, 1); for (let i = -hw; i <= hw; i++) twP(x, 24 + i, 21 + y, C[Math.floor((i + 20) / 8) % 5]); }
+        twDisc(x, 16, 12, 3, 4, 'rgba(255,255,255,.55)');
+        twLine(x, 13, 39, 17, 49, '#5a3818'); twLine(x, 35, 39, 31, 49, '#5a3818'); twLine(x, 24, 41, 24, 49, '#5a3818');
+      });
+      A.basket = twMk(18, 12, x => { twP(x, 0, 0, OL, 18, 12); twP(x, 1, 1, '#c88848', 16, 10); for (let i = 2; i < 17; i += 4) twP(x, i, 1, '#a0682e', 1, 10); twP(x, 1, 4, '#a0682e', 16, 1); });
+      A.balloon = twMk(48, 64, x => { x.drawImage(A.balloonTop, 0, 0); x.drawImage(A.basket, 15, 49); });
+      // 풍차 (날개는 돌아요)
+      A.windmill = twMk(48, 80, x => {
+        twDisc(x, 24, 77, 18, 3, 'rgba(40,72,32,.3)');
+        for (let y = 20; y < 78; y++) { const hw = 8 + Math.round((y - 20) * 8 / 58); twP(x, 24 - hw - 1, y, OL, hw * 2 + 2, 1); twP(x, 24 - hw, y, y % 12 < 1 ? '#e2e8f0' : '#f8fafc', hw * 2, 1); }
+        for (let i = 0; i < 10; i++) twP(x, 14 - Math.round(i * .6), 14 + i, OL, 20 + Math.round(i * 1.2), 1);
+        twP(x, 12, 14, OL, 24, 8); twP(x, 13, 15, '#ef4444', 22, 6); twP(x, 13, 15, '#f87171', 22, 1);
+        twP(x, 19, 60, OL, 10, 17); twP(x, 20, 61, '#2563eb', 8, 16); twP(x, 20, 36, OL, 8, 8); twP(x, 21, 37, '#a8d8ff', 6, 6);
+      });
+      A.ic_windmill = twMk(48, 80, x => { x.drawImage(A.windmill, 0, 0); for (let k = 0; k < 4; k++) txBlade(x, 24, 20, k * Math.PI / 2 + .4); });
+      // 온실
+      A.green = twMk(64, 64, x => {
+        twDisc(x, 32, 61, 30, 3, 'rgba(40,72,32,.3)');
+        for (let i = 0; i < 18; i++) { twP(x, 30 - Math.round(i * 1.55), 6 + i, OL, 4 + Math.round(i * 3.1), 1); if (i) twP(x, 31 - Math.round(i * 1.55), 6 + i, '#d9f5ff', 2 + Math.round(i * 3.1), 1); }
+        twP(x, 2, 24, OL, 60, 36); twP(x, 3, 25, '#cdeffd', 58, 34);
+        [[10, 44, 7, 6, '#16a34a'], [22, 40, 6, 9, '#22c55e'], [44, 42, 8, 7, '#15803d'], [54, 46, 5, 5, '#22c55e']].forEach(([a, b, rx, ry, c]) => { twDisc(x, a, b, rx, ry, c); twDisc(x, a - 2, b - 2, rx - 3, ry - 3, '#86efac'); });
+        [[8, 40, '#f472b6'], [24, 34, '#fde047'], [46, 38, '#f87171'], [52, 44, '#c084fc']].forEach(([a, b, c]) => { twP(x, a, b, c, 3, 3); twP(x, a + 1, b + 1, '#fff'); });
+        for (let a = 2; a < 62; a += 12) twP(x, a, 24, '#fff', 1, 36); twP(x, 2, 40, '#fff', 60, 1);
+        for (let i = 0; i < 18; i += 6) twLine(x, 32, 6, 32 - i * 1.55 * 1.6, 24, '#fff');
+        twP(x, 26, 44, OL, 12, 16); twP(x, 27, 45, '#bae6fd', 10, 15); twP(x, 32, 45, OL, 1, 15);
+        twP(x, 2, 58, OL, 60, 3); twP(x, 3, 58, '#a16207', 58, 2);
+      });
+      // 모닥불 캠프 (불은 일렁여요)
+      A.camp = twMk(64, 48, x => {
+        twDisc(x, 16, 31, 15, 2, 'rgba(40,72,32,.3)');
+        for (let i = 0; i < 26; i++) { const hw = Math.round(i * .58); twP(x, 15 - hw, 4 + i, OL, hw * 2 + 3, 1); twP(x, 16 - hw, 4 + i, i % 6 < 3 ? '#f97316' : '#fb923c', hw * 2 + 1, 1); }
+        for (let i = 6; i < 26; i++) { const hw = Math.round((i - 6) * .3); twP(x, 16 - hw, 4 + i, '#7c2d12', hw * 2 + 1, 1); }
+        for (let k = 0; k < 8; k++) { const an = k * Math.PI / 4, sx = 44 + Math.round(Math.cos(an) * 9), sy = 36 + Math.round(Math.sin(an) * 5); twP(x, sx - 2, sy - 1, OL, 5, 4); twP(x, sx - 1, sy, '#9ca3af', 3, 2); }
+        twLine(x, 38, 39, 50, 33, '#5a3818', 3); twLine(x, 38, 33, 50, 39, '#7c4a1e', 3);
+        [[28, 44], [56, 44]].forEach(([a, b]) => { twP(x, a - 6, b - 2, OL, 12, 5); twP(x, a - 5, b - 1, '#a0682e', 10, 3); twDisc(x, a - 5, b, 1, 1, '#e8b070'); });
+      });
+      A.ic_camp = twMk(64, 48, x => { x.drawImage(A.camp, 0, 0); txFire(x, 44, 36, 0); });
+      // 회전목마
+      A.carBase = twMk(80, 80, x => {
+        twDisc(x, 40, 70, 38, 9, 'rgba(40,72,32,.3)');
+        twDisc(x, 40, 66, 37, 11, OL); twP(x, 3, 60, OL, 74, 7); twDisc(x, 40, 60, 37, 11, OL);
+        twDisc(x, 40, 66, 36, 10, '#be185d'); twP(x, 4, 60, '#be185d', 72, 6); for (let i = 6; i < 74; i += 8) twP(x, i, 61, '#fde047', 2, 2);
+        twDisc(x, 40, 60, 36, 10, '#fbcfe8'); twDisc(x, 40, 60, 30, 7, '#f9a8d4');
+      });
+      A.carRoof = twMk(80, 30, x => {
+        for (let i = 0; i < 20; i++) { const hw = Math.round(i * 1.95); twP(x, 40 - hw - 1, 2 + i, OL, hw * 2 + 3, 1); for (let j = -hw; j <= hw; j++) { const sec = Math.floor((Math.atan2(i + 1, j) / Math.PI) * 10); twP(x, 40 + j, 2 + i, sec % 2 ? '#ef4444' : '#fff'); } }
+        for (let k = 0; k < 10; k++) { twDisc(x, 4 + k * 8, 23, 4, 3, OL); twDisc(x, 4 + k * 8, 23, 3, 2, k % 2 ? '#ef4444' : '#fde047'); }
+        twP(x, 39, 0, OL, 3, 4); twP(x, 40, 0, '#fde047', 1, 3);
+      });
+      A.horse = twMk(16, 12, x => { txPat(x, ['.......XX.', '......XwwX', 'XXXXXXXwwX', 'XwwwwwwwX.', 'XwrrrwwwX.', 'XwwwwwwwX.', '.XX...XX..', '.X.X.X.X..'], 3, 2, { X: OL, w: '#fff', r: '#3a6ae0' }); });
+      A.ic_carousel = twMk(80, 80, x => { x.drawImage(A.carBase, 0, 0); twP(x, 38, 26, OL, 4, 34); twP(x, 39, 26, '#fde047', 2, 34); [[14, 52], [52, 54], [30, 58]].forEach(([a, b]) => { twP(x, a + 7, 26, '#e2e8f0', 1, b - 26); x.drawImage(A.horse, a, b - 6); }); x.drawImage(A.carRoof, 0, 0); });
+      // 동굴
+      A.cave = twMk(96, 64, x => {
+        let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+        const topY = i => 10 + Math.round(Math.sin(i / 9) * 4 + Math.sin(i / 4) * 2);
+        for (let i = 0; i < 96; i++) { const t = topY(i); twP(x, i, t, OL, 1, 62 - t); for (let y = t + 1; y < 62; y++) twP(x, i, y, (Math.floor((y + (i % 7 < 3 ? 1 : 0)) / 7) % 2) ? '#8b7355' : '#a68a64'); twP(x, i, t + 1, '#c2a77d'); }
+        for (let k = 0; k < 14; k++) { const a = Math.floor(r() * 88), b = 18 + Math.floor(r() * 36); twP(x, a, b, '#6b5a43', 5, 2); twP(x, a, b, '#c2a77d', 3, 1); }
+        twDisc(x, 48, 50, 16, 16, OL); twDisc(x, 48, 50, 14, 14, '#1e1b2e'); twDisc(x, 48, 54, 10, 10, '#0f0d1a'); twP(x, 30, 62, OL, 36, 2);
+        [[20, 20], [74, 26], [12, 40]].forEach(([a, b]) => { twP(x, a, b, OL, 4, 4); twP(x, a + 1, b + 1, '#a5f3fc', 2, 2); });
+      });
+      // 관람차
+      A.ferrisBase = twMk(80, 112, x => {
+        twDisc(x, 40, 108, 34, 3, 'rgba(40,72,32,.3)');
+        twLine(x, 40, 44, 14, 104, OL, 3); twLine(x, 40, 44, 66, 104, OL, 3); twLine(x, 40, 44, 15, 104, '#94a3b8', 1); twLine(x, 40, 44, 65, 104, '#94a3b8', 1);
+        twP(x, 8, 102, OL, 64, 8); twP(x, 9, 103, '#e5e7eb', 62, 3); twP(x, 9, 106, '#9ca3af', 62, 3);
+      });
+      A.ferrisRing = twMk(80, 88, x => { for (let k = 0; k < 360; k++) { const an = k * Math.PI / 180; twP(x, Math.round(40 + Math.cos(an) * 34) - 1, Math.round(44 + Math.sin(an) * 34) - 1, OL, 3, 3); } for (let k = 0; k < 360; k++) { const an = k * Math.PI / 180; twP(x, Math.round(40 + Math.cos(an) * 34), Math.round(44 + Math.sin(an) * 34), '#f472b6'); } });
+      A.ic_ferris = twMk(80, 112, x => { x.drawImage(A.ferrisBase, 0, 0); txFerrisWheel(x, { x: 0, y: 0, ang: .3 }, 0, []); });
+      // 기차
+      A.loco = twMk(20, 18, x => { twP(x, 1, 6, OL, 18, 10); twP(x, 2, 7, '#dc2626', 16, 8); twP(x, 2, 7, '#f87171', 16, 1); twP(x, 10, 1, OL, 9, 8); twP(x, 11, 2, '#1d4ed8', 7, 6); twP(x, 12, 3, '#bae6fd', 5, 3); twP(x, 3, 1, OL, 4, 6); twP(x, 4, 2, '#374151', 2, 5); [4, 14].forEach(a => { twDisc(x, a, 15, 2, 2, OL); twP(x, a, 15, '#9ca3af'); }); });
+      A.car = twMk(18, 14, x => { twP(x, 0, 3, OL, 18, 9); twP(x, 1, 4, '#2563eb', 16, 7); twP(x, 1, 4, '#60a5fa', 16, 1); twP(x, 1, 7, '#fde047', 16, 1); [4, 13].forEach(a => { twDisc(x, a, 12, 2, 1, OL); }); });
+      A.ic_train = twMk(64, 32, x => { x.drawImage(A.car, 2, 12); x.drawImage(A.car, 22, 12); x.drawImage(A.loco, 42, 8); twP(x, 0, 27, '#78716c', 64, 2); });
+      A.train = A.ic_train;
+      // 꾸미기
+      A.lockSign = twMk(16, 24, x => { twP(x, 7, 12, OL, 3, 11); twP(x, 8, 12, TC.wod, 1, 10); twP(x, 1, 1, OL, 15, 12); twP(x, 2, 2, '#fff7d6', 13, 10); txPat(x, ['..XXX..', '.X...X.', 'XXXXXXX', 'XyyXyyX', 'XyyyyyX', 'XXXXXXX'], 4, 3, { X: OL, y: '#fbbf24' }); });
+      A.umb = twMk(32, 40, x => { twDisc(x, 16, 37, 9, 2, 'rgba(120,90,40,.3)'); twP(x, 15, 10, OL, 2, 28); for (let i = 0; i < 9; i++) { const hw = 3 + i * 1.5 | 0; twP(x, 16 - hw - 1, 2 + i, OL, hw * 2 + 2, 1); for (let j = -hw; j < hw; j++) twP(x, 16 + j, 2 + i, Math.floor((j + 16) / 4) % 2 ? '#fff' : '#06b6d4'); } twP(x, 2, 11, OL, 28, 1); });
+      A.palm = twMk(32, 48, x => { twDisc(x, 16, 46, 9, 2, 'rgba(120,90,40,.3)'); for (let i = 0; i < 30; i++) { const xx = 14 + Math.round(Math.sin(i / 10) * 3); twP(x, xx - 1, 16 + i, OL, 5, 1); twP(x, xx, 16 + i, i % 4 ? '#a16207' : '#78350f', 3, 1); } [[-14, 4], [14, 4], [-10, -6], [10, -6], [0, -9]].forEach(([dx, dy]) => { twLine(x, 16, 15, 16 + dx, 15 + dy, OL, 3); twLine(x, 16, 15, 16 + dx, 15 + dy, '#16a34a', 2); }); twDisc(x, 15, 17, 2, 2, '#78350f'); });
+      A.rock = twMk(16, 16, x => { twDisc(x, 8, 13, 7, 2, 'rgba(40,72,32,.3)'); twDisc(x, 8, 9, 7, 5, OL); twDisc(x, 8, 9, 6, 4, '#a8a29e'); twDisc(x, 6, 7, 3, 2, '#d6d3d1'); });
+      A.pine = twMk(32, 40, x => { twDisc(x, 16, 37, 10, 2, 'rgba(40,72,32,.35)'); twP(x, 14, 30, TC.trd, 4, 8); for (let k = 0; k < 3; k++) for (let i = 0; i < 12; i++) { const hw = 2 + Math.round(i * (1 + k * .25)); twP(x, 16 - hw - 1, 2 + k * 8 + i, OL, hw * 2 + 2, 1); twP(x, 16 - hw, 2 + k * 8 + i, i < 3 ? '#4ade80' : '#15803d', hw * 2, 1); } });
+      return A;
+    }
+    function txBlade(x, cx, cy, an) {
+      const ex = cx + Math.cos(an) * 22, ey = cy + Math.sin(an) * 22;
+      twLine(x, cx, cy, Math.round(ex), Math.round(ey), TC.ol, 3);
+      const px = -Math.sin(an), py = Math.cos(an);
+      for (let k = 6; k <= 21; k++) { const bx = cx + Math.cos(an) * k, by = cy + Math.sin(an) * k; twLine(x, Math.round(bx), Math.round(by), Math.round(bx + px * 5), Math.round(by + py * 5), k % 5 ? '#f8fafc' : '#cbd5e1', 1); }
+      twDisc(x, cx, cy, 2, 2, TC.ol); twP(x, cx, cy, '#fde047');
+    }
+    function txFire(x, cx, cy, t) {
+      const f = Math.floor(t / 110) % 3;
+      for (let i = 0; i < 9; i++) { const h = [9, 13, 10, 7, 11, 14, 8, 12, 9][(i + f) % 9], c = i % 3 === 0 ? '#ef4444' : i % 3 === 1 ? '#f97316' : '#fde047'; twP(x, cx - 5 + i, cy - h + 2, c, 2, h - 1); }
+      twP(x, cx - 2, cy - 4, '#fef9c3', 4, 3);
+    }
+    function txFerrisWheel(ctx, o, t, riders) {
+      const A = txA, cx = o.x + 40, cy = o.y + 44, ang = o.ang || 0;
+      ctx.drawImage(A.ferrisRing, o.x, o.y);
+      for (let k = 0; k < 8; k++) { const an = ang + k * Math.PI / 4; twLine(ctx, cx, cy, Math.round(cx + Math.cos(an) * 33), Math.round(cy + Math.sin(an) * 33), '#94a3b8'); }
+      twDisc(ctx, cx, cy, 3, 3, TC.ol); twDisc(ctx, cx, cy, 2, 2, '#fde047');
+      const C = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899'];
+      for (let k = 0; k < 6; k++) {
+        const an = ang + k * Math.PI / 3, gx = Math.round(cx + Math.cos(an) * 34), gy = Math.round(cy + Math.sin(an) * 34), rd = riders[k];
+        twP(ctx, gx, gy, TC.ol, 1, 4);
+        if (rd) { rd.x = gx; rd.y = gy + 12; rd.dir = 'down'; rd.draw(ctx); }
+        twP(ctx, gx - 7, gy + 4, TC.ol, 15, 10); twP(ctx, gx - 6, gy + 5, C[k], 13, 8); twP(ctx, gx - 6, gy + 5, '#fff', 13, 1); if (!rd) { twP(ctx, gx - 4, gy + 7, '#bae6fd', 9, 3); }
+      }
+    }
+
+    /* ---------- 땅 만들기 ---------- */
+    const txIn2 = (r, x, y) => x >= r[0] && x < r[0] + r[2] && y >= r[1] && y < r[1] + r[3];
+    function txTiles(T) {
+      for (let y = 0; y < TW_MH; y++) for (let x = 0; x < TW_MW; x++) {
+        if (x >= 40 && y < 22) T[y][x] = x >= 54 - (y % 4 === 1 ? 1 : 0) - (y < 4 ? 3 : 0) ? 2 : 5;   // 바닷가: 모래와 바다
+        if (x >= 40 && y >= 24) T[y][x] = (x * 7 + y * 3) % 11 === 0 ? 6 : T[y][x] === 1 ? 1 : 6;   // 산: 돌이 섞인 풀밭
+        if ((y === 12 || y === 13) && x >= 37 && x <= 41) T[y][x] = 1;
+        if ((y === 29 || y === 30) && x >= 1 && x <= 56) T[y][x] = 1;   // 공부 거리 큰길 → 산
+        if ((x === 50 || x === 51) && y >= 22 && y <= 30) T[y][x] = 1;
+        if ((x === 54) && (y === 31 || y === 32)) T[y][x] = 1;   // 기차역
+        if ((x === 19 || x === 20) && y >= 41) T[y][x] = 0;
+      }
+      for (let y = 40; y <= 41; y++) for (let x = 15; x <= 17; x++) T[y][x] = 4;
+      for (let y = 40; y <= 41; y++) for (let x = 31; x <= 35; x++) T[y][x] = 4;
+      [[2, 32], [9, 32], [10, 33], [16, 32], [25, 32], [26, 33], [34, 32], [35, 33], [10, 37], [24, 37], [35, 38], [2, 41], [45, 26], [59, 28], [52, 35], [55, 37], [57, 34], [60, 38]].forEach(([x, y]) => T[y][x] = 3);
+    }
+    let txR = {};
+    function txBuild(place, T, B) {
+      const A = txArt(), s = twLoad(); txR = {};
+      const own = k => twHas(k) && txOpen(TW_ITEMS[k].reg);
+      const lot = (k, tx, ty) => { if (txOpen(TW_ITEMS[k].reg)) place(twArt.lot, tx, ty, { blocks: [[0, 1]], lot: k }); };
+      const blk = (x0, y0, w, h) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (B[y]) B[y][x] = 1; };
+      const bld = (k, img, tx, ty, w, h, door, extra = {}) => { const o = place(img, tx, ty, Object.assign({ txk: k, door }, extra)); blk(tx, ty, w, h); txR[k] = o; return o; };
+      // 공부 거리
+      bld('school', A.school, 2, 25, 4, 4, [4, 29], { glow: [[13, 41], [51, 41]] });
+      bld('bakery', A.bakery, 7, 26, 3, 3, [8, 29], { glow: [[10, 27], [37, 27]] });
+      bld('library', A.library, 11, 25, 4, 4, [13, 29], { glow: [[12, 37], [52, 37]] });
+      bld('maze', A.maze, 3, 31, 5, 3, [4, 30]);
+      if (own('photo')) bld('photo', A.photo, 22, 26, 3, 3, [23, 29], { glow: [[10, 27], [38, 27]] }); else lot('photo', 23, 26.5);
+      if (own('museum')) bld('museum', A.museum, 27, 25, 4, 4, [29, 29], { glow: [[32, 44]] }); else lot('museum', 28.5, 26);
+      place(twArt.sign, 17, 26.5, { blocks: [[0, 1]], txk: 'ssign' });
+      [[10, 31], [17, 31], [24, 31], [33, 31]].forEach(([a, b]) => place(twArt.lamp, a, b - 1, { blocks: [[0, 1]], lamp: true }));
+      place(twArt.bench, 12, 32, { blocks: [[0, 0], [1, 0]] }); place(twArt.bench, 28, 32, { blocks: [[0, 0], [1, 0]] });
+      // 바닷가
+      if (txOpen('beach')) {
+        if (own('balloon')) { const o = bld('balloon', A.balloon, 42, 5, 3, 4, [43, 9], { txRide: 1, rise: 0, txd: txDrawBalloon }); o.busy = null; } else lot('balloon', 43, 6);
+        if (own('windmill')) { bld('windmill', A.windmill, 47, 4, 3, 5, null, { txd: txDrawWindmill, seats: [[46, 9], [47, 10], [49, 10], [50, 9], [48, 10]] }); } else lot('windmill', 48, 6);
+        if (own('stage')) { const o = bld('stage', A.stage, 42, 16, 5, 3, [44, 19], { txRide: 1, txd: txDrawStage, glow: [[10, 8], [70, 8], [40, 30]] }); o.busy = null; } else lot('stage', 44, 16.5);
+        place(A.palm, 48, 16.2, { blocks: [[0, 1]] }); place(A.palm, 52, 4.5, { blocks: [[0, 1]] });
+        place(A.umb, 50, 12.6, { blocks: [[0, 1]] }); place(A.umb, 52, 18.6, { blocks: [[0, 1]] });
+      }
+      // 숲
+      if (txOpen('forest')) {
+        if (own('green')) bld('green', A.green, 3, 36, 4, 4, [5, 40], { glow: [[32, 40]] }); else lot('green', 4.5, 37);
+        if (own('camp')) { const o = bld('camp', A.camp, 11, 38, 2, 2, null, { txd: txDrawCamp, seats: [[12, 40], [14, 40], [13, 41], [14, 39], [12, 41]] }); B[40][13] = 1; o.foot = o.y + 40; } else lot('camp', 12.5, 38);
+        if (own('carousel')) { const o = bld('carousel', A.carBase, 26, 36, 5, 5, [28, 41], { txRide: 1, txd: txDrawCarousel, ang: 0, glow: [[40, 24]] }); o.riders = [null, null, null, null]; } else lot('carousel', 28, 37);
+      }
+      // 산
+      if (txOpen('mount')) {
+        [[42, 24.8], [46, 25.4], [59, 25], [60, 31], [41, 38.6]].forEach(([a, b]) => place(A.pine, a, b, { blocks: [[0, 1], [1, 1]] }));
+        [[57, 30], [47, 36], [60, 40], [52, 36], [56, 35]].forEach(([a, b]) => place(A.rock, a, b, { blocks: [[0, 0]] }));
+        if (own('cave')) bld('cave', A.cave, 53, 24, 6, 4, [56, 28], { glow: [[48, 52]] }); else lot('cave', 55, 25);
+        if (own('ferris')) { const o = bld('ferris', A.ferrisBase, 41, 31, 5, 7, [43, 38], { txRide: 1, txd: txDrawFerris, ang: 0 }); o.riders = []; } else lot('ferris', 43, 32);
+        if (own('train')) {
+          const o = place(txTrack(), 48, 32, { foot: 0, txk: 'track' }); for (let y = 33; y <= 39; y++) for (let x = 49; x <= 59; x++) B[y][x] = 1;
+          txR.train = { txRide: 1, s: 0, riders: [null, null, null], img: A.loco, x: 0, y: 0, foot: 0, door: [54, 32], track: o };
+        } else lot('train', 54, 34);
+      }
+      // 잠긴 땅: 막고, 안개 덮기
+      Object.entries(TX_REG).forEach(([k, g]) => { if (!g.need || txOpen(k)) return; blk(...g.r); g.gate.forEach(([x, y]) => B[y][x] = 1); });
+      if (!txOpen('beach')) place(A.lockSign, 37, 10.5, { blocks: [[0, 1]], lockReg: 'beach' });
+      if (!txOpen('mount')) place(A.lockSign, 37, 27, { blocks: [[0, 1]], lockReg: 'mount' });
+      if (!txOpen('forest')) place(A.lockSign, 21, 32, { blocks: [[0, 1]], lockReg: 'forest' });
+      txLabels();
+      // 새로 열린 땅 축하
+      const open = Object.keys(TX_REG).filter(k => TX_REG[k].need && txOpen(k)), was = s.regs || [];
+      const fresh = open.filter(k => !was.includes(k)); s.regs = open; twSave();
+      if (fresh.length) setTimeout(() => txCelebrate(fresh[fresh.length - 1]), 1600);
+    }
+    function txTrack() {
+      return twMk(13 * 16, 9 * 16, x => {
+        const X0 = 16 + 8, X1 = 11 * 16 + 8, Y0 = 16 + 8, Y1 = 7 * 16 + 8;
+        for (let px = X0; px <= X1; px += 5) { twP(x, px, Y0 - 5, '#78350f', 3, 11); twP(x, px, Y1 - 5, '#78350f', 3, 11); }
+        for (let py = Y0; py <= Y1; py += 5) { twP(x, X0 - 5, py, '#78350f', 11, 3); twP(x, X1 - 5, py, '#78350f', 11, 3); }
+        [-3, 3].forEach(d => { twP(x, X0 + d, Y0 + d, '#64748b', X1 - X0 - d * 2 + 1, 1); twP(x, X0 + d, Y1 - d, '#64748b', X1 - X0 - d * 2 + 1, 1); twP(x, X0 + d, Y0 + d, '#64748b', 1, Y1 - Y0 - d * 2 + 1); twP(x, X1 - d, Y0 + d, '#64748b', 1, Y1 - Y0 - d * 2 + 1); });
+        twP(x, 5 * 16, 0, TC.ol, 3 * 16, 10); twP(x, 5 * 16 + 1, 1, '#fde68a', 3 * 16 - 2, 8); twP(x, 5 * 16 + 1, 1, '#fff7d6', 3 * 16 - 2, 2);
+      });
+    }
+    function txLabels() {
+      const over = document.getElementById('tw-over'); if (!over) return;
+      over.querySelectorAll('.tx-lock').forEach(e => e.remove());
+      Object.entries(TX_REG).forEach(([k, g]) => { if (!g.need || txOpen(k)) return; const el = document.createElement('div'); el.className = 'tx-lock'; el._c = g.c; el.innerHTML = `🔒 ${g.e} ${g.n}<small>선물 ${g.need - txCount()}개 더 모으면 열려요</small>`; over.appendChild(el); });
+    }
+    function txCelebrate(k) {
+      if (!twActive) return; const g = TX_REG[k];
+      twScrollTo(g.c[0], g.c[1]); playSuccessChime();
+      twSay(`와! ${g.n}${sbJosa(g.n, '이')} 열렸어요! 친구들이 놀러 갈 수 있어요.`); twToast(`${g.e} ${g.n}${sbJosa(g.n, '이')} 열렸어요!`);
+      twActors.filter(a => !a.sleep).slice(0, 6).forEach((a, i) => setTimeout(() => { a.emote('ex', 1200); a.jump(8); }, i * 120));
+    }
+
+    /* ---------- 움직이는 시설 그리기 ---------- */
+    const txDt = (o, t) => { const d = o.lt ? Math.min(100, t - o.lt) : 0; o.lt = t; return d; };
+    function txDrawWindmill(ctx, t, o) { ctx.drawImage(o.img, o.x, o.y); const d = txDt(o, t); o.ang = (o.ang || 0) + d * (twNight ? .0004 : .0016); for (let k = 0; k < 4; k++) txBlade(ctx, o.x + 24, o.y + 20, o.ang + k * Math.PI / 2); }
+    function txDrawCamp(ctx, t, o) { ctx.drawImage(o.img, o.x, o.y); txFire(ctx, o.x + 44, o.y + 36, t); }
+    function txDrawBalloon(ctx, t, o) {
+      const A = txA, r = Math.round(o.rise || 0);
+      if (r > 2) twDisc(ctx, o.x + 24, o.y + 61, 10, 2, 'rgba(40,72,32,.25)');
+      twLine(ctx, o.x + 24, o.y + 60 - r, o.x + 24, o.y + 62, '#a16207');
+      ctx.drawImage(A.balloonTop, o.x, o.y - r);
+      if (o.busy && o.busy.ride === o) { const a = o.busy; a.x = o.x + 24; a.y = o.y + 56 - r; a.draw(ctx); }
+      ctx.drawImage(A.basket, o.x + 15, o.y + 49 - r);
+    }
+    function txDrawStage(ctx, t, o) {
+      ctx.drawImage(o.img, o.x, o.y);
+      if (o.on) for (let k = 0; k < 6; k++) { const ph = ((t / 900) + k / 6) % 1; twP(ctx, Math.round(o.x + 8 + k * 13 + Math.sin(ph * 6) * 3), Math.round(o.y + 24 - ph * 30), k % 2 ? '#fde047' : '#f472b6', 2, 2); }
+      if (o.busy && o.busy.ride === o) { const a = o.busy; a.x = o.x + 40; a.y = o.y + 32; a.draw(ctx); }
+    }
+    function txDrawCarousel(ctx, t, o) {
+      const A = txA, d = txDt(o, t), any = o.riders.some(Boolean);
+      o.ang = (o.ang + d * (twNight ? 0 : any ? .0013 : .0005)) % (Math.PI * 2);
+      ctx.drawImage(A.carBase, o.x, o.y);
+      const cx = o.x + 40, cy = o.y + 58;
+      const hs = [0, 1, 2, 3].map(k => { const an = o.ang + k * Math.PI / 2; return { k, an, x: Math.round(cx + Math.cos(an) * 26), y: Math.round(cy + Math.sin(an) * 8 - Math.sin(t / 220 + k * 1.7) * 3 * (twNight ? 0 : 1)), z: Math.sin(an) }; }).sort((p, q) => p.z - q.z);
+      const horse = h => { twP(ctx, h.x, o.y + 24, '#e2e8f0', 1, h.y - o.y - 24); ctx.save(); if (Math.cos(h.an + Math.PI / 2) < 0) { ctx.translate(h.x * 2, 0); ctx.scale(-1, 1); } ctx.drawImage(A.horse, h.x - 8, h.y - 10); ctx.restore(); const r = o.riders[h.k]; if (r) { r.x = h.x; r.y = h.y - 3; r.dir = Math.cos(h.an + Math.PI / 2) < 0 ? 'left' : 'right'; r.draw(ctx); } };
+      hs.filter(h => h.z < 0).forEach(horse);
+      twP(ctx, cx - 2, o.y + 24, TC.ol, 4, 36); twP(ctx, cx - 1, o.y + 24, '#fde047', 2, 36);
+      hs.filter(h => h.z >= 0).forEach(horse);
+      ctx.drawImage(A.carRoof, o.x, o.y);
+    }
+    function txDrawFerris(ctx, t, o) {
+      const d = txDt(o, t); o.ang = (o.ang + d * (twNight ? 0 : .00045)) % (Math.PI * 2);
+      ctx.drawImage(o.img, o.x, o.y); txFerrisWheel(ctx, o, t, o.riders);
+    }
+    const TX_TR = { X0: 49 * 16 + 8, X1: 59 * 16 + 8, Y0: 33 * 16 + 8, Y1: 39 * 16 + 8 };
+    const txTrP = () => 2 * ((TX_TR.X1 - TX_TR.X0) + (TX_TR.Y1 - TX_TR.Y0));
+    function txTrPos(s) {
+      const { X0, X1, Y0, Y1 } = TX_TR, w = X1 - X0, h = Y1 - Y0, P = txTrP(); s = ((s % P) + P) % P;
+      if (s < w) return [X0 + s, Y0, 'right']; s -= w; if (s < h) return [X1, Y0 + s, 'down']; s -= h; if (s < w) return [X1 - s, Y1, 'left']; s -= w; return [X0, Y1 - s, 'up'];
+    }
+    function txDraw(list, t) {
+      const TR = txR.train; if (!TR) return;
+      const d = txDt(TR, t); TR.s = (TR.s + d * (twNight ? 0 : .045)) % txTrP();
+      [0, 1, 2].forEach(i => {
+        const [x, y, dir] = txTrPos(TR.s - i * 22); TR.pos = TR.pos || []; TR.pos[i] = [x, y];
+        list.push({ f: y + 6, d: () => {
+          const r = TR.riders[i];
+          if (i === 0) { twCtx.drawImage(txA.loco, Math.round(x - 10), Math.round(y - 14)); const k = Math.floor(t / 300) % 3; if (!twNight) twDisc(twCtx, Math.round(x - 5 - k), Math.round(y - 17 - k * 3), 2 + k, 2 + k, 'rgba(255,255,255,.75)'); return; }
+          if (r) { r.x = x; r.y = y + 1; r.dir = dir; r.draw(twCtx); }
+          twCtx.drawImage(txA.car, Math.round(x - 9), Math.round(y - 8));
+        } });
+      });
+    }
+    function txDrawTop(ctx, t) {
+      Object.entries(TX_REG).forEach(([k, g]) => {
+        if (!g.need || txOpen(k)) return;
+        const [x, y, w, h] = g.r.map(v => v * 16);
+        ctx.fillStyle = 'rgba(232,238,246,.8)'; ctx.fillRect(x, y, w, h);
+        for (let i = 0; i < 7; i++) { const cx = x + ((i * 97 + t / 60) % (w + 80)) - 40, cy = y + 24 + (i * 53) % Math.max(24, h - 40); twDisc(ctx, Math.round(cx), Math.round(cy), 22, 8, 'rgba(255,255,255,.7)'); twDisc(ctx, Math.round(cx + 14), Math.round(cy - 5), 14, 6, 'rgba(255,255,255,.7)'); }
+      });
+      document.querySelectorAll('#tw-over .tx-lock').forEach(el => { el.style.left = el._c[0] * 16 * twS2 + 'px'; el.style.top = el._c[1] * 16 * twS2 + 'px'; });
+      if (txFlash > 0) { ctx.fillStyle = `rgba(255,255,255,${txFlash})`; ctx.fillRect(0, 0, TW_PW, TW_PH); txFlash = Math.max(0, txFlash - .06); }
+    }
+    function txGlow(glow) {
+      twObjs.filter(o => o.glow).forEach(o => o.glow.forEach(([dx, dy]) => glow(o.x + dx, o.y + dy, o.txk === 'stage' ? 26 : 14, '255,220,130')));
+      if (txR.camp) glow(txR.camp.x + 44, txR.camp.y + 30, 54, '255,150,60');
+      if (txR.ferris) glow(txR.ferris.x + 40, txR.ferris.y + 44, 40, '255,150,220');
+      if (txR.carousel) glow(txR.carousel.x + 40, txR.carousel.y + 50, 40, '255,200,120');
+    }
+
+    /* ---------- 친구들이 하는 일 ---------- */
+    // 타는 곳에 누가 서 있으면 바로 옆까지만 가도 돼요
+    async function txReach(a, x, y) { for (let i = 0; i < 3; i++) { if (a.tx === x && a.ty === y) return true; if (await a.goTo(x, y)) return true; if (a.token !== twToken) return false; await twWait(400); } if (Math.abs(a.tx - x) + Math.abs(a.ty - y) <= 2) return true; const n = twNear(x, y, 1); return !!(n && await a.goTo(...n)); }
+    // 내린 뒤에는 타는 곳을 비켜 줘요
+    async function txAway(a) { const n = twNear(a.tx, a.ty, 2); if (n && Math.abs(n[0] - a.tx) + Math.abs(n[1] - a.ty) > 0) await a.goTo(...n); }
+    const TX_IN_EMO = { school: 'note', bakery: 'food', library: 'heart', photo: 'star', museum: 'ex', green: 'heart', cave: 'ex' };
+    async function txInside(a, k) {
+      const o = txR[k]; if (!o || !o.door) return false;
+      if (!await txReach(a, ...o.door)) return false;
+      a.dir = 'up'; await twWait(250);
+      twLeave(a); a.inside = k;
+      for (let i = 9; i >= 0; i--) { a.alpha = i / 10; await twWait(35); }
+      a.x = a.y = -999;
+      const t0 = performance.now(), dur = twRnd(4000, 8000); while (performance.now() - t0 < dur && a.token === twToken && !twNight) await twWait(250);
+      a.inside = null; a.alpha = 1; twBack(a, o.door[0], o.door[1]); a.dir = 'down';
+      const fav = txFavOf(a.form) === k; a.emote(fav ? 'star' : TX_IN_EMO[k] || 'heart', 1600); await a.jump(8, fav ? 2 : 1);
+      twAddLove(a.n, fav ? 2 : 1); await txAway(a); return true;
+    }
+    async function txNearSpot(a, k) {   // 풍차 · 모닥불 옆에서 놀기
+      const o = txR[k]; if (!o || !o.seats) return false;
+      const seat = fdShuffle(o.seats.slice()).find(([x, y]) => twBlock[y][x] === 0 && !twOcc.has(twKey(x, y))); if (!seat || !await a.goTo(...seat)) return false;
+      const cx = (o.x + (k === 'camp' ? 44 : 24)) / 16, cy = (o.y + (k === 'camp' ? 36 : 40)) / 16;
+      a.dir = Math.abs(cx - a.tx) > Math.abs(cy - a.ty) ? (cx > a.tx ? 'right' : 'left') : (cy > a.ty ? 'down' : 'up');
+      const fav = txFavOf(a.form) === k;
+      for (let i = 0; i < 3 && !twNight; i++) { a.emote(fav ? (k === 'windmill' ? 'ex' : 'heart') : 'note', 1100); await a.jump(fav ? 8 : 4); await twWait(twRnd(900, 1600)); }
+      twAddLove(a.n, fav ? 2 : 1); return true;
+    }
+    async function txSea(a) {
+      const c = []; for (let y = 5; y <= 21; y++) for (let x = 53; x <= 58; x++) if (twBlock[y][x] === 2 && !twOcc.has(twKey(x, y))) c.push([x, y]);
+      if (!c.length || !await a.goTo(...twPick(c))) return false;
+      a.emote('heart', 1200);
+      for (let k = 0; k < 4 && !twNight; k++) { const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [a.tx + dx, a.ty + dy]).filter(([p, q]) => twBlock[q] && twBlock[q][p] === 2 && a.free(p, q)); if (n.length) await a.stepTo(...twPick(n), 450); await twWait(500); }
+      twAddLove(a.n, 2); return true;
+    }
+    async function txBalloon(a) {
+      const o = txR.balloon; if (!o || o.busy) return false; o.busy = a;
+      if (!await txReach(a, 43, 9) || twNight) { o.busy = null; return false; }
+      twLeave(a); a.ride = o; a.dir = 'down'; a.emote('ex', 900);
+      const fly = (from, to, ms) => new Promise(res => { const t0 = performance.now(); const st = t => { const k = Math.min(1, (t - t0) / ms); o.rise = from + (to - from) * (1 - Math.cos(k * Math.PI)) / 2; k < 1 && twActive ? requestAnimationFrame(st) : res(); }; requestAnimationFrame(st); });
+      await fly(0, 40, 2400); const fav = txFavOf(a.form) === 'balloon'; a.emote(fav ? 'star' : 'note', 2500); await twWait(3500); await fly(40, 0, 2400);
+      o.rise = 0; o.busy = null; twBack(a, 43, 9); a.emote('heart'); twAddLove(a.n, fav ? 2 : 1); await txAway(a); return true;
+    }
+    async function txCarousel(a) {
+      const o = txR.carousel; if (!o) return false; const slot = o.riders.findIndex(r => !r); if (slot < 0) return false; o.riders[slot] = a;
+      if (!await txReach(a, 28, 41) || twNight) { o.riders[slot] = null; return false; }
+      twLeave(a); a.ride = o; a.emote('note', 1500);
+      const t0 = performance.now(), dur = twRnd(8000, 12000); while (performance.now() - t0 < dur && a.token === twToken && !twNight) { await twWait(1800); if (Math.random() < .4) a.emote(Math.random() < .5 ? 'note' : 'heart', 900); }
+      o.riders[slot] = null; twBack(a, 28, 41); a.emote('star'); await a.jump(8); twAddLove(a.n); await txAway(a); return true;
+    }
+    async function txFerris(a) {
+      const o = txR.ferris; if (!o) return false;
+      const norm = v => { v %= Math.PI * 2; return v < 0 ? v + Math.PI * 2 : v; };
+      if (o.riders.filter(Boolean).length >= 2 || o.wait) return false; o.wait = a;
+      if (!await txReach(a, 43, 38) || twNight) { o.wait = null; return false; }
+      let k = -1; for (let i = 0; i < 80 && k < 0 && a.token === twToken && !twNight; i++) { for (let g = 0; g < 6; g++) if (!o.riders[g] && Math.abs(norm(o.ang + g * Math.PI / 3) - Math.PI / 2) < .12) k = g; if (k < 0) await twWait(120); }
+      o.wait = null; if (k < 0) return false;
+      twLeave(a); a.ride = o; o.riders[k] = a; a.emote('ex', 900);
+      const t0 = performance.now(); await twWait(2500);
+      while (a.token === twToken && !twNight && (performance.now() - t0 < 9000 || Math.abs(norm(o.ang + k * Math.PI / 3) - Math.PI / 2) > .12)) { await twWait(120); if (Math.random() < .02) a.emote(Math.random() < .5 ? 'note' : 'heart', 900); }
+      o.riders[k] = null; twBack(a, 43, 38); a.emote('star'); twAddLove(a.n); await txAway(a); return true;
+    }
+    async function txTrain(a) {
+      const TR = txR.train; if (!TR) return false; const slot = TR.riders[1] ? (TR.riders[2] ? -1 : 2) : 1; if (slot < 0 || TR.wait) return false; TR.wait = a;
+      if (!await txReach(a, 54, 32) || twNight) { TR.wait = null; return false; }
+      a.dir = 'down'; const sx = 54 * 16 + 8, near = () => TR.pos && TR.pos[slot] && Math.abs(TR.pos[slot][0] - sx) < 6 && TR.pos[slot][1] < TX_TR.Y0 + 2;
+      let ok = false; for (let i = 0; i < 300 && a.token === twToken && !twNight; i++) { if (near()) { ok = true; break; } await twWait(80); }
+      TR.wait = null; if (!ok) return false;
+      twLeave(a); a.ride = TR; TR.riders[slot] = a; a.emote('note', 1500);
+      const t0 = performance.now(); await twWait(4000);
+      while (a.token === twToken && !twNight && (performance.now() - t0 < 10000 || !near())) await twWait(80);
+      TR.riders[slot] = null; twBack(a, 54, 32); a.emote('star'); await a.jump(8); twAddLove(a.n); await txAway(a); return true;
+    }
+    async function txStroll(a) {   // 열린 땅 아무 곳이나 산책
+      const regs = ['study', ...Object.keys(TX_REG).filter(k => TX_REG[k].need && txOpen(k))], g = TX_REG[twPick(regs)];
+      const t = twNear(Math.round(g.c[0]), Math.round(g.c[1]), 4); if (!t || !await a.goTo(...t)) return false;
+      await twWait(twRnd(800, 2000)); return true;
+    }
+    async function txPlay(a) {
+      const fav = txFavOf(a.form), o = [];
+      const add = (w, f) => o.push([w, f]);
+      if (fav === 'sea' && txOpen('beach')) add(4, () => txSea(a));
+      if (fav === 'windmill' && txR.windmill) add(4, () => txNearSpot(a, 'windmill'));
+      if (fav === 'camp' && txR.camp) add(4, () => txNearSpot(a, 'camp'));
+      if (fav === 'green' && txR.green) add(4, () => txInside(a, 'green'));
+      if (fav === 'cave' && txR.cave) add(4, () => txInside(a, 'cave'));
+      if (fav === 'balloon' && txR.balloon) add(4, () => txBalloon(a));
+      add(1.4, () => txInside(a, twPick(['school', 'bakery', 'library', ...(txR.photo ? ['photo'] : []), ...(txR.museum ? ['museum'] : [])])));
+      if (txR.carousel) add(1.2, () => txCarousel(a));
+      if (txR.ferris) add(1, () => txFerris(a));
+      if (txR.train) add(1, () => txTrain(a));
+      if (txR.balloon && fav !== 'balloon') add(.6, () => txBalloon(a));
+      if (txR.camp && fav !== 'camp') add(.5, () => txNearSpot(a, 'camp'));
+      if (txR.windmill && fav !== 'windmill') add(.4, () => txNearSpot(a, 'windmill'));
+      add(1.2, () => txStroll(a));
+      let r = Math.random() * o.reduce((p, q) => p + q[0], 0);
+      for (const [w, f] of o) { r -= w; if (r <= 0) return await f(); }
+      return false;
+    }
+
+    /* ---------- 누르기 ---------- */
+    const TX_LEARN = {
+      school: { t: '🏫 학교', g: 'hangul', m: '한글을 배우는 학교예요. 공부를 마치면 새 친구 카드가 나와요!' },
+      bakery: { t: '🥐 빵집', g: 'math', m: '빵을 세면서 수학 놀이를 해요. 다 풀면 새 친구 카드가 나와요!' },
+      library: { t: '📚 도서관', g: 'story', m: '포켓몬 동화를 읽는 도서관이에요.' },
+      maze: { t: '🌿 길 찾기 미로', g: 'play', only: [4], m: '화살표로 길을 만들어 미로를 빠져나가요. 길 코딩도 새 친구 카드가 나와요!' }
+    };
+    function txLearn(k) {
+      const L = TX_LEARN[k], G = RN_GROUPS.find(g => g.k === L.g); if (!G) return;
+      const ov = document.getElementById('rw-ov'); if (!ov.classList.contains('hidden') && !ov._tw) return;
+      const items = G.items.map((it, i) => [it, i]).filter(([, i]) => !L.only || L.only.includes(i));
+      ov.innerHTML = `<div class="rw-box tw-box"><div class="rw-head">${L.t}</div><p class="rw-tip">${L.m}</p>
+        <div class="tx-learn">${items.map(([it, i]) => `<button onclick="twCloseOv(); rnPick('${L.g}', ${i})"><span>${it.e}</span>${it.n}</button>`).join('')}</div>
+        <button class="fd-btn" onclick="twCloseOv()">마을에 있을래요</button></div>`;
+      ov.classList.remove('hidden'); ov._tw = 1;
+      twSay(L.m);
+    }
+    function txTapAt(px, py, hitObj) {
+      const tx = Math.floor(px / 16), ty = Math.floor(py / 16);
+      const lockO = twObjs.find(o => o.lockReg && px >= o.x && px < o.x + 16 && py >= o.y && py < o.y + 24);
+      const lockR = lockO ? lockO.lockReg : Object.keys(TX_REG).find(k => TX_REG[k].need && !txOpen(k) && txIn2(TX_REG[k].r, tx, ty));
+      if (lockR) { const g = TX_REG[lockR], left = g.need - txCount(); twSay(`${g.n}예요. 선물 상자에서 ${left}개 더 고르면 열려요!`); twToast(`🔒 ${g.e} ${g.n} · 선물 ${left}개 더`); return true; }
+      if (txR.train && txR.train.pos && txR.train.pos.some(([x, y]) => Math.abs(px - x) < 12 && Math.abs(py - y) < 12)) { playTone(520, .12, 'square'); setTimeout(() => playTone(520, .18, 'square'), 160); twSay('칙칙폭폭! 미니 기차예요.'); return true; }
+      const o = twObjs.filter(o => o.txk && px >= o.x && px < o.x + o.img.width && py >= o.y && py < o.y + o.img.height).sort((p, q) => q.foot - p.foot)[0];
+      if (!o || (hitObj && hitObj.lot && hitObj.foot > o.foot)) return false;
+      const k = o.txk;
+      if (TX_LEARN[k]) { txKnock(o); return txLearn(k), true; }
+      if (k === 'ssign') { twSay('공부 거리예요. 학교, 빵집, 도서관, 미로에서 공부하면 새 친구가 이사 와요!'); twToast('📚 공부 거리 · 공부하면 새 친구가 와요'); return true; }
+      if (k === 'photo') { txCamera(); return true; }
+      if (k === 'museum') { txMuseum(); return true; }
+      if (k === 'stage') { txStageTap(); return true; }
+      if (k === 'windmill') { o.ang = (o.ang || 0) + 2; playTone(880, .05); twSay('풍차가 빙글빙글! 전기 타입 친구들이 좋아해요.'); return true; }
+      if (k === 'camp') { playTone(330, .08); twSay('따뜻한 모닥불이에요. 불꽃 타입 친구들이 좋아해요.'); return true; }
+      if (k === 'green') { twSay('온실이에요. 풀 타입, 벌레 타입 친구들이 좋아해요.'); return true; }
+      if (k === 'cave') { twSay('동굴이에요. 안이 깜깜해요! 바위 타입, 땅 타입 친구들이 좋아해요.'); playTone(200, .15); return true; }
+      if (k === 'balloon') { twSay('열기구예요. 비행 타입 친구들이 제일 좋아해요. 누가 타러 올까요?'); txCall(txBalloon); return true; }
+      if (k === 'carousel') { twSay('회전목마예요! 누가 타러 올까요?'); txCall(txCarousel); return true; }
+      if (k === 'ferris') { twSay('관람차예요! 높이 올라가면 마을이 다 보여요.'); txCall(txFerris); return true; }
+      if (k === 'track') { twSay('기차역이에요! 누가 기차를 탈까요?'); txCall(txTrain); return true; }
+      return false;
+    }
+    function txKnock(o) { o.y -= 1; setTimeout(() => o.y += 1, 120); playTone(700, .05); }
+    function txCall(fn) {   // 가까이 있는 친구를 불러요
+      const cand = twActors.filter(o => !o.sleep && !o.ride && !o.want && !o.hold && !o.inside); if (!cand.length) return;
+      const a = twPick(cand.slice(0, 6)); a.want = () => fn(a); a.halt = true; a.emote('ex', 900); setTimeout(() => a.halt = false, 60);
+    }
+
+    /* ---------- 무대: 노래 공연 ---------- */
+    const TX_SONG = [262, 262, 392, 392, 440, 440, 392, 0, 349, 349, 330, 330, 294, 294, 262, 0];
+    function txStageTap() {
+      const ST = txR.stage;
+      if (ST.on) { (ST.fans || []).forEach(f => { f.emote('heart', 700); f.jump(8); }); playTone(1200, .03, 'square'); setTimeout(() => playTone(1000, .03, 'square'), 90); return; }
+      if (ST.busy) return twSay('곧 공연이 시작돼요!');
+      const dist = o => Math.abs(o.tx - 44) + Math.abs(o.ty - 19) + (o.busy ? 30 : 0);
+      const free = twActors.filter(o => !o.sleep && !o.ride && !o.want && !o.hold && !o.inside).sort((p, q) => dist(p) - dist(q));
+      const singer = free.find(o => [39, 40, 174].includes(o.form)) || free.find(o => txTypes(o.form).has('페어리')) || free[0];
+      if (!singer) return twSay('공연할 친구가 지금 없어요. 조금 있다가 다시 눌러 봐요!');
+      ST.busy = singer; twSay(`${singer.name}의 노래 공연이 곧 시작돼요! 공연하는 동안 무대를 누르면 박수를 쳐요.`); twScrollTo(44.5, 18);
+      singer.want = () => txSing(singer); singer.halt = true; setTimeout(() => singer.halt = false, 60);
+      ST.fans = free.filter(o => o !== singer).slice(0, 5);
+      const seats = [[42, 20], [44, 21], [46, 20], [43, 22], [45, 22]];
+      ST.fans.forEach((f, i) => { f.want = async () => { if (await f.goTo(...seats[i])) f.dir = 'up'; for (let k = 0; k < 120 && (ST.busy || ST.on) && f.token === twToken; k++) await twWait(250); }; f.halt = true; setTimeout(() => f.halt = false, 60); });
+      setTimeout(() => { if (ST.busy === singer && !ST.on && singer.ride !== ST) { ST.busy = null; ST.fans = []; } }, 45000);
+    }
+    async function txSing(a) {
+      const ST = txR.stage; if (!ST || ST.busy !== a) return false;
+      if (!await txReach(a, 44, 19) || twNight) { ST.busy = null; return false; }
+      twLeave(a); a.ride = ST; a.dir = 'down'; await twWait(2200);
+      ST.on = true; twSay(`${a.name}의 노래 공연!`); await twWait(1400);
+      for (let i = 0; i < TX_SONG.length && a.token === twToken && twActive; i++) {
+        if (TX_SONG[i]) { playTone(TX_SONG[i], .3, 'triangle'); a.emote('note', 380); a.jump(5); if (i % 2 === 0) (ST.fans || []).forEach(f => !f.walk && f.jump(4)); }
+        await twWait(420);
+      }
+      ST.on = false; playSuccessChime(); (ST.fans || []).forEach(f => { f.emote('heart', 1500); twAddLove(f.n); });
+      a.emote('star', 1800); twAddLove(a.n); twSay('짝짝짝! 멋진 공연이었어요!');
+      await twWait(1200); ST.busy = null; ST.fans = []; twBack(a, 44, 19); return true;
+    }
+
+    /* ---------- 사진관: 마을 사진 찍기 ---------- */
+    let txShotOn = 0, txFlash = 0;
+    const txShotBtn = () => txShotOn > Date.now() ? `<button class="tw-btn tx-shot" onclick="txShot()">📸 찰칵</button>` : '';
+    function txCamera() {
+      txShotOn = Date.now() + 60000; twRenderTop();
+      twSay('사진관이에요! 마을을 둘러보고 찍고 싶은 곳에서 찰칵 버튼을 눌러요.'); twToast('📸 찍고 싶은 곳에서 [찰칵]을 눌러요');
+      setTimeout(() => { if (txShotOn && txShotOn <= Date.now()) { txShotOn = 0; twRenderTop(); } }, 60500);
+    }
+    async function txShot() {
+      const v = document.getElementById('tw-view'); if (!v || !twCv) return;
+      txShotOn = 0; twRenderTop();
+      const sx = Math.max(0, v.scrollLeft / twS2), sy = Math.max(0, v.scrollTop / twS2), sw = Math.min(TW_PW - sx, v.clientWidth / twS2), sh = Math.min(TW_PH - sy, v.clientHeight / twS2);
+      const k = 3, pad = 12 * k, cv = document.createElement('canvas'); cv.width = Math.round(sw * k) + pad * 2; cv.height = Math.round(sh * k) + pad * 2 + 18 * k;
+      const x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height);
+      x.drawImage(twCv, sx, sy, sw, sh, pad, pad, Math.round(sw * k), Math.round(sh * k));
+      const d = new Date(), nm = typeof kpName === 'function' ? kpName() : '';
+      x.fillStyle = '#475569'; x.font = `${11 * k}px Jua, sans-serif`; x.textBaseline = 'middle';
+      x.fillText(`📸 ${nm ? nm + '의 ' : ''}포켓몬 마을 · ${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`, pad, cv.height - 13 * k);
+      txFlash = 1; playTone(1400, .04, 'square'); setTimeout(() => playTone(900, .06, 'square'), 80);
+      const cx = sx + sw / 2, cy = sy + sh / 2, near = twActors.filter(a => a.x > 0).sort((p, q) => Math.hypot(p.x - cx, p.y - cy) - Math.hypot(q.x - cx, q.y - cy))[0];
+      const n = near ? near.form : 25;
+      const blob = await new Promise(res => { try { cv.toBlob(b => res(b), 'image/jpeg', 0.88); } catch (e) { res(null); } });
+      let saved = false;
+      if (blob && typeof exPut === 'function') {
+        try { const id = 'a' + Date.now(); await exPut('art', id, { id, n, t: Date.now(), blob, photo: 1 }); const keys = (await exKeys('art')).sort(); for (let i = 0; i < keys.length - (typeof EX_ART_MAX !== 'undefined' ? EX_ART_MAX : 120); i++) await exDel('art', keys[i]); saved = true; } catch (e) {}
+      }
+      if (!blob) { txFlash = 0; return twSay('이번에는 사진을 찍지 못했어요. 조금 있다가 다시 찍어 봐요.'); }
+      const url = URL.createObjectURL(blob);
+      const ov = document.getElementById('rw-ov');
+      ov.innerHTML = `<div class="rw-box tw-box"><div class="rw-head">📸 찰칵! ${saved ? '그림 전시관에 걸었어요' : ''}</div>
+        <img class="tx-photo" src="${url}" alt="마을 사진">
+        <div class="tw-row">${saved ? '<button class="fd-btn" onclick="exGallery()">🖼️ 전시관 보기</button>' : ''}<a class="fd-btn" href="${url}" download="포켓몬마을_${twDay()}.jpg">⬇ 내려받기</a><button class="rw-go" onclick="twCloseOv()">닫기</button></div></div>`;
+      ov.classList.remove('hidden'); ov._tw = 1;
+      playSuccessChime(); twSay(saved ? '멋진 사진이에요! 그림 전시관에 걸었어요.' : '멋진 사진이에요!');
+    }
+
+    /* ---------- 박물관 ---------- */
+    function txMuseum() {
+      const ov = document.getElementById('rw-ov'); if (!ov.classList.contains('hidden') && !ov._tw) return;
+      const cup = typeof cpLoad === 'function' ? Object.entries(cpLoad().wins || {}).sort((a, b) => b[1] - a[1]).slice(0, 6) : [];
+      const res = Object.entries(twLoad().res || {});
+      const evo = res.filter(([, r]) => r.forms && r.forms.length > 1).slice(0, 6);
+      const champ = res.filter(([, r]) => r.w > 0).sort((a, b) => b[1].w - a[1].w).slice(0, 3);
+      const nm = n => POKEMON_NAMES_1025[n - 1] || '';
+      ov.innerHTML = `<div class="rw-box tw-box tx-mus"><div class="rw-head">🏛️ 포켓몬 박물관</div>
+        <h4>🏆 월드컵 우승</h4>${cup.length ? `<div class="tx-mus-row">${cup.map(([n, c]) => `<div>${rwImg(+n)}<span>${nm(+n)}</span><small>${c}번 우승</small></div>`).join('')}</div>` : '<p class="rw-tip">이상형 월드컵에서 우승한 친구가 여기에 걸려요.</p>'}
+        <h4>✨ 진화 기록</h4>${evo.length ? evo.map(([, r]) => `<div class="tx-mus-evo">${r.forms.map(f => rwImg(f)).join('<b>➜</b>')}</div>`).join('') : '<p class="rw-tip">마을에서 진화한 친구가 여기에 기록돼요.</p>'}
+        <h4>🥊 경기장 챔피언</h4>${champ.length ? `<div class="tx-mus-row">${champ.map(([n, r], i) => `<div>${rwImg(twForm(+n))}<span>${['🥇', '🥈', '🥉'][i]} ${nm(twForm(+n))}</span><small>${r.w}번 승리</small></div>`).join('')}</div>` : '<p class="rw-tip">배틀 경기장에서 이긴 친구가 여기에 기록돼요.</p>'}
+        <button class="rw-go" onclick="twCloseOv()">닫기</button></div>`;
+      ov.classList.remove('hidden'); ov._tw = 1;
+      twSay('포켓몬 박물관이에요. 우승한 친구, 진화한 친구, 챔피언이 기록돼 있어요.');
+    }
+
+    /* ---------- 마을 지도 ---------- */
+    function txMap() {
+      const ov = document.getElementById('rw-ov'); if (!ov.classList.contains('hidden') && !ov._tw) return;
+      const rows = [['🏡', '광장', true, [20, 12.5], ''], ...Object.entries(TX_REG).map(([k, g]) => [g.e, g.n, txOpen(k), g.c, g.need && !txOpen(k) ? `선물 ${g.need - txCount()}개 더 모으면 열려요` : ''])];
+      ov.innerHTML = `<div class="rw-box tw-box"><div class="rw-head">🗺️ 마을 지도 <small>모은 선물 ${txCount()}개</small></div>
+        <div class="tx-map">${rows.map(([e, n, ok, c, m]) => `<button class="${ok ? '' : 'off'}" onclick="twCloseOv(); twScrollTo(${c[0]}, ${c[1]})"><span>${ok ? e : '🔒'}</span><b>${n}</b>${m ? `<small>${m}</small>` : ''}</button>`).join('')}</div>
+        <button class="fd-btn" onclick="twCloseOv()">닫기</button></div>`;
+      ov.classList.remove('hidden'); ov._tw = 1;
+    }
     /**
      * ==============================================================
      * [포켓몬 이상형 월드컵] 둘 중 더 좋은 친구를 골라 최애 포켓몬 찾기
