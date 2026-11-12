@@ -16872,6 +16872,435 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const sw = switchMainView;
       switchMainView = function (v) { if (v !== 'hg') hgStop(); const r = sw.apply(this, arguments); if (v === 'hg') hgInit(); return r; };
     })();
+    /**
+     * ==============================================================
+     * [코딩 학교] 길 코딩 · 반복 코딩 · 분류 기계
+     *  - 버그 찾기, 춤 코딩, 순서 카드는 뺐어요 (답을 보고 따라 누르기만 해도 되는 놀이)
+     *  - 놀이마다 같은 흐름: 이야기(처음 한 번) → 출발 전 예측 → 실행 → 내 코드 읽어 주기 → 집에서 해 보기
+     *  - 반복 코딩: 상자 수가 정해져 있어서 "×3"처럼 반복을 써야만 몬스터볼까지 가요
+     *  - 분류 기계: 색·모양 도형. 6세부터 같은 도형을 기준을 바꿔 다시 나눠요 (인지적 유연성)
+     * ==============================================================
+     */
+    const CG3 = ['code', 'rep', 'sorter'];
+    const CG_KN = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열', '열한', '열두'];
+    const cgEl = id => document.getElementById(id);
+    function cgSt() { if (!fdS) fdS = fdLoad(); fdS.cg = Object.assign({ pn: 0, pok: 0, said: 0, home: 0, sw: 0, intro: {}, homeDay: {} }, fdS.cg || {}); return fdS.cg; }
+
+    /* ---------- 메뉴 정리 ---------- */
+    FD_GAMES.rep = ['🔁', '반복 코딩'];
+    FD_SETS.play.games = ['memory', 'code', 'rep', 'sorter', 'care'];
+    FD_SETS.play.desc = '짝 맞추기, 코딩 놀이(길 · 반복 · 분류 기계), 내 포켓몬 돌보기.';
+    RW_LEARN.add('rep'); RW_SRC.rep = ['🔁', '반복 코딩'];
+    if (typeof EX_CAT !== 'undefined' && EX_CAT.play) EX_CAT.play.src.push('rep');
+    (function () {
+      const C = RN_GROUPS.find(g => g.k === 'code');
+      if (C) C.items = [{ e: '🧭', n: '길 코딩', v: 'play', g: 'code' }, { e: '🔁', n: '반복 코딩', v: 'play', g: 'rep' }, { e: '🔺', n: '분류 기계', v: 'play', g: 'sorter' }];
+      if (typeof TX_LEARN !== 'undefined' && TX_LEARN.maze) TX_LEARN.maze.m = '미로에서 코딩 놀이를 해요. 길 코딩, 반복 코딩, 분류 기계 모두 새 친구 카드가 나와요!';
+      // 예전에 고른 놀이가 빠진 놀이면 길 코딩으로 열어요
+      try {
+        if (!fdS) fdS = fdLoad();
+        if (['bug', 'dance', 'order'].includes(fdS.games.play)) { fdS.games.play = 'code'; if (fdS.set === 'play') fdS.game = 'code'; fdSave(); }
+        rnLoad(); const n = C ? C.items.length : 3;
+        if (rnS.g === 'code' && (rnS.i || 0) >= n) rnS.i = 0;
+        if (rnS.last && (rnS.last.code || 0) >= n) rnS.last.code = 0;
+        rnSave();
+      } catch (e) {}
+      // 길 코딩은 모든 나이에서 화살표 하나 = 한 칸. 반복은 반복 코딩에서 따로 배워요
+      CD_CFG[4] = Object.assign({}, CD_CFG[4], { counts: false });
+    })();
+
+    /* ---------- 이야기 (처음 열 때 한 번, 📖 버튼으로 다시) ---------- */
+    const CG_STORY = {
+      code: [['🤖', '로봇 피카츄는 말한 대로만 움직여요. 스스로 길을 찾지 못해요.'],
+        ['⬆️➡️', '화살표 하나가 명령 하나예요. 명령을 차례대로 이어 놓은 것을 코드라고 해요.'],
+        ['🧠', '출발하기 전에 먼저 생각해요. 이 코드로 몬스터볼까지 갈 수 있을까?']],
+      code3: [['🤖', '로봇 피카츄는 말한 대로만 움직여요.'], ['👆', '화살표를 누를 때마다 한 칸씩 가요. 몬스터볼까지 데려다줘요!']],
+      rep: [['🪜', '계단을 오를 때 한 칸, 한 칸, 한 칸 말하는 대신 세 칸 올라가 하면 짧아요.'],
+        ['🔁', '같은 명령을 여러 번 할 때는 몇 번인지 붙여요. 이것을 반복이라고 해요.'],
+        ['📦', '상자 수가 정해져 있어요. 반복을 쓰면 짧은 코드로 멀리 갈 수 있어요.']],
+      sorter: [['🤖', '기계는 스스로 생각하지 못해요. 사람이 규칙을 알려 줘야 해요.'],
+        ['☂️', '만약 비가 오면 우산을 써요. 아니면 모자를 써요. 이렇게 정해 두는 것을 조건이라고 해요.'],
+        ['🔺', '분류 기계에게 만약 무엇이면 어느 바구니로 갈지 알려 줘요.']]
+    };
+    function cgOv(html) { let o = cgEl('cg-ov'); if (!o) { document.body.insertAdjacentHTML('beforeend', '<div id="cg-ov" class="hidden"></div>'); o = cgEl('cg-ov'); } o.innerHTML = html; o.classList.remove('hidden'); return o; }
+    function cgOvClose() { cgEl('cg-ov')?.classList.add('hidden'); }
+    let cgStoryK = null, cgStoryI = 0;
+    function cgStory(k) {
+      cgStoryK = k === 'code' && fdS.age <= 3 ? 'code3' : k; cgStoryI = 0; cgStoryDraw();
+    }
+    function cgStoryDraw() {
+      const P = CG_STORY[cgStoryK], p = P[cgStoryI], last = cgStoryI >= P.length - 1;
+      cgOv(`<div class="cgm-card"><div class="cgm-big">${p[0]}</div><p>${p[1]}</p>
+        <div class="cgm-dots">${P.map((_, i) => `<i class="${i === cgStoryI ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="cgm-row">${cgStoryI ? '<button onclick="cgStoryGo(-1)">◀ 앞</button>' : ''}<button onclick="fdSay(CG_STORY[cgStoryK][cgStoryI][1])">🔊</button><button class="pri" onclick="cgStoryGo(1)">${last ? '시작해요!' : '다음 ▶'}</button></div></div>`);
+      fdSay(p[1]);
+    }
+    function cgStoryGo(d) {
+      const P = CG_STORY[cgStoryK]; cgStoryI += d; playTone(560, .04);
+      if (cgStoryI >= P.length) { cgOvClose(); const st = cgSt(); st.intro[cgStoryK === 'code3' ? 'code' : cgStoryK] = 1; fdSave(); setTimeout(fdReplay, 200); return; }
+      cgStoryDraw();
+    }
+    // 시작 화면 아래 줄에 📖 이야기 버튼, 처음이면 이야기부터
+    function cgAfterStart(k) {
+      const b = cgEl('fd-bottom');
+      if (b && !b.querySelector('.cg-sb')) b.firstElementChild?.insertAdjacentHTML('afterend', `<button class="fd-btn cg-sb" onclick="cgStory('${k}')">📖 이야기</button>`);
+      if (!cgSt().intro[k]) setTimeout(() => { if (fdG && (fdG.kind === k || (k === 'code' && fdG.kind === 'code'))) cgStory(k); }, 350);
+    }
+
+    function cgShow() {
+      setTimeout(() => {
+        if (typeof fdFull === 'function' && fdFull()) return fdRes();
+        const b = cgEl('fd-bottom'); if (!b) return;
+        const r = b.getBoundingClientRect(), lim = window.innerHeight - (typeof rnBotH === 'function' ? rnBotH() : 0) - 8;
+        if (r.bottom > lim) window.scrollBy({ top: r.bottom - lim, behavior: 'smooth' });
+      }, 60);
+    }
+    /* ---------- 출발 전 예측 ---------- */
+    function cgAsk(g, q, go) {
+      g.run = true; g.asking = true;
+      const list = cgEl('fd-list'); g.askPrev = list.innerHTML;
+      list.innerHTML = `<div class="cg-pred"><b>🧠 출발하기 전에 생각해요</b><span>${q}</span><div><button onclick="cgAnswer(true)">👍 갈 거야</button><button onclick="cgAnswer(false)">🤔 안 될 것 같아</button></div></div>`;
+      g.askGo = go; fdSay(q); cgShow();
+    }
+    function cgAnswer(v) {
+      const g = fdG; if (!g || !g.asking) return;
+      g.asking = false; g.run = false; g.pred = v; playTone(v ? 700 : 500, .05);
+      cgEl('fd-list').innerHTML = g.askPrev; const go = g.askGo; g.askGo = null; go && go();
+    }
+    // 결과가 나오면 예측과 맞춰 봐요. 돌려주는 말은 메시지 앞에 붙여요
+    function cgJudge(g, ok) {
+      if (g.pred === undefined) return '';
+      const st = cgSt(), hit = g.pred === ok; st.pn++; if (hit) st.pok++; fdSave();
+      g.lastPred = hit && ok; const p = g.pred; g.pred = undefined;
+      if (ok) return hit ? '예측이 맞았어요!' : '안 될 줄 알았는데 갔네요!';
+      return p ? '생각과 달랐어요.' : '예측대로 멈췄어요. 어디를 고칠지 찾아봐요.';
+    }
+
+    /* ---------- 내 코드 읽어 주기 (처음에 · 그다음에 · 마지막에) ---------- */
+    function cgPieces(parts, end) {
+      if (parts.length === 1) return [`${parts[0]} ${end}`];
+      return parts.map((p, i) => i === 0 ? `처음에 ${p},` : i === parts.length - 1 ? `마지막에 ${p} ${end}` : `그다음에 ${p},`);
+    }
+    function cgReflect(g, pieces, hl, n, msg, next, pre) {
+      g.run = true; g.refl = { n, msg, next, pieces, hl };
+      const young = fdS.age <= 4;
+      cgEl('fd-list').innerHTML = `<div class="cg-say"><b>🗣️ 내 코드 읽어 주기</b><p id="cg-say-t">${pieces.map((p, i) => `<span data-k="${i}">${p}</span>`).join(' ')}</p><small>${young ? '잘 들어 봐요.' : '같이 소리 내어 따라 말해 봐요.'}</small></div>`;
+      cgEl('fd-bottom').innerHTML = `<button class="fd-btn" onclick="cgReflSkip()">⏭ 넘기기</button>`;
+      let i = 0;
+      const step = () => {
+        if (fdG !== g) return;
+        document.querySelectorAll('#cg-say-t span').forEach(s => s.classList.toggle('on', +s.dataset.k === i));
+        if (hl) hl(i < pieces.length ? i : -1);
+        if (i >= pieces.length) return end();
+        fdSay(pieces[i], () => { i++; fdLater(step, 200); });
+      };
+      const end = () => {
+        cgEl('fd-bottom').innerHTML = young ? `<button class="fd-btn fd-primary" onclick="cgReflEnd(0)">👍 다 들었어요</button>`
+          : `<button class="fd-btn fd-primary" onclick="cgReflEnd(1)">🗣️ 따라 말했어요</button><button class="fd-btn" onclick="cgReflAgain()">🔊 한 번 더</button><button class="fd-btn" onclick="cgReflEnd(0)">다음에 할래요</button>`;
+        cgShow();
+      };
+      g.refl.end = () => { fdStopSpeech(); if (hl) hl(-1); document.querySelectorAll('#cg-say-t span').forEach(s => s.classList.remove('on')); end(); };
+      cgShow();
+      if (pre) { cgEl('cg-say-t').insertAdjacentHTML('beforebegin', `<em class="cg-pre">${pre}</em>`); fdSay(pre, () => fdLater(step, 150)); } else step();
+    }
+    function cgReflSkip() { const g = fdG; if (g && g.refl && g.refl.end) { g.refl.i = 1; g.refl.end(); } }
+    function cgReflAgain() { const g = fdG; if (!g || !g.refl) return; const r = g.refl; g.refl = null; cgReflect(g, r.pieces, r.hl, r.n, r.msg, r.next); }
+    function cgReflEnd(said) {
+      const g = fdG; if (!g || !g.refl) return; const r = g.refl; g.refl = null; g.run = false;
+      const st = cgSt(); if (said) st.said++; fdSave();
+      let n = r.n, msg = r.msg;
+      if (g.lastPred) { n++; msg += ' 예측도 맞혔어요!'; }
+      if (said) { n++; msg += ' 코드도 또박또박 읽었어요!'; }
+      fdDone(Math.min(5, n), msg, r.next);
+    }
+
+    /* ---------- 집에서 해 보기 (부모님과 함께) ---------- */
+    const CG_HOME = {
+      code: [['🤖', '엄마 로봇 놀이', '아이가 "앞으로 세 걸음, 오른쪽으로 돌아"처럼 말로 명령해서 엄마(아빠)가 냉장고 앞까지 가요. 로봇은 말한 대로만 움직여요. 틀린 명령이면 틀린 곳으로 가요.', '명령을 하나 빼먹으면 로봇이 어떻게 됐어?'],
+        ['🧸', '인형 배달 길', '바닥에 쿠션이나 테이프로 칸을 만들고, 종이에 화살표를 그려 순서대로 놓아요. 화살표대로 인형을 옮겨 목적지에 닿는지 봐요.', '처음에 어디로 갔고, 마지막에 어디로 갔어?'],
+        ['🥪', '샌드위치 코드', '빵, 잼, 빵 순서로 샌드위치 만드는 법을 아이가 말해요. 어른이 순서를 일부러 바꿔서 따라 해 보면 무엇이 이상해지는지 함께 웃어요.', '순서가 바뀌면 왜 안 될까?']],
+      rep: [['👏', '반복 박수', '"박수 세 번, 발 구르기 두 번"을 만들고, "이걸 두 번 반복!" 하고 함께 해요. 아이가 직접 반복 문제를 내게 해요.', '반복을 쓰면 말이 어떻게 짧아졌어?'],
+        ['🎵', '노래 속 반복 찾기', '아는 동요를 함께 부르고 똑같이 되풀이되는 부분을 찾아요. 그 부분을 "몇 번 반복"으로 말해 봐요.', '이 노래에서 몇 번 반복됐어?'],
+        ['🧦', '양말 짝 맞추기', '"한 짝 집어서 짝 찾기"를 양말이 다 없어질 때까지 반복해요. 언제 멈추는지도 이야기해요.', '반복은 언제 멈춰야 할까?']],
+      sorter: [['🧺', '빨래 나누기 기계', '아이가 규칙을 정해요. "만약 양말이면 이 바구니, 아니면 저 바구니." 규칙대로 함께 나눠요.', '규칙에 안 맞는 건 어디로 갔어?'],
+        ['🧱', '장난감 두 번 나누기', '블록이나 장난감을 색으로 한 번 나누고, 다 섞은 뒤 모양(또는 크기)으로 다시 나눠요.', '기준을 바꾸니까 무엇이 달라졌어?'],
+        ['🚦', '만약 놀이', '"만약 신호등이 빨간불이면?", "만약 비가 오면?"처럼 번갈아 문제를 내고 "~이면 ~해요"로 답해요.', '오늘 만든 만약 문장 중에 뭐가 제일 재밌었어?']]
+    };
+    function cgToday() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+    function cgHome(k) {
+      const L = CG_HOME[k], a = L[Math.floor(Math.random() * L.length)], st = cgSt(), done = st.homeDay[k] === cgToday();
+      cgOv(`<div class="cgm-card cgm-home"><h3>🏠 부모님과 함께 · 집에서 해 보기</h3><div class="cgm-big">${a[0]}</div><b class="cgm-ht">${a[1]}</b><p class="cgm-hp">${a[2]}</p>
+        <div class="q">끝나고 물어보기: "${a[3]}"</div>
+        <div class="cgm-row"><button onclick="cgOvClose()">닫기</button><button class="pri" onclick="cgHomeDone('${k}')" ${done ? 'disabled' : ''}>${done ? '오늘은 받았어요' : '✅ 해 봤어요 (스티커 2개)'}</button></div></div>`);
+    }
+    function cgHomeDone(k) {
+      const st = cgSt(); if (st.homeDay[k] === cgToday()) return;
+      st.homeDay[k] = cgToday(); st.home++; fdSave(); cgOvClose();
+      const cards = rwGive([25, 133], k); playSuccessChime();
+      fdSay('집에서도 코딩했어요! 스티커 2개를 받았어요!', () => { if (cards.length) rwShowCards(cards); });
+    }
+    (function () {
+      const fd = fdDone;
+      fdDone = function (n, msg, next) {
+        const g = fdG, r = fd.apply(this, arguments);
+        if (g && CG3.includes(g.kind)) { cgEl('fd-bottom')?.insertAdjacentHTML('beforeend', `<button class="fd-btn" onclick="cgHome('${g.kind}')">🏠 집에서 해 보기</button>`); cgShow(); }
+        return r;
+      };
+    })();
+
+    /* ---------- 길 코딩 · 반복 코딩: 예측, 읽어 주기 ---------- */
+    // 화살표 묶음 → 읽을 조각들. 길 코딩은 같은 방향을 묶고, 반복 코딩은 상자 하나가 한 조각
+    function cgCodeParts(g) {
+      const groups = [];
+      g.prog.forEach((c, i) => {
+        const last = groups[groups.length - 1];
+        if (g.kind === 'code' && last && last.d === c.d) { last.k += c.k; last.idx.push(i); }
+        else groups.push({ d: c.d, k: c.k, idx: [i] });
+      });
+      const unit = g.kind === 'rep' ? '번' : '칸';
+      return { groups, parts: groups.map(x => `${CD_DIR[x.d][3]} ${CG_KN[x.k] || x.k} ${unit}`) };
+    }
+    (function () {
+      const run = cdRun, win = cdWin, end = cdEnd, nw = cdNew, key = cdKey, back = cdBack, draw = cdDrawProg, hint = cdHint;
+      cdNew = function () { const r = nw.apply(this, arguments); if (fdS.game === 'code') cgAfterStart('code'); return r; };
+      cdRun = function () {
+        const g = fdG; if (!g || g.run || g.done) return;
+        if (!['code', 'rep'].includes(g.kind) || g.cfg.direct) return run.apply(this, arguments);
+        if (!g.prog.length) return cdMsg('먼저 화살표를 놓아 볼까요?');
+        cgAsk(g, g.lv.berry ? '딸기를 먹고 몬스터볼까지 갈까요?' : '이 코드로 피카츄가 몬스터볼까지 갈까요?', () => run());
+      };
+      cdWin = function () {
+        const g = fdG; if (!g || g.done) return;
+        if (g.cfg.direct) return win.apply(this, arguments);
+        document.querySelector('#cd-board .cd-goal')?.classList.add('got');
+        const pre = cgJudge(g, true), { groups, parts } = cgCodeParts(g);
+        const hl = i => { document.querySelectorAll('#cd-prog .cd-grp').forEach(e => e.classList.remove('say')); if (i >= 0) groups[i].idx.forEach(j => document.querySelector(`#cd-prog .cd-grp[data-i="${j}"]`)?.classList.add('say')); };
+        const msg = (g.fails ? '고쳐서 도착했어요!' : '한 번에 도착했어요!');
+        cgReflect(g, cgPieces(parts, '가서 몬스터볼에 도착했어요.'), hl, 3, msg, '다음 길 ▶', pre);
+      };
+      cdEnd = function () {
+        const g = fdG, r = end.apply(this, arguments);
+        if (g && ['code', 'rep'].includes(g.kind)) { const pre = cgJudge(g, false); const el = cgEl('cd-msg'); if (pre && el) { el.textContent = pre + ' ' + el.textContent; fdSay(el.textContent); } }
+        return r;
+      };
+      cdHint = function () { const g = fdG; if (g && g.kind === 'rep') { g.kind = 'code'; try { hint.apply(this, arguments); } finally { g.kind = 'rep'; } } else hint.apply(this, arguments); };
+      // 반복 코딩: 화살표를 누르면 새 상자, ×숫자로 그 상자를 몇 번 할지 정해요
+      cdKey = function (d) {
+        const g = fdG; if (!g || g.kind !== 'rep') return key.apply(this, arguments);
+        if (g.run || g.done) return;
+        if (g.prog.length >= g.lv.limit) return cdMsg(`상자는 ${g.lv.limit}개까지예요. ×숫자로 반복을 써 봐요!`);
+        g.prog.push({ d, k: 1 }); g.sel = g.prog.length - 1; playTone(560, .04); cdDrawProg(); fdSay(CD_DIR[d][3]);
+      };
+      cdBack = function () { const g = fdG; if (!g || g.kind !== 'rep') return back.apply(this, arguments); if (g.run) return; g.prog.pop(); g.sel = g.prog.length - 1; playTone(400, .04); cdDrawProg(); };
+      cdDrawProg = function () {
+        const g = fdG; if (!g || g.kind !== 'rep') return draw.apply(this, arguments);
+        const el = cgEl('cd-prog'); if (!el) return; let st = 0;
+        el.innerHTML = `<span class="cd-lim">상자 ${g.prog.length} / ${g.lv.limit}</span>` + g.prog.map((c, i) => {
+          const s0 = st; st += c.k;
+          return `<span class="cd-grp cg-box ${g.sel === i ? 'cg-on' : ''}" data-i="${i}" onclick="cgRepSel(${i})"><span class="cd-ar" data-s="${s0}">${CD_DIR[c.d][2]}</span>${Array.from({ length: c.k - 1 }, (_, j) => `<i class="cd-ar cg-ghost" data-s="${s0 + j + 1}"></i>`).join('')}<b class="cg-k">×${c.k}</b></span>`;
+        }).join('') + Array.from({ length: Math.max(0, g.lv.limit - g.prog.length) }, () => '<span class="cd-grp empty"></span>').join('');
+      };
+    })();
+    function cgRepSel(i) { const g = fdG; if (!g || g.kind !== 'rep' || g.run || g.done) return; g.sel = i; playTone(620, .04); cdDrawProg(); }
+    function cgRepCount(n) {
+      const g = fdG; if (!g || g.kind !== 'rep' || g.run || g.done) return;
+      const c = g.prog[g.sel >= 0 ? g.sel : g.prog.length - 1]; if (!c) return cdMsg('먼저 화살표를 놓고, 몇 번 갈지 눌러요.');
+      c.k = n; playTone(660, .05); cdDrawProg(); fdSay(`${CD_DIR[c.d][3]} ${CG_KN[n]} 번`);
+    }
+    // 반복 코딩 판: 곧게 뻗은 길이 길어서 반복 없이는 상자가 모자라요
+    const REP_CFG = {
+      5: { n: 5, rocks: 3, len: [6, 8], runs: 2, far: 4, counts: true, cards: [2, 3] },
+      6: { n: 6, rocks: 5, len: [8, 11], runs: 3, far: 4, counts: true, cards: [3, 4] },
+      7: { n: 6, rocks: 6, len: [9, 13], runs: 3, far: 4, berry: true, counts: true, cards: [3, 5] }
+    };
+    function cgRepNew() {
+      const a = fdS.age, i = a - 3, keep = CD_CFG[i];
+      CD_CFG[i] = REP_CFG[Math.min(7, Math.max(5, a))];
+      try { cdNew(); } finally { CD_CFG[i] = keep; }
+      const g = fdG; g.kind = 'rep'; g.cfg = Object.assign({}, g.cfg, { counts: false, direct: false }); g.sel = -1;
+      document.querySelector('.cd-side .cd-pad').insertAdjacentHTML('afterend', `<div class="cg-cnt"><span>몇 번?</span>${[2, 3, 4, 5].map(n => `<button onclick="cgRepCount(${n})">×${n}</button>`).join('')}</div>`);
+      cdDrawProg();
+      const m = `상자는 ${g.lv.limit}개까지! 화살표를 놓고 ×숫자를 눌러 몇 번 갈지 정해요.${g.lv.berry ? ' 딸기도 꼭 먹어요.' : ''}`;
+      cgEl('fd-list').innerHTML = `<div class="cd-msg" id="cd-msg">${m}</div>`;
+      const nb = cgEl('fd-bottom').lastElementChild; if (nb) nb.textContent = '🔄 새 길';
+      g.say = `반복 코딩이에요. ${m}${a < 5 ? ' 조금 어려우면 어른이랑 같이 해요.' : ''}`; fdSay(g.say);
+      cgAfterStart('rep');
+    }
+    (function () {
+      const fs = fdStart;
+      fdStart = function () {
+        if (fdS.game !== 'rep') return fs.apply(this, arguments);
+        fdStopSpeech(); fdUid++;
+        const nm = cgEl('fd-pname'); if (nm) nm.textContent = `🔁 반복 코딩 · ${fdS.age}세`;
+        cgEl('fd-list').innerHTML = ''; cgEl('fd-bottom').innerHTML = '';
+        cgRepNew(); if (!fdFull()) setTimeout(fdScroll, 60); else fdRes();
+      };
+    })();
+
+    /* ---------- 분류 기계: 색 · 모양 도형 ---------- */
+    const SH_COL = { R: ['#e5484d', '빨강'], Y: ['#f2b705', '노랑'], B: ['#3b82f6', '파랑'], G: ['#22a55b', '초록'] };
+    const SH_SHP = { O: '동그라미', T: '세모', S: '네모', X: '별' };
+    const SH_DIR = { L: ['⬅️', '왼쪽', '왼쪽으로'], D: ['⬇️', '가운데', '가운데로'], R: ['➡️', '오른쪽', '오른쪽으로'] };
+    function shSvg(c, s) {
+      const f = c ? SH_COL[c][0] : '#cbd5e1', k = 'stroke="#1f2937" stroke-width="3" stroke-linejoin="round"';
+      const body = s === 'O' ? `<circle cx="32" cy="32" r="24" fill="${f}" ${k}/>` : s === 'T' ? `<path d="M32 7 L58 54 L6 54 Z" fill="${f}" ${k}/>`
+        : s === 'S' ? `<rect x="9" y="9" width="46" height="46" rx="6" fill="${f}" ${k}/>` : `<path d="M32 5 L39.5 23.5 L59 24.5 L44 37 L49 56 L32 45.5 L15 56 L20 37 L5 24.5 L24.5 23.5 Z" fill="${f}" ${k}/>`;
+      return `<svg class="cg-shp" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
+    }
+    const shName = v => v[0] === 'c' ? SH_COL[v[2]][1] : SH_SHP[v[2]];
+    const shBadge = v => v[0] === 'c' ? `<i class="cg-dot" style="background:${SH_COL[v[2]][0]}"></i>${SH_COL[v[2]][1]}` : `<span class="cg-mini">${shSvg('', v[2])}</span>${SH_SHP[v[2]]}`;
+    const shMyeon = w => { const k = w.charCodeAt(w.length - 1) - 0xAC00; return w + (k >= 0 && k % 28 ? '이면' : '면'); };
+    cgSortNew = function (opt) {
+      const a = fdS.age, three = a >= 6, k = three ? 3 : 2;
+      const pc = opt ? opt.pc : fdShuffle(Object.keys(SH_COL)).slice(0, k), ps = opt ? opt.ps : fdShuffle(Object.keys(SH_SHP)).slice(0, k);
+      const dim = opt ? opt.dim : a <= 4 ? 'c' : a === 5 ? fdPick(['c', 's']) : 'c';
+      let items = opt && opt.items;
+      if (!items) {
+        const n = a <= 4 ? 4 : three ? 7 : 6, cs = fdShuffle(Array.from({ length: n }, (_, i) => pc[i % k])), ss = fdShuffle(Array.from({ length: n }, (_, i) => ps[i % k]));
+        items = cs.map((c, i) => ({ c, s: ss[i] }));
+      }
+      const picks = dim === 'c' ? pc : ps, dirs = three ? ['L', 'D', 'R'] : ['L', 'R'], sd = fdShuffle(dirs.slice()), want = {};
+      picks.forEach((v, i) => want[sd[i]] = dim + ':' + v);
+      const all = d => Object.keys(d === 'c' ? SH_COL : SH_SHP).map(v => d + ':' + v), other = dim === 'c' ? 's' : 'c';
+      const mine = picks.map(v => dim + ':' + v);
+      const condOpts = a <= 4 ? mine : a <= 6 ? fdShuffle(all(dim)) : fdShuffle([...all(dim), ...all(other)]);
+      fdG = { kind: 'sorter', dim, pc, ps, items, want, condOpts, dirs, rules: Array.from({ length: three ? 2 : 1 }, () => ({ c: null, d: null })), elseD: null, run: false, done: false, fails: 0, pks: [25, 1, 7], switched: !!(opt && opt.switched) };
+      const bk = d => `<div class="cg-bk" data-d="${d}"><span class="cg-want">${shBadge(want[d])}</span><span class="cg-got" id="cg-got-${d}"></span><b>${SH_DIR[d][0]}</b></div>`;
+      cgEl('fd-game').innerHTML = `<div class="cg-sort">
+          ${fdG.switched ? `<div class="cg-switch">🔄 규칙이 바뀌었어요! 이번에는 <b>${dim === 'c' ? '색' : '모양'}</b>으로 나눠요</div>` : ''}
+          <div class="cg-belt" id="cg-belt">${items.map((it, i) => `<span class="cg-it" data-i="${i}">${shSvg(it.c, it.s)}</span>`).join('')}</div>
+          <div class="cg-mach">🤖 분류 기계</div>
+          <div class="cg-bks">${dirs.map(bk).join('')}</div>
+          <div class="cg-rules" id="cg-rules"></div></div>`;
+      const m = fdG.switched ? `아까랑 같은 도형이에요. 이번에는 ${dim === 'c' ? '색' : '모양'}으로 규칙을 다시 만들어요.` : `바구니마다 원하는 ${dim === 'c' ? '색' : '모양'}이 있어요. 기계에 "만약 ~이면 어느 쪽" 규칙을 알려 줘요.`;
+      cgEl('fd-list').innerHTML = `<div class="cd-msg" id="cg-msg">${m}</div>`;
+      cgEl('fd-bottom').innerHTML = `<button class="fd-btn" onclick="fdReplay()">🔊 다시 듣기</button><button class="fd-btn fd-primary" onclick="cgSortRun()">▶ 기계 켜기</button><button class="fd-btn" onclick="fdStart()">🔄 새 도형</button>`;
+      cgSortDraw();
+      fdG.say = fdG.switched ? `규칙이 바뀌었어요! 같은 도형을 이번에는 ${dim === 'c' ? '색' : '모양'}으로 나눠요. 물음표를 눌러 새 규칙을 만들어 봐요.`
+        : three ? `분류 기계에 규칙을 두 개 알려 줘요. 만약 무엇이면 어느 바구니로 갈지 정하고, 아니면 어디로 갈지도 정해요.` : `분류 기계에 규칙을 알려 줘요. 만약 무엇이면 어느 쪽으로 보낼지, 아니면 어느 쪽으로 보낼지 정해 봐요.`;
+      fdSay(fdG.say);
+      if (!fdG.switched) cgAfterStart('sorter');
+    };
+    cgSortDraw = function () {
+      const g = fdG, el = cgEl('cg-rules'); if (!el) return;
+      const condBtn = (i, r) => `<button class="cg-sel" onclick="cgSortCond(${i})">${r.c ? shBadge(r.c) : '❓ 무엇'}</button>`;
+      const dirBtn = (i, d) => `<button class="cg-sel dir" onclick="cgSortDir(${i})">${d ? SH_DIR[d][0] : '❓'}</button>`;
+      el.innerHTML = g.rules.map((r, i) => `<div class="cg-rule"><b>${i ? '아니고 만약' : '만약'}</b>${condBtn(i, r)}<b>이면</b>${dirBtn(i, r.d)}</div>`).join('') + `<div class="cg-rule"><b>아니면</b>${dirBtn(-1, g.elseD)}</div>`;
+    };
+    cgSortCond = function (i) { const g = fdG; if (!g || g.run || g.done) return; const o = g.condOpts, r = g.rules[i]; r.c = o[(o.indexOf(r.c) + 1) % o.length]; playTone(560, .04); fdSay(shName(r.c)); cgSortDraw(); };
+    cgSortDir = function (i) { const g = fdG; if (!g || g.run || g.done) return; const cur = i < 0 ? g.elseD : g.rules[i].d, nx = g.dirs[(g.dirs.indexOf(cur) + 1) % g.dirs.length]; if (i < 0) g.elseD = nx; else g.rules[i].d = nx; playTone(620, .04); fdSay(SH_DIR[nx][1]); cgSortDraw(); };
+    cgSortRun = function () {
+      const g = fdG; if (!g || g.kind !== 'sorter' || g.run || g.done) return;
+      if (g.rules.some(r => !r.c || !r.d) || !g.elseD) return cgMsg('물음표를 눌러서 규칙을 다 정해 볼까요?');
+      cgAsk(g, '기계를 켜면 도형이 모두 맞는 바구니로 갈까요?', () => cgSortGo());
+    };
+    function cgSortGo() {
+      const g = fdG; g.run = true;
+      document.querySelectorAll('.cg-got').forEach(e => e.innerHTML = ''); document.querySelectorAll('#cg-belt .cg-it').forEach(e => e.classList.remove('gone'));
+      let i = 0, wrong = 0;
+      const val = (it, v) => (v[0] === 'c' ? it.c : it.s) === v[2];
+      const tick = () => {
+        if (fdG !== g) return;
+        if (i >= g.items.length) {
+          g.run = false;
+          const pre = cgJudge(g, !wrong);
+          if (!wrong) return cgSortWin(g, pre);
+          g.fails++; return cgMsg(`${pre ? pre + ' ' : ''}${wrong}개가 다른 바구니로 갔어요. 빨간 테두리 도형은 어떤 규칙을 따라갔을까요?`);
+        }
+        const it = g.items[i], r = g.rules.find(r => val(it, r.c)), d = r ? r.d : g.elseD, ok = val(it, g.want[d]);
+        document.querySelector(`#cg-belt .cg-it[data-i="${i}"]`)?.classList.add('gone');
+        cgEl('cg-got-' + d).insertAdjacentHTML('beforeend', `<span class="${ok ? '' : 'bad'}">${shSvg(it.c, it.s)}</span>`);
+        playTone(ok ? 600 + i * 40 : 220, .08, ok ? 'sine' : 'sawtooth'); if (!ok) wrong++;
+        i++; setTimeout(tick, 600);
+      };
+      tick();
+    }
+    function cgSortWin(g, pre) {
+      const parts = g.rules.map((r, i) => `${i ? '아니고 만약' : '만약'} ${shMyeon(shName(r.c))} ${SH_DIR[r.d][1]},`);
+      parts.push(`아니면 ${SH_DIR[g.elseD][2]} 보냈어요.`);
+      const canSwitch = fdS.age >= 6 && !g.switched;
+      if (g.switched) { cgSt().sw++; fdSave(); }
+      cgReflect(g, parts, i => document.querySelectorAll('#cg-rules .cg-rule').forEach((e, j) => e.classList.toggle('say', j === i)), 3,
+        g.switched ? '기준이 바뀌어도 해냈어요!' : '분류 기계가 도형을 다 맞게 나눴어요!', canSwitch ? '🔄 규칙 바꾸기 ▶' : '다음 도형 ▶', pre);
+      if (canSwitch) g.nextSwitch = { pc: g.pc, ps: g.ps, items: g.items, dim: g.dim === 'c' ? 's' : 'c', switched: true, age: fdS.age };
+    }
+    // '규칙 바꾸기'를 누르면 같은 도형으로 기준만 바꿔 다시 해요
+    (function () {
+      const fs = fdStart;
+      fdStart = function () {
+        const g = fdG;
+        if (fdS.game === 'sorter' && g && g.kind === 'sorter' && g.done && g.nextSwitch && g.nextSwitch.age === fdS.age) {
+          const o = g.nextSwitch; fdStopSpeech(); fdUid++;
+          cgEl('fd-list').innerHTML = ''; cgEl('fd-bottom').innerHTML = '';
+          return cgSortNew(o);
+        }
+        return fs.apply(this, arguments);
+      };
+    })();
+
+    /* ---------- 부모님 리포트에 코딩 줄 ---------- */
+    (function () {
+      const rp = exReport;
+      exReport = function () {
+        const r = rp.apply(this, arguments), st = cgSt(), box = document.querySelector('#rw-ov .ex-report'), go = box && box.querySelector('.rw-go');
+        if (go) {
+          const d = fdS.done || {}, top = CG3.slice().sort((a, b) => (d[b] || 0) - (d[a] || 0))[0];
+          const Q = { code: '피카츄한테 어떤 명령을 줬어? 처음엔 어디로 갔어?', rep: '똑같은 걸 여러 번 할 때 어떻게 짧게 말했어?', sorter: '기계한테 어떤 규칙을 알려 줬어? 규칙이 바뀌었을 때는 어땠어?' };
+          go.insertAdjacentHTML('beforebegin', `<div class="cg-rp"><b>🤖 코딩 수첩 (지금까지)</b>
+            <span>길 ${d.code || 0}판 · 반복 ${d.rep || 0}판 · 분류 ${d.sorter || 0}판</span>
+            <span>출발 전 예측 ${st.pn}번 중 ${st.pok}번 맞힘 · 코드 읽어 주기 ${st.said}번 · 규칙 바꾸기 ${st.sw}번 · 집에서 해 보기 ${st.home}번</span>
+            ${d[top] ? `<span class="q">저녁에 물어보기: "${Q[top]}"</span>` : ''}</div>`);
+        }
+        return r;
+      };
+    })();
+
+    document.head.insertAdjacentHTML('beforeend', `<style>
+      .cg-box { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: .7rem; border: 2px solid #c7d2fe; background: #fff; cursor: pointer; }
+      .cg-box.cg-on { border-color: #6366f1; box-shadow: 0 0 0 3px #c7d2fe; }
+      .cg-box .cg-k { font: 900 1.05rem/1 'Jua', sans-serif; color: #4338ca; }
+      .cg-ghost { display: none !important; }
+      .cd-grp.cg-box { flex: 0 0 auto; width: auto; min-width: 0; }
+      .cg-box:has(.now), .cd-grp.say { background: #fde68a !important; border-color: #f59e0b !important; }
+      .cg-box:has(.bad) { background: #fecaca; border-color: #ef4444; }
+      .cg-cnt { display: flex; align-items: center; justify-content: center; gap: .35rem; margin-top: .4rem; flex-wrap: wrap; }
+      .cg-cnt span { font-size: .85rem; font-weight: 800; color: #6366f1; }
+      .cg-cnt button { min-width: 2.9rem; height: 2.6rem; border-radius: .8rem; border: 2px solid #a5b4fc; background: #eef2ff; font: 900 1.1rem 'Jua', sans-serif; color: #4338ca; }
+      .cg-pred, .cg-say { display: flex; flex-direction: column; align-items: center; gap: .45rem; padding: .7rem .9rem; border-radius: 1rem; background: #fff7ed; border: 2px solid #fdba74; text-align: center; }
+      .cg-pred b, .cg-say b { font-size: .95rem; color: #c2410c; }
+      .cg-pred span { font-size: 1.15rem; font-weight: 800; color: #1f2937; }
+      .cg-pred div { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+      .cg-pred button { padding: .6rem 1.1rem; border-radius: .9rem; font-size: 1.1rem; font-weight: 800; border: 2px solid #fb923c; background: #fff; }
+      .cg-say p { font-size: 1.12rem; font-weight: 700; line-height: 1.7; color: #1f2937; margin: 0; }
+      .cg-say p span { padding: 0 .15rem; border-radius: .4rem; transition: background .2s; }
+      .cg-say p span.on { background: #fde68a; }
+      .cg-pre { font-style: normal; font-weight: 800; color: #15803d; }
+      .cg-say small { color: #9a3412; font-weight: 600; }
+      #cg-ov { position: fixed; inset: 0; z-index: 99999; background: rgba(15, 23, 42, .55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+      #cg-ov.hidden { display: none; }
+      .cgm-card { background: #fff; border-radius: 1.4rem; max-width: 32rem; width: 100%; padding: 1.4rem 1.2rem; display: flex; flex-direction: column; gap: .8rem; align-items: center; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+      .cgm-card .cgm-big { font-size: 3.6rem; line-height: 1.1; }
+      .cgm-card p { font-size: 1.2rem; font-weight: 700; line-height: 1.6; color: #1f2937; margin: 0; }
+      .cgm-dots { display: flex; gap: .35rem; } .cgm-dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #e5e7eb; } .cgm-dots i.on { background: #f97316; }
+      .cgm-row { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+      .cgm-card button { padding: .65rem 1.1rem; border-radius: .9rem; font-size: 1.05rem; font-weight: 800; border: 2px solid #e5e7eb; background: #f9fafb; color: #1f2937; }
+      .cgm-card button.pri { background: #f97316; border-color: #f97316; color: #fff; }
+      .cgm-card button:disabled { opacity: .5; }
+      .cgm-home h3 { font-size: .9rem; font-weight: 800; color: #c2410c; margin: 0; }
+      .cgm-home .cgm-ht { font-size: 1.3rem; }
+      .cgm-home .cgm-hp { font-size: 1rem; font-weight: 600; text-align: left; }
+      .cgm-home .q, .cg-rp .q { font-size: .98rem; background: #f1f5f9; border-radius: .8rem; padding: .5rem .8rem; font-weight: 700; color: #334155; }
+      .cg-rp { display: flex; flex-direction: column; gap: .3rem; background: #eef2ff; border-radius: 1rem; padding: .7rem .9rem; margin: .5rem 0; font-size: .9rem; color: #1e293b; text-align: left; }
+      .cg-rp b { color: #4338ca; }
+      .cg-it .cg-shp { width: 100%; height: 100%; }
+      .cg-got span { display: inline-flex; } .cg-got .cg-shp { width: 100%; height: 100%; }
+      .cg-want { display: inline-flex; align-items: center; gap: .25rem; font-weight: 800; }
+      .cg-dot { display: inline-block; width: .95rem; height: .95rem; border-radius: 50%; border: 2px solid #1f2937; }
+      .cg-mini { display: inline-flex; width: 1.1rem; height: 1.1rem; }
+      .cg-sel { display: inline-flex; align-items: center; gap: .25rem; }
+      .cg-rule.say { background: #fde68a; border-radius: .7rem; }
+      .cg-switch { width: 100%; text-align: center; font-weight: 800; color: #7c2d12; background: #ffedd5; border: 2px dashed #fb923c; border-radius: .9rem; padding: .4rem .6rem; }
+    </style>`);
     // Application Initialization
     window.addEventListener('DOMContentLoaded', () => {
       initChosungBar();
