@@ -707,6 +707,11 @@
     .tx-mus h4 { align-self: flex-start; font-family: Jua, sans-serif; font-weight: normal; color: #475569; margin: .3rem 0 0; }
     .tx-mus-row { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; width: 100%; }
     .tx-mus-row > div { display: flex; flex-direction: column; align-items: center; width: 5.2rem; background: #fffbeb; border: 3px solid #fde68a; border-radius: .9rem; padding: .2rem; font-family: Jua, sans-serif; font-size: .75rem; color: #334155; }
+    .wb-row .wb-e, .wb-list .wb-e { font-size: 2.2rem; line-height: 1.2; }
+    .wb-list { display: flex; flex-direction: column; gap: .4rem; width: 100%; max-height: 50vh; overflow-y: auto; }
+    .wb-list > div { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: .5rem; background: #fffbeb; border: 3px solid #fde68a; border-radius: .9rem; padding: .3rem .6rem; font-family: Jua, sans-serif; color: #334155; }
+    .wb-list small { color: #b45309; }
+    a.wb-link { text-decoration: none; text-align: center; }
     .tx-mus-row img, .tx-mus-evo img { width: 3.6rem; height: 3.6rem; object-fit: contain; }
     .tx-mus-row small { color: #b45309; }
     .tx-mus-evo { display: flex; align-items: center; justify-content: center; gap: .2rem; color: #f59e0b; }
@@ -12063,7 +12068,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     const RW_POOL = [25, 1, 4, 7, 133, 39, 52, 143, 54, 35, 172, 175, 183, 393, 906, 909, 912, 132, 79, 151,
       94, 6, 9, 3, 149, 131, 129, 95, 74, 16, 10, 197, 448, 778, 196, 134, 135, 136, 470, 471,
       700, 258, 255, 252, 501, 495, 498, 722, 725, 728, 810, 813, 816, 37, 58, 77, 113, 152, 155, 158];
-    const RW_SRC = { math: ['🔢', '수학 놀이'], hide: ['⚡', '찌리리공 찾기'], diff: ['👀', '틀린그림찾기'], puzzle: ['🧩', '퍼즐'], memory: ['🃏', '짝 맞추기'], code: ['🧭', '길 코딩'], care: ['🏠', '돌보기'] };
+    const RW_SRC = { math: ['🔢', '수학 놀이'], hide: ['⚡', '찌리리공 찾기'], diff: ['👀', '틀린그림찾기'], puzzle: ['🧩', '퍼즐'], memory: ['🃏', '짝 맞추기'], code: ['🧭', '길 코딩'], care: ['🏠', '돌보기'], wiin: ['📖', '위인 그림책'] };
     const RW_BALL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fff" stroke="#334155" stroke-width="4"/><path d="M4,32 A28,28 0 0 1 60,32Z" fill="#ef4444" stroke="#334155" stroke-width="4"/><path d="M4,32H60" stroke="#334155" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="#fff" stroke="#334155" stroke-width="4"/></svg>');
     let rwS = null, rwBarLen = -1;
     // 위에 붙어 있는 메뉴 줄 높이 (화면을 올릴 때 메뉴에 가리지 않게)
@@ -12095,7 +12100,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
     // 스티커는 두 줄이에요
     //  - 📚 공부 스티커(한글 · 수학 · 길 코딩 · 미션): 10개면 새 친구 카드 (친구는 공부해야만 와요)
     //  - 🎁 놀이 스티커(그 밖의 놀이): 10개면 마을 선물 상자 (놀이기구 · 먹이 · 꾸미기)
-    const RW_LEARN = new Set(['quiz', 'desc', 'study', 'math', 'code', 'mission']);
+    const RW_LEARN = new Set(['quiz', 'desc', 'study', 'math', 'code', 'mission', 'wiin']);   // wiin: 위인 그림책(history-edu)
     const rwIsLearn = src => RW_LEARN.has(src) || typeof twOpenBox !== 'function';
     const rwTotal = () => { rwLoad(); return rwS.stickers.length + rwS.pst.length + rwS.got * 10; };
     const rwCount = src => { rwLoad(); return rwIsLearn(src) ? `📚 ${rwS.stickers.length} / 10` : `🎁 ${rwS.pst.length} / 10`; };
@@ -12159,7 +12164,7 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const types = row[2].map(i => TYPE_NAMES[i]).join('·');
       const src = RW_SRC[c.s] || ['🎁', ''];
       ov.innerHTML = `<div class="rw-box">
-        <div class="rw-head">🎁 스티커 10개 달성! 카드를 눌러 뒤집어 봐요</div>
+        <div class="rw-head">${c.head || '🎁 스티커 10개 달성! 카드를 눌러 뒤집어 봐요'}</div>
         <button class="rw-flip" id="rw-flip" onclick="rwFlip()">
           <div class="rw-face rw-back"><div class="rw-back-ball"></div><span>톡!</span></div>
           <div class="rw-face rw-front ${c.g ? 'gold' : ''}">
@@ -15648,14 +15653,64 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       const evo = res.filter(([, r]) => r.forms && r.forms.length > 1).slice(0, 6);
       const champ = res.filter(([, r]) => r.w > 0).sort((a, b) => b[1].w - a[1].w).slice(0, 3);
       const nm = n => POKEMON_NAMES_1025[n - 1] || '';
+      const wi = wbItems();
       ov.innerHTML = `<div class="rw-box tw-box tx-mus"><div class="rw-head">🏛️ 포켓몬 박물관</div>
+        <h4>📖 위인 전시실 <small>${wi.length} / 60</small></h4>${wi.length ? `<div class="tx-mus-row wb-row">${wi.map(r => `<div title="${r.who} · ${r.title}"><span class="wb-e">${r.e}</span><span>${r.item}</span><small>${r.who}${r.told ? ' ✨' : ''}${r.tried ? ' ⭐' : ''}</small></div>`).join('')}</div><p class="rw-tip">✨ 이야기를 들려준 책 · ⭐ 해 보기를 한 책</p>` : '<p class="rw-tip">위인 그림책을 끝까지 읽으면 그 책의 물건이 여기에 전시돼요.</p>'}
+        <a class="rw-go wb-link" href="${WB_URL}">📖 위인 그림책 열기</a>
         <h4>🏆 월드컵 우승</h4>${cup.length ? `<div class="tx-mus-row">${cup.map(([n, c]) => `<div>${rwImg(+n)}<span>${nm(+n)}</span><small>${c}번 우승</small></div>`).join('')}</div>` : '<p class="rw-tip">이상형 월드컵에서 우승한 친구가 여기에 걸려요.</p>'}
         <h4>✨ 진화 기록</h4>${evo.length ? evo.map(([, r]) => `<div class="tx-mus-evo">${r.forms.map(f => rwImg(f)).join('<b>➜</b>')}</div>`).join('') : '<p class="rw-tip">마을에서 진화한 친구가 여기에 기록돼요.</p>'}
         <h4>🥊 경기장 챔피언</h4>${champ.length ? `<div class="tx-mus-row">${champ.map(([n, r], i) => `<div>${rwImg(twForm(+n))}<span>${['🥇', '🥈', '🥉'][i]} ${nm(twForm(+n))}</span><small>${r.w}번 승리</small></div>`).join('')}</div>` : '<p class="rw-tip">배틀 경기장에서 이긴 친구가 여기에 기록돼요.</p>'}
         <button class="rw-go" onclick="twCloseOv()">닫기</button></div>`;
       ov.classList.remove('hidden'); ov._tw = 1;
-      twSay('포켓몬 박물관이에요. 우승한 친구, 진화한 친구, 챔피언이 기록돼 있어요.');
+      twSay(wbItems().length ? `포켓몬 박물관이에요. 위인 그림책에서 온 물건 ${wbItems().length}개가 전시돼 있어요.` : '포켓몬 박물관이에요. 우승한 친구, 진화한 친구, 챔피언이 기록돼 있어요.');
     }
+
+    /**
+     * ==============================================================
+     * [위인 그림책 연결] jeromettf.github.io/history-edu 와 이어져요
+     *  - 같은 주소(jeromettf.github.io) 아래라서 localStorage를 함께 써요
+     *  - 그림책이 'wiin_bridge_v1'에 적은 기록을 읽어 보상을 한 번씩만 줘요
+     *    끝까지 읽음 → 공부 스티커 1 + 박물관 전시품 · 이야기를 들려줌 → 공부 스티커 2 · 해 보기 → 새 친구 카드 1
+     *  - 받은 기록은 'pkmn_wiin_v1'. 규칙은 history-edu 저장소 docs/BRIDGE.md
+     * ==============================================================
+     */
+    const WB_IN = 'wiin_bridge_v1', WB_KEY = 'pkmn_wiin_v1', WB_URL = 'https://jeromettf.github.io/history-edu/';
+    const WB_LV = { read: ['다 읽었어요', 1], told: ['이야기를 들려줬어요', 2], tried: ['해 보기를 했어요', 'card'] };
+    function wbIn() { try { return (JSON.parse(localStorage.getItem(WB_IN) || 'null') || {}).books || {}; } catch (e) { return {}; } }
+    function wbGot() { try { return JSON.parse(localStorage.getItem(WB_KEY) || 'null') || { got: {} }; } catch (e) { return { got: {} }; } }
+    // 박물관 전시품: 끝까지 읽은 책 (번호 순)
+    function wbItems() { const b = wbIn(); return Object.values(b).filter(r => r && r.read && r.e).sort((p, q) => (p.no || 0) - (q.no || 0)); }
+    let wbBusy = false;
+    function wbSync() {
+      if (wbBusy) return;
+      const books = wbIn(), st = wbGot(), todo = [];
+      Object.entries(books).forEach(([id, r]) => { const g = st.got[id] || {}; ['read', 'told', 'tried'].forEach(lv => { if (r && r[lv] && !g[lv]) todo.push([id, lv, r]); }); });
+      if (!todo.length) return;
+      const ov = document.getElementById('rw-ov');
+      if (!ov || !ov.classList.contains('hidden')) { setTimeout(wbSync, 1500); return; }
+      wbBusy = true;
+      // 먼저 받은 것으로 적어 두고 (두 번 받지 않게) 보상을 줘요
+      todo.forEach(([id, lv]) => { (st.got[id] = st.got[id] || {})[lv] = Date.now(); });
+      try { localStorage.setItem(WB_KEY, JSON.stringify(st)); } catch (e) {}
+      // 첫 전시품이 오면 박물관을 지어 줘요 (공부 거리)
+      let built = false;
+      try { if (todo.some(t => t[1] === 'read') && typeof twLoad === 'function' && !twLoad().own.museum) { twLoad().own.museum = 1; twSave(); built = true; } } catch (e) {}
+      const pk = () => (typeof kpPick === 'function' ? kpPick() : 25);
+      const stk = []; let cards = [];
+      todo.forEach(([, lv]) => { const v = WB_LV[lv][1]; if (v === 'card') { const c = rwNewCard('wiin'); c.head = '📖 그림책 "해 보기" 선물! 카드를 눌러 뒤집어 봐요'; cards.push(c); } else for (let k = 0; k < v; k++) stk.push(pk()); });
+      if (cards.length) { rwSave(); }
+      if (stk.length) cards = cards.concat(rwGive(stk, 'wiin'));
+      ov.innerHTML = `<div class="rw-box wb-box"><div class="rw-head">📖 위인 그림책에서 온 선물</div>
+        <div class="wb-list">${todo.map(([, lv, r]) => `<div><span class="wb-e">${r.e || '📖'}</span><b>${r.who || ''}</b><span>${WB_LV[lv][0]}</span><small>${WB_LV[lv][1] === 'card' ? '새 친구 카드' : '공부 스티커 +' + WB_LV[lv][1]}</small></div>`).join('')}</div>
+        ${built ? '<p class="rw-tip">🏛️ 공부 거리에 박물관이 생겼어요! 그림책 물건이 거기에 전시돼요.</p>' : (todo.some(t => t[1] === 'read') ? '<p class="rw-tip">🏛️ 박물관에 새 전시품이 생겼어요.</p>' : '')}
+        <button class="rw-go" id="wb-ok">받기</button></div>`;
+      ov.classList.remove('hidden');
+      try { speakText('위인 그림책에서 선물이 왔어요!'); } catch (e) {}
+      document.getElementById('wb-ok').onclick = () => { ov.classList.add('hidden'); ov.innerHTML = ''; wbBusy = false; try { rwRenderBars(); } catch (e) {} rwShowCards(cards); };
+    }
+    window.addEventListener('load', () => setTimeout(wbSync, 1800));
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(wbSync, 600); });
+    window.addEventListener('storage', e => { if (e.key === WB_IN) setTimeout(wbSync, 600); });
 
     /* ---------- 마을 지도 ---------- */
     function txMap() {
