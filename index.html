@@ -2704,6 +2704,11 @@
     .rw-row > i { font-style: normal; font-size: .85rem; text-align: center; }
     .rw-row.play .rw-stk { border-color: #f9a8d4; background: #fff1f2; color: #f9a8d4; }
     .rw-row.play .rw-stk.on { background: radial-gradient(circle at 35% 30%, #fff, #fbcfe8 70%, #f472b6); }
+
+    .rw-vtabs { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; width: 100%; }
+    .rw-vt { padding: .25rem .6rem; border-radius: 999px; border: 2px solid #fde68a; background: #fffbeb; font-family: Jua, sans-serif; font-size: .85rem; color: #92400e; }
+    .rw-vt.on { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+    .rw-vnext { font-family: Jua, sans-serif; font-size: .75rem; color: #94a3b8; }
     /* ===== 그림 찾기 ===== */
     #view-find .hidden { display: none !important; }
     .fd-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
@@ -12088,17 +12093,45 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       return out;
     }
     // 새 친구 카드: 앨범에 없는 친구 먼저, 다 모으면 아이 수준 포켓몬 중에서
+    // 주민 명부는 권으로 나뉘어요 (나이와 상관없이 같아요)
+    //  1권: 인기 친구 60마리 · 2권부터: 잘 알려진 친구 → 1세대 → 2세대 … 순서로 60마리씩 (마지막 권은 남은 친구 모두)
+    //  앞 권을 다 모아야 다음 권 친구가 와요. 6~9세대는 맨 뒤 권이라 마을에서는 정면 그림으로 다녀요
+    const RW_VOL = 60;
+    let rwVolCache = null;
+    function rwVols() {
+      if (rwVolCache) return rwVolCache;
+      const first = [...(typeof KP_POOL_S !== 'undefined' ? KP_POOL_S : []), ...(typeof KP_POOL_M !== 'undefined' ? KP_POOL_M : [])].filter(n => n <= 649);
+      const rest = [...new Set([...first, ...Array.from({ length: 1025 }, (_, i) => i + 1)])].filter(n => !RW_POOL.includes(n));
+      const vols = [RW_POOL.slice()];
+      for (let i = 0; i < rest.length; i += RW_VOL) vols.push(rest.slice(i, i + RW_VOL));
+      if (vols.length > 2 && vols[vols.length - 1].length < RW_VOL / 2) { const last = vols.pop(); vols[vols.length - 1].push(...last); }
+      return (rwVolCache = vols);
+    }
+    const RW_GEN = [151, 251, 386, 493, 649, 721, 809, 905, 1025];
+    const rwGenOf = n => RW_GEN.findIndex(m => n <= m) + 1;
+    function rwVolSub(k) {   // 권 이름 옆 설명
+      if (k === 0) return '인기 친구';
+      if (k === 1) return '잘 알려진 친구';
+      const g = rwVols()[k].map(rwGenOf), a = Math.min(...g), b = Math.max(...g);
+      return a === b ? `${a}세대` : `${a}~${b}세대`;
+    }
+    const rwHaveSet = () => { rwLoad(); return new Set(rwS.cards.map(c => c.n)); };
+    // 지금 모으는 권 (다 모았으면 마지막 권 다음 번호)
+    function rwCurVol(have) { have = have || rwHaveSet(); const v = rwVols(); const k = v.findIndex(vol => vol.some(n => !have.has(n))); return k < 0 ? v.length : k; }
     function rwNewCard(src) {
       rwLoad();
-      const have = new Set(rwS.cards.map(c => c.n));
-      let pool = RW_POOL.filter(n => !have.has(n));
-      if (!pool.length && typeof kpPool === 'function') pool = kpPool().filter(n => !have.has(n) && n <= 649);
-      if (!pool.length && typeof kpPool === 'function') pool = kpPool().filter(n => !have.has(n));
-      if (!pool.length) pool = RW_POOL;
+      const have = rwHaveSet(), vols = rwVols(), cur = rwCurVol(have);
+      let pool = cur < vols.length ? vols[cur].filter(n => !have.has(n)) : [];
+      const dupe = !pool.length; if (dupe) pool = [...have];
       const n = pool[Math.floor(Math.random() * pool.length)];
       const card = { n, g: Math.random() < 0.15 ? 1 : 0, s: src, dup: have.has(n) };
       if (card.dup && typeof twAddLove === 'function') twAddLove(n, 5, true);   // 같은 카드를 또 받으면 마을 친구 하트 +5
       rwS.cards.push({ n: card.n, g: card.g, s: card.s });
+      // 이 카드로 한 권을 다 채웠어요
+      if (!dupe && vols[cur].every(x => x === n || have.has(x))) {
+        card.volDone = cur + 1;
+        card.head = cur + 1 < vols.length ? `🎉 ${cur + 1}권 완성! ${cur + 2}권이 열렸어요. 카드를 눌러 뒤집어 봐요` : `🏆 마지막 권까지 모두 모았어요! 카드를 눌러 뒤집어 봐요`;
+      }
       return card;
     }
     let rwPBarLen = -1;
@@ -12173,22 +12206,26 @@ const BX_LEARN = {"1":"tackle:1,growl:1,vinewhip:3,growth:6,leechseed:9,razorlea
       ov.classList.add('hidden'); ov.innerHTML = '';
       if (rest && rest.length) rwShowCardsRaw(rest, done); else if (done) done();
     }
-    function rwShowAlbum() {
+    function rwShowAlbum(vol) {
       rwLoad();
       const ov = document.getElementById('rw-ov');
       const got = {}; rwS.cards.forEach(c => { const g = got[c.n] || (got[c.n] = { k: 0, g: 0 }); g.k++; if (c.g) g.g = 1; });
-      const extra = Object.keys(got).map(Number).filter(n => !RW_POOL.includes(n));
-      const have = RW_POOL.filter(n => got[n]).length;
+      const vols = rwVols(), haveSet = new Set(Object.keys(got).map(Number)), cur = Math.min(rwCurVol(haveSet), vols.length - 1);
+      const k = Number.isInteger(vol) && vol >= 0 && vol <= cur ? vol : cur, list = vols[k];
+      const have = list.filter(n => got[n]).length;
+      const tabs = vols.slice(0, cur + 1).map((v, i) => { const full = v.every(n => got[n]); return `<button class="rw-vt ${i === k ? 'on' : ''}" onclick="rwShowAlbum(${i})">${full ? '✅' : '📖'} ${i + 1}권</button>`; }).join('');
+      const allDone = rwCurVol(haveSet) >= vols.length;
       const cell = n => {
         const g = got[n], nm = POKEMON_NAMES_1025[n - 1];
         return g ? `<div class="rw-mini ${g.g ? 'gold' : ''}" ${typeof twFriend === 'function' ? `onclick="twFriend(${n})" style="cursor:pointer"` : ''}>${rwImg(typeof twForm === 'function' ? twForm(n) : n)}<span>${typeof twForm === 'function' ? POKEMON_NAMES_1025[twForm(n) - 1] : nm}</span>${typeof twReady === 'function' && twReady(n) ? '<b class="rw-evo">✨</b>' : ''}${g.k > 1 ? `<b class="rw-k">×${g.k}</b>` : ''}</div>`
           : `<div class="rw-mini rw-shadow">${rwImg(n)}<span>?</span></div>`;
       };
       ov.innerHTML = `<div class="rw-box rw-album">
-        <div class="rw-head">📒 마을 주민 명부 <small>${have} / ${RW_POOL.length}</small></div>
-        <p class="rw-tip">📚 한글 · 수학 · 길 코딩에서 공부 스티커를 10개 모으면 새 친구가 마을로 이사 와요. 🎁 다른 놀이 스티커 10개는 마을 선물이 돼요. 친구를 누르면 하트와 진화 조건을 볼 수 있어요.</p>
+        <div class="rw-head">📒 마을 주민 명부 · ${k + 1}권 <small>${rwVolSub(k)} · ${have} / ${list.length}</small></div>
+        <div class="rw-vtabs">${tabs}${!allDone ? `<span class="rw-vnext">🔒 ${cur + 2 <= vols.length ? `${cur + 1}권을 다 모으면 ${cur + 2}권이 열려요` : '마지막 권이에요'}</span>` : `<span class="rw-vnext">🏆 ${vols.length}권 모두 완성!</span>`}</div>
+        <p class="rw-tip">📚 한글 · 수학 · 코딩 · 위인 그림책에서 공부 스티커를 10개 모으면 새 친구가 마을로 이사 와요. 🎁 다른 놀이 스티커 10개는 마을 선물이 돼요. 친구를 누르면 하트와 진화 조건을 볼 수 있어요.</p>
         ${(rwS.boxes || 0) > 0 && typeof twOpenPending === 'function' ? `<button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden'); twOpenPending()">🎁 열지 않은 선물 상자 ${rwS.boxes}개</button>` : ''}
-        <div class="rw-album-grid">${RW_POOL.map(cell).join('')}${extra.map(cell).join('')}</div>
+        <div class="rw-album-grid">${list.map(cell).join('')}</div>
         ${(rwS.caught || []).length ? `<div class="rw-head">📡 포획 모드에서 잡은 포켓몬 <small>${rwS.caught.length}마리</small></div>
         <div class="rw-album-grid">${rwS.caught.map(n => `<div class="rw-mini rw-caught" ${typeof twFriend === 'function' ? `onclick="twFriend(${n})" style="cursor:pointer"` : ''}>${rwImg(n)}<span>${POKEMON_NAMES_1025[n - 1]}</span></div>`).join('')}</div>` : ''}
         <button class="rw-go" onclick="document.getElementById('rw-ov').classList.add('hidden')">닫기</button></div>`;
