@@ -5557,11 +5557,18 @@
       document.getElementById('coloring-story-text').textContent = currentColoringPokemon.desc;
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.src = getPokemonArtworkUrl(num);
+      let retry = 0;
+      img.onerror = () => {
+        if (!currentColoringPokemon || currentColoringPokemon.num !== num) return;
+        if (retry++ < 1) { img.src = getPokemonArtworkUrl(num) + '?c=' + Date.now(); return; }
+        showToast('색칠 도안을 불러오지 못했어요. 인터넷을 확인하고 다시 골라 주세요.');
+      };
       img.onload = () => {
+        if (!currentColoringPokemon || currentColoringPokemon.num !== num) return;
         resizeColoringCanvases();
         renderPokemonOutlineOnCanvas(img);
       };
+      img.src = getPokemonArtworkUrl(num) + '?c=1';
 
       fetchOfficialDexText(num).then(officialLore => {
         if (officialLore && currentColoringPokemon && currentColoringPokemon.num === num) {
